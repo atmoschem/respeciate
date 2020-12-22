@@ -23,18 +23,18 @@ spec <- function(code) {
   REFERENCES <- sysdata$REFERENCES
 
 df <- PROFILES[PROFILES$PROFILE_CODE == code, ]
-    df <- data.table::merge.data.table(df,
+    df <- merge(df,
               SPECIES,
               by = "PROFILE_CODE")
   cat("Sum WEIGHT_PERCENT: ",
       sum(as.numeric(as.character(df$WEIGHT_PERCENT)), na.rm = T),
       "\n")
 
-  df <- data.table::merge.data.table(df, SPECIES_PROPERTIES, by = "SPECIES_ID")
+  df <- merge(df, SPECIES_PROPERTIES, by = "SPECIES_ID")
 
-  df <- data.table::merge.data.table(df, PROFILE_REFERENCE, by = "PROFILE_CODE")
+  df <- merge(df, PROFILE_REFERENCE, by = "PROFILE_CODE")
 
-  df <- data.table::merge.data.table(df, REFERENCES, by = "REF_Code")
+  df <- merge(df, REFERENCES, by = "REF_Code")
 
 return(df)
 

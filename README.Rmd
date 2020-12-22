@@ -1,17 +1,19 @@
 ---
-title: "Untitled"
+title: "respeciate"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/"
+)
 ```
 
-## respeciate
+respeciate give you access to the [US/EPA Speciate v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
 
-respeciate give you acess to the [US/EPA Speciate v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
-
-![](figs/spe.png)
+![](man/figures/logo.png)
 
 The instalation is:
 
