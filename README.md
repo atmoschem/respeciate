@@ -121,7 +121,11 @@ head(dt, 2)
 ## plot
 
 ``` r
-pie(dt$WEIGHT_PERCENT, labels = dt$SPECIES_NAME, cex = 0.8)
+library(ggplot2)
+ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
+       aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
+  geom_bar(stat = "identity") +
+  coord_flip()
 ```
 
-![](man/figures/unnamed-chunk-5-1.png)<!-- -->
+<img src="man/figures/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />

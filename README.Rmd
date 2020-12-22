@@ -46,7 +46,12 @@ head(dt, 2)
 
 ## plot
 
-```{r }
-pie(dt$WEIGHT_PERCENT, labels = dt$SPECIES_NAME, cex = 0.8)
+
+```{r fig.width=12, fig.height=10, fig.align="center"}
+library(ggplot2)
+ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
+       aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
+  geom_bar(stat = "identity") +
+  coord_flip()
 
 ```
