@@ -1,0 +1,2 @@
+"0","labs <- names(table(dt$SPECIES_NAME))"
+"0","text(cex=1, x=x-.5, y=-1.25, labs, xpd=TRUE, srt=90)"

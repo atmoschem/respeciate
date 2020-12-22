@@ -1,0 +1,30 @@
+Package: vein
+Type: Package
+Title: Vehicular Emissions Inventories
+Version: 0.9.0.3
+Date: 2020-12-05
+Authors@R: c( 
+  person(given = "Sergio", family = "Ibarra-Espinosa",
+         role = c("aut", "cre", "wdc"),
+         email = "sergio.ibarra@usp.br",
+         comment = c(ORCID = "0000-0002-3162-1905"))) 
+Description: Elaboration of vehicular emissions inventories,
+    consisting in four stages, pre-processing activity data, preparing 
+    emissions factors, estimating the emissions and post-processing of emissions 
+    in maps and databases. More details in Ibarra-Espinosa et al (2018) <doi:10.5194/gmd-11-2209-2018>.
+    Before using VEIN you need to know the vehicular composition of your study area, in other words,
+    the combination of of type of vehicles, size and fuel of the fleet. Then, it is recommended to
+    start with the project to download a template to create a structure of directories and scripts.
+License: MIT + file LICENSE
+URL: https://gitlab.com/ibarraespinosa/vein
+BugReports: https://gitlab.com/ibarraespinosa/vein/-/issues
+LazyData: no
+Depends: R (>= 3.5.0)
+Imports: sf, data.table, units, graphics, stats
+Suggests: knitr, rmarkdown, testthat, covr, lwgeom, cptcity
+RoxygenNote: 7.1.1
+Encoding: UTF-8
+NeedsCompilation: yes
+Config/testthat/parallel: true
+Packaged: 2016-10-21 10:31:39 UTC; sergio
+VignetteBuilder: knitr
