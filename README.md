@@ -1,13 +1,11 @@
-respeciate
-================
+
+# respeciate <img src="man/figures/logo.png" align="right" alt="" width="220" />
 
 [![R build
 status](https://github.com/atmoschem/respeciate/workflows/R-CMD-check/badge.svg)](https://github.com/atmoschem/respeciate/actions)
 
 respeciate give you access to the [US/EPA Speciate
 v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
-
-![](man/figures/logo.png)
 
 The installation is:
 

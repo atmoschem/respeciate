@@ -1,5 +1,7 @@
-"0","x$PROFILE_CODE
-"
+"0","library(respeciate)"
+"0",""
+"0","x <- find_code(""Ethanol"")"
+"0","x$PROFILE_CODE"
 "1"," [1]"
 "1"," ""8733"""
 "1"," ""8736"""
