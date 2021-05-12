@@ -14,7 +14,7 @@ Description: Acess to the US.EPA Speciate (v5.1) tool,
 License: MIT + file LICENSE
 URL: https://github.com/atmoschem/respeciate
 BugReports: https://github.com/atmoschem/respeciate/issues
-LazyData: no
+LazyData: yes
 Depends: R (>= 3.5.0)
 RoxygenNote: 7.1.1
 Encoding: UTF-8
