@@ -22,8 +22,8 @@ spec <- function(code) {
   PROFILE_REFERENCE <- sysdata$PROFILE_REFERENCE
   REFERENCES <- sysdata$REFERENCES
 
-df <- PROFILES[PROFILES$PROFILE_CODE == code, ]
-    df <- merge(df,
+  df <- PROFILES[PROFILES$PROFILE_CODE == code, ]
+  df <- merge(df,
               SPECIES,
               by = "PROFILE_CODE")
   cat("Sum WEIGHT_PERCENT: ",

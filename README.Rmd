@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
     status](https://github.com/atmoschem/respeciate/workflows/R-CMD-check/badge.svg)](https://github.com/atmoschem/respeciate/actions)
 
 
-respeciate give you access to the [US/EPA Speciate v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
+respeciate gives you access to the [US/EPA Speciate v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
 
 
 The installation is:
@@ -25,33 +25,51 @@ The installation is:
 remotes::install_github("atmoschem/respeciate")
 ```
 
+Sergio, 
+
+I was think about using respeciate on a project and was having a play. As part of that, I: 
+
+* moved your sysdata.rda to the package data folder 
+* reset lazy.data to TRUE  
+* added an object class 
+* added find_profile_code (find_code but making object class)
+* added profile (spec but making object class)
+* added crude print and plot methods for object classes 
+* updated date and version
+
+The new code is in R/speciate.0.2.r
+
 ## example
 
 find PROFILE_CODE
 ```{r }
 library(respeciate)
-
-x <- find_code("Ethanol")
-x$PROFILE_CODE
+x <- find_profile_code("Ethanol")
+x
 ```
 
 
 ## speciate
 
 ```{r }
-PROFILE_CODE = "8855"
-dt <- spec(PROFILE_CODE)
-head(dt, 2)
+dt <- get_profile("8833")
+dt
 ```
 
 ## plot
 
 
+```{r fig.align="center"}
+#profiles have a default plot option
+plot(dt)
+```
+
 ```{r fig.width=12, fig.height=10, fig.align="center"}
+#but they are just data.frame at heart 
+#so you can plot as previous
 library(ggplot2)
 ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
        aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
   geom_bar(stat = "identity") +
   coord_flip()
-
 ```
