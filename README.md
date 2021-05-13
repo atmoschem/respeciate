@@ -1,3 +1,4 @@
+
 # respeciate <img src="man/figures/logo.png" align="right" alt="" width="220" />
 
 [![R build
@@ -8,7 +9,9 @@ v5.1](https://www.epa.gov/air-emissions-modeling/speciate) profiles
 
 The installation is:
 
-    remotes::install_github("atmoschem/respeciate")
+``` r
+remotes::install_github("atmoschem/respeciate")
+```
 
 Sergio,
 
@@ -29,37 +32,45 @@ The new code is in R/speciate.0.2.r
 
 find PROFILE\_CODE
 
-    library(respeciate)
-    x <- find_profile_code("Ethanol")
-    x
-    #> respeciate profile reference
-    #> 8733 8736 8757 8758 8760 8761 8763 8764 8765 8766 8767 8768 8769 8770 8771 8772 
-    #> 8773 8827 8828 8829 8830 8831 8832 8833 8834 8835 8836 8837 8838 8839 8840 8841 
-    #> 8842 8843 8844 8845 8846 8847 8848 8849 8850 8851 8852 8853 8854 8855 8863 8864 
-    #> 8865 8866 8867 8868 8869 8870 8871 8872 8884 8885 8886 8887 8888 8889 8934
-    #>    > 63 profiles
+``` r
+library(respeciate)
+x <- find_profile_code("Ethanol")
+x
+#> respeciate profile reference
+#> 8733 8736 8757 8758 8760 8761 8763 8764 8765 8766 8767 8768 8769 8770 8771 8772 
+#> 8773 8827 8828 8829 8830 8831 8832 8833 8834 8835 8836 8837 8838 8839 8840 8841 
+#> 8842 8843 8844 8845 8846 8847 8848 8849 8850 8851 8852 8853 8854 8855 8863 8864 
+#> 8865 8866 8867 8868 8869 8870 8871 8872 8884 8885 8886 8887 8888 8889 8934
+#>    > 63 profiles
+```
 
 ## speciate
 
-    dt <- get_profile("8833")
-    dt
-    #> respeciate profile:  Haskew2010a 
-    #>  checksum:  100
+``` r
+dt <- get_profile("8833")
+dt
+#> respeciate profile:  Haskew2010a 
+#>  checksum:  100
+```
 
 ## plot
 
-    #profiles have a default plot option
-    plot(dt)
+``` r
+#profiles have a default plot option
+plot(dt)
+```
 
 <img src="man/figures/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
-    #but they are just data.frame at heart 
-    #so you can plot as previous
-    library(ggplot2)
-    #> Warning: package 'ggplot2' was built under R version 4.0.5
-    ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
-           aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
-      geom_bar(stat = "identity") +
-      coord_flip()
+``` r
+#but they are just data.frame at heart 
+#so you can plot as previous
+library(ggplot2)
+#> Warning: package 'ggplot2' was built under R version 4.0.5
+ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
+       aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
+  geom_bar(stat = "identity") +
+  coord_flip()
+```
 
 <img src="man/figures/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
