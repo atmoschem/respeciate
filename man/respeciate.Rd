@@ -2,21 +2,20 @@
 % Please edit documentation in R/speciate.0.2.R
 \name{respeciate}
 \alias{respeciate}
-\alias{find_profile_code}
-\alias{profile}
-\alias{get_profile}
+\alias{sp_find_profile}
+\alias{sp_profile}
 \alias{print.respeciate}
 \alias{plot.respeciate}
 \alias{print.respeciate.ref}
 \title{respeciate}
 \usage{
-find_profile_code(term, by = "Keywords")
+sp_find_profile(term, by = "Keywords")
 
-get_profile(code)
+sp_profile(code)
 
-\method{print}{respeciate}(x, ...)
+\method{print}{respeciate}(x, n = 6, ...)
 
-\method{plot}{respeciate}(x, ...)
+\method{plot}{respeciate}(x, n = NULL, order = TRUE, ..., legend.text = NULL, args.legend = NULL)
 
 \method{print}{respeciate.ref}(x, ...)
 }
@@ -28,29 +27,40 @@ when searching archive.}
 search, by default \code{'keywords'}.}
 
 \item{code}{character or numeric, the speciate code
-of the required source profile (EPA SPECIATE PROFILE_CODE).}
+of the required source profile (EPA SPECIATE term PROFILE_CODE).}
 
-\item{x}{the \code{respeciate.ref} object to be printed.}
+\item{x}{the \code{respeciate} or \code{respeciate.ref}
+object to be printed, plotted, etc.}
 
-\item{...}{any extra arguments, currently ignored.}
+\item{n}{when plotting or printing a multi-profile, the
+number(s) of profile(s) to report.}
+
+\item{...}{any extra arguments, mostly ignored except by
+\code{plot} which passes them to \code{\link{barplot}}.}
+
+\item{order}{logical, order the species in the
+profile(s) by molecular weight before plotting.}
+
+\item{legend.text, args.legend}{\code{\link{barplot}}
+arguments.}
 }
 \value{
-\code{find_profile_code} returns a object of
+\code{sp_find_profile} returns a object of
 \code{respeciate.ref} class, a \code{data.frame} of
 profile information.
 
-\code{get_profile} returns a object of
+\code{sp_profile} returns a object of
 \code{respeciate} class, a \code{data.frame} containing a
 speciate profile.
 }
 \description{
-respeciate but with object classes...
+This is respeciate but with object classes...
 
-\code{\link{find_profile_code}} finds
+\code{\link{sp_find_profile}} finds
 the codes of speciate profiles in the local speciate
 archive using supplied search terms.
 
-\code{\link{get_profile}} extracts a
+\code{\link{sp_profile}} extracts a
 speciate profile from the local speciate archive.
 
 When supplied a \code{respeciate}
@@ -58,21 +68,29 @@ object, \code{\link{print}} manages its appearance.
 
 When supplied a \code{respeciate}
 object, \code{\link{plot}} provides a basic plot
-output. The objects is a data.frame so you can still
-use it with as normal with \code{lattice} or
-\code{ggplot2}...
+output. This uses base function \code{\link{barplot}};
+also see note.
 
 When supplied a \code{respeciate.ref}
 object, \code{\link{print}} manages its appearance.
 }
+\note{
+\code{respeciate} objects revert to
+\code{data.frame}s when not doing anything
+package-specific, so you can still
+use as previously with \code{lattice} or
+\code{ggplot2}, useful it you are pulling multiple
+profiles and you exceed the base \code{\link{barplot}}
+capacity...
+}
 \examples{
 \dontrun{
 profile <- "Ethanol"
-dt <- find_profile_code(profile)
+dt <- sp_find_profile(profile)
 }
 \dontrun{
-code <- "8855"
-x <- spec(code)
+x <- sp_profile(c(8833, 8850))
+plot(x)
 }
 }
 \references{

@@ -1,40 +1,41 @@
 #' @name respeciate
 #' @title respeciate
-#' @aliases find_profile_code profile
+#' @aliases sp_find_profile sp_profile
 
-#' @description respeciate but with object classes...
+#' @description This is respeciate but with object classes...
 
-#reversed order of documentation
+#reversed order of documentation,
+#started with the find function...
 
-#' @description \code{\link{find_profile_code}} finds
+#' @description \code{\link{sp_find_profile}} finds
 #' the codes of speciate profiles in the local speciate
 #' archive using supplied search terms.
 #' @param term character, the search term to use
 #' when searching archive.
 #' @param by character, the section of the archive to
 #' search, by default \code{'keywords'}.
-#' @return \code{find_profile_code} returns a object of
+#' @return \code{sp_find_profile} returns a object of
 #' \code{respeciate.ref} class, a \code{data.frame} of
 #' profile information.
 #' @rdname respeciate
 #' @export
 #' @examples \dontrun{
 #' profile <- "Ethanol"
-#' dt <- find_profile_code(profile)
+#' dt <- sp_find_profile(profile)
 #' }
-find_profile_code <- function(term, by = "Keywords") {
+sp_find_profile <- function(term, by = "Keywords") {
   #extract profile info from archive
   PROFILES <- sysdata$PROFILES
   out <- PROFILES[grep(term, PROFILES[[by]]), ]
-  out <- sp_build_respeciate.ref(out)
+  out <- rsp_build_respeciate.ref(out)
   return(out)
 }
 
-#' @description \code{\link{get_profile}} extracts a
+#' @description \code{\link{sp_profile}} extracts a
 #' speciate profile from the local speciate archive.
 #' @param code character or numeric, the speciate code
-#' of the required source profile (EPA SPECIATE PROFILE_CODE).
-#' @return \code{get_profile} returns a object of
+#' of the required source profile (EPA SPECIATE term PROFILE_CODE).
+#' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
 #' speciate profile.
 #' @rdname respeciate
@@ -45,8 +46,8 @@ find_profile_code <- function(term, by = "Keywords") {
 #' The development and uses of EPA SPECIATE database.
 #' Atmospheric Pollution Research, 1(4), pp.196-206.
 #' @examples \dontrun{
-#' code <- "8855"
-#' x <- spec(code)
+#' x <- sp_profile(c(8833, 8850))
+#' plot(x)
 #' }
 
 #NOTE
@@ -54,9 +55,9 @@ find_profile_code <- function(term, by = "Keywords") {
 #get_profile allows you to get multiple profiles
 #not sure this is staying
 
-get_profile <- function(code) {
+sp_profile <- function(code) {
 
-  #handle numerics
+  #handle numerics/characters
   if(is.numeric(code)) code <- as.character(code)
   if(!is.character(code)) stop("unexpected code class")
 
@@ -66,6 +67,7 @@ get_profile <- function(code) {
   PROFILE_REFERENCE <- sysdata$PROFILE_REFERENCE
   REFERENCES <- sysdata$REFERENCES
 
+  #handle multiple codes
   df <- lapply(code, function(x){
     df <- PROFILES[PROFILES$PROFILE_CODE == x, ]
     df <- merge(df, SPECIES, by = "PROFILE_CODE")
@@ -75,8 +77,8 @@ get_profile <- function(code) {
     df
   })
   #build
-  df <- do.call(rbind,df)
-  df <- sp_build_respeciate(df)
+  df <- do.call(rbind, df)
+  df <- rsp_build_respeciate(df)
   return(df)
 }
 
@@ -115,61 +117,143 @@ print.respeciate <-
 
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{plot}} provides a basic plot
-#' output. The objects is a data.frame so you can still
-#' use it with as normal with \code{lattice} or
-#' \code{ggplot2}...
-#' @param x the \code{respeciate} or \code{respeciate}
+#' output. This uses base function \code{\link{barplot}};
+#' also see note.
+#' @note \code{respeciate} objects revert to
+#' \code{data.frame}s when not doing anything
+#' package-specific, so you can still
+#' use as previously with \code{lattice} or
+#' \code{ggplot2}, useful it you are pulling multiple
+#' profiles and you exceed the base \code{\link{barplot}}
+#' capacity...
+#' @param x the \code{respeciate}
 #' object to be printed, plotted, etc.
-#' @param ... any extra arguments, currently ignored.
+#' @param n when plotting or printing a multi-profile, the
+#' number(s) of profile(s) to report.
+#' @param order logical, order the species in the
+#' profile(s) by molecular weight before plotting.
+#' @param legend.text,args.legend \code{\link{barplot}}
+#' arguments.
+#' @param ... any extra arguments, mostly ignored except by
+#' \code{plot} which passes them to \code{\link{barplot}}.
 #' @rdname respeciate
 #' @method plot respeciate
 #' @export
 plot.respeciate <-
-  function(x, profile=NULL, ...){
-    #test single or multiple profile
-    test <- unique(x$PROFILE_CODE)
-    if(length(test)>1){
-      if(is.null(profile)) {
-        profile <- 1
-        cat("(multi-profile object; showing first)\n")
-      } else {
-        if(length(profile)>1){
-          warning("Multiple profiles requested; show first")
-          profile <- profile[1]
-        }
-      }
-      if(any(profile>length(test))){
-        profile <- 1
-        warning(paste("Requested profile not present; showing first\n",
-          "  (NB: only ", length(test), " available)\n",
-                      sep=""))
-      }
-      x <- x[x$PROFILE_CODE==test[profile],]
-      test <- test[profile]
-    }
+  function(x, n=NULL, order=TRUE, ...,
+           legend.text=NULL,
+           args.legend = NULL){
 
+    #test number of profiles
+    #and subset x, etc...
+    test <- unique(x$PROFILE_CODE)
+    if(is.null(n)) n <- 1:length(test)
+    test <- test[n]
+    x <- x[x$PROFILE_CODE %in% test,]
+    #above will die if n-th profile not there
+    if(length(n)>6){
+      warning(paste("\n\t", length(test),
+                    " profiles (might be too many; suggest 6 or less...)",
+                    "\n", sep=""))
+    }
+    test.names <- make.unique(sapply(test,
+                                     function(y) subset(x,
+                                                        PROFILE_CODE==y)$PROFILE_NAME[1]))
+
+    #check anything left to work with
     if(length(test)==0){
       stop("empty (or bad) respeciate object?")
     }
 
-    #single profile
-    #x <- x[rev(order(x$WEIGHT_PERCENT)),]
-    b <- x$WEIGHT_PERCENT
-    xx <- sp_tidy_species_name(x$SPECIES_NAME)
+    #assuming multiple profiles
+    #build common data (could use dplyr)
+    x <- x[c("PROFILE_NAME", "PROFILE_CODE",
+             "SPECIES_NAME", "SPECIES_ID", "SPEC_MW",
+             "WEIGHT_PERCENT")]
+    x <- rsp_split_profile(x)
+    x <- suppressWarnings(Reduce(function(x, y)
+      merge(x=x, y=y,
+            by=c("SPECIES_ID", "SPECIES_NAME",
+                 "SPEC_MW"),
+            all.x=T, all.y=T), x)
+    )
+    #in case names not unique
+    names(x) <- make.names(names(x), unique=TRUE)
 
-    #set up x annotation
-    ref <- max(nchar(xx), na.rm=TRUE) * 0.25
-    if(ref>10) ref <- 10 #stop it getting silly with x names
-    op <- par(mar=c(ref,4,4,2))
+    #order largest to smallest
+    if(order){
+      temp <- names(x)[grep("WEIGHT_PERCENT", names(x))]
+      temp <- apply(x[temp], 1,
+                    function(y) sum(y, na.rm=TRUE))
+      x <-x[rev(order(temp)),]
+    }
 
-    #notes:
-    #currently doesn't like horiz =TRUE
-      #need to rethink par and axis to make this work...
+    #prepare plot
+    xx <- rsp_tidy_species_name(x$SPECIES_NAME)
+    x <- x[grep("WEIGHT_PERCENT", names(x))]
+    x[is.na(x)] <- 0
+    #########################
+    #above kills log but seems to be needed
+    #or we loose all records of one species if any are NA
+    b <- as.matrix(t(x))
 
-    b <- barplot(b, xaxt="n", space=0.5,
-                 ...)
-    axis(1, at=b, labels=xx, las=2, tick=FALSE, cex.axis=0.5)
-    rm(op)
+    #below now handled later
+    #if("beside" %in% names(list(...)) &&
+    #        list(...)$beside){
+    #  #need to replace this with something nicer
+    #  temp <- rep(NA, length(xx) * length(n))
+    #  temp[(1:length(xx))*length(n)] <- xx
+    #  xx <- temp
+    #}
+
+    #plot legend handling
+    #could simplify this
+    if(is.null(legend.text)){
+      legend.text <- test.names
+    }
+    if(is.null(args.legend)){
+      args.legend <- list()
+    }
+    if(!"cex" %in% names(args.legend)){
+      args.legend$cex <- 0.5
+    }
+    if(!"x" %in% names(args.legend)){
+      args.legend$x <- "topright"
+    }
+
+    #need to do plot differently if horiz(ontal)
+    if("horiz" %in% names(list(...)) &&
+       list(...)$horiz){
+      #set up y annotation
+      ref <- max(nchar(xx), na.rm=TRUE) * 0.25
+      if(ref>10) ref <- 10 #stop it getting silly with x names
+      op <- par(mar=c(2,ref,4,2))
+      #plot standard
+      b <- barplot(b, yaxt="n", #space=0.5,
+                   legend.text=legend.text,
+                   args.legend =args.legend,
+                   ...)
+      if(is.matrix(b)){
+        b <- apply(b, 2, function(x) mean(x, na.rm=T))
+      }
+      axis(2, at=b, labels=xx, las=2, tick=FALSE, cex.axis=0.5)
+      rm(op)
+    } else {
+      #set up x annotation
+      ref <- max(nchar(xx), na.rm=TRUE) * 0.25
+      if(ref>10) ref <- 10 #stop it getting silly with x names
+      op <- par(mar=c(ref,4,4,2))
+      #plot standard
+      b <- barplot(b, xaxt="n", #space=0.5,
+                   legend.text=legend.text,
+                   args.legend = args.legend,
+                   ...)
+      if(is.matrix(b)){
+        b <- apply(b, 2, function(x) mean(x, na.rm=T))
+      }
+      axis(1, at=b, labels=xx, las=2, tick=FALSE, cex.axis=0.5)
+      rm(op)
+    }
   }
 
 
@@ -179,8 +263,8 @@ plot.respeciate <-
 
 #' @description When supplied a \code{respeciate.ref}
 #' object, \code{\link{print}} manages its appearance.
-#' @param x the \code{respeciate.ref} object to be printed.
-#' @param ... any extra arguments, currently ignored.
+#' @param x the \code{respeciate} or \code{respeciate.ref}
+#' object to be printed, plotted, etc.
 #' @rdname respeciate
 #' @method print respeciate.ref
 #' @export
@@ -213,14 +297,14 @@ print.respeciate.ref <-
 #class builds
 ###################################
 
-sp_build_respeciate.ref <-
+rsp_build_respeciate.ref <-
   function(x, ...){
     #build
     class(x) <- c("respeciate.ref", "data.frame")
     x
   }
 
-sp_build_respeciate <-
+rsp_build_respeciate <-
   function(x, ...){
     #build
     class(x) <- c("respeciate", "data.frame")
@@ -236,7 +320,7 @@ sp_build_respeciate <-
 
 #note: not fully tested
 
-sp_tidy_species_name <- function(x){
+rsp_tidy_species_name <- function(x){
 
   #attempts shorten names by remove other versions
   #names seem to be in format a (or b || c)
@@ -267,7 +351,7 @@ sp_tidy_species_name <- function(x){
 #currently not exported
 #quick code assumed CODE is unique to profile
 
-sp_split_profile <- function(x){
+rsp_split_profile <- function(x){
   ref <- unique(x$PROFILE_CODE)
   lapply(ref, function(y) x[x$PROFILE_CODE==y,])
 }
@@ -281,66 +365,5 @@ sp_split_profile <- function(x){
 #alternative to above plot.respeciate
 #working on this handle multiple profiles...
 
-#not exporting
+#now replacing previous plot.respeciate
 
-plot.v2.respeciate <-
-  function(x, profile=1:6, ...){
-    #test single or multiple profile
-    test <- unique(x$PROFILE_CODE)
-    if(length(test)>6){
-      warning(paste(length(test),
-            " profiles; might be too many profiles for plot",
-            "\n  (suggest plotting 6 or less)",
-            "\n", sep=""))
-    }
-
-    test.names <- make.unique(sapply(test,
-                                     function(y) subset(x,
-                                                        PROFILE_CODE==y)$PROFILE_NAME[1]))
-    if(length(test)==0){
-      stop("empty (or bad) respeciate object?")
-    }
-
-    #assuming multiple profile
-    #build common data (could use dplyr)
-    x <- x[c("PROFILE_NAME", "PROFILE_CODE",
-               "SPECIES_NAME", "SPECIES_ID", "SPEC_MW",
-               "WEIGHT_PERCENT")]
-    x <- sp_split_profile(x)
-    x <- suppressWarnings(Reduce(function(x, y)
-            merge(x=x, y=y,
-                  by=c("SPECIES_ID", "SPECIES_NAME",
-                      "SPEC_MW"),
-                  all.x=T, all.y=T), x)
-            )
-    names(x) <- make.names(names(x), unique=TRUE)
-
-    #order largest to smallest
-    temp <- names(x)[grep("WEIGHT_PERCENT", names(x))]
-    temp <- apply(x[temp], 1,
-                  function(y) sum(y, na.rm=TRUE))
-    x <-x[rev(order(temp)),]
-
-    #prepare plot
-    xx <- sp_tidy_species_name(x$SPECIES_NAME)
-    x <- x[grep("WEIGHT_PERCENT", names(x))]
-    x[is.na(x)] <- 0
-    b <- t(as.matrix(x))
-
-    #set up x annotation
-    ref <- max(nchar(xx), na.rm=TRUE) * 0.25
-    if(ref>10) ref <- 10 #stop it getting silly with x names
-    op <- par(mar=c(ref,4,4,2))
-
-    #notes:
-    #currently doesn't like horiz =TRUE
-    #need to rethink par and axis to make this work...
-    #currently doesn't like beside=TRUE
-
-    b <- barplot(b, xaxt="n", space=0.5,
-                 legend.text=test.names,
-                 args.legend = list(cex=0.5, x="topright"),
-                 ...)
-    axis(1, at=b, labels=xx, las=2, tick=FALSE, cex.axis=0.5)
-    rm(op)
-  }

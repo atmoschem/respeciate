@@ -21,8 +21,8 @@ As part of that, I:
 -   moved your sysdata.rda to the package data folder
 -   reset lazy.data to TRUE  
 -   added an object class
--   added find\_profile\_code (find\_code but making object class)
--   added profile (spec but making object class)
+-   added sp\_find\_profile (find\_code but making object class)
+-   added sp\_profile (spec but making object class)
 -   added crude print and plot methods for object classes
 -   updated date and version
 
@@ -30,11 +30,11 @@ The new code is in R/speciate.0.2.r
 
 ## example
 
-find PROFILE\_CODE
+Find profiles based on search criteria
 
 ``` r
 library(respeciate)
-x <- find_profile_code("Ethanol")
+x <- sp_find_profile("Ethanol")
 x
 #> respeciate profile reference
 #> 8733 8736 8757 8758 8760 8761 8763 8764 8765 8766 8767 8768 8769 8770 8771 8772 
@@ -47,30 +47,30 @@ x
 ## speciate
 
 ``` r
-dt <- get_profile("8833")
-dt
-#> respeciate profile:  Haskew2010a 
-#>  checksum:  100
+p <- sp_profile("8833")
 ```
 
 ## plot
 
+Plotting a profile
+
 ``` r
 #profiles have a default plot option
-plot(dt)
+plot(p)
 ```
 
 <img src="man/figures/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
+… or multiple profiles using barplot syntax
+
 ``` r
-#but they are just data.frame at heart 
-#so you can plot as previous
-library(ggplot2)
-#> Warning: package 'ggplot2' was built under R version 4.0.5
-ggplot(dt[, c("WEIGHT_PERCENT", "SPECIES_NAME")], 
-       aes(x = SPECIES_NAME, y = WEIGHT_PERCENT)) +
-  geom_bar(stat = "identity") +
-  coord_flip()
+#using base barplot 
+p2 <- sp_profile(c(8833, 8850))
+plot(p2, beside=TRUE)
 ```
 
 <img src="man/figures/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+
+> NOTE: The respeciate objects are just data.frames at heart. So, please
+> feel free to use any preferred plotting methods: ggplot2, lattice,
+> etc…
