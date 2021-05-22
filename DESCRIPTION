@@ -1,20 +1,20 @@
 Package: respeciate
-Type: Package
 Title: Speciation profiles for gases and aerosols
-Version: 0.1.0
-Date: 2020-12-21
-Authors@R: c( 
-  person(given = "Sergio", family = "Ibarra-Espinosa",
-         role = c("aut", "cre"),
-         email = "sergio.ibarra@usp.br",
-         comment = c(ORCID = "0000-0002-3162-1905"))) 
-Description: Acess to the US.EPA Speciate (v5.1) tool,
-    to generate speciation for gases and particles. 
-    More details in Simon et al (2010) <doi:10.5094/APR.2010.026>.
+Version: 0.1.1
+Date: 2021-05-21
+Description: Acess to the US.EPA Speciate (v5.1) tool, to
+      generate speciation for gases and particles. More
+      details in Simon et al (2010)
+      <doi:10.5094/APR.2010.026>.
+Type: Package
+Authors@R: c( person(given = "Sergio", family =
+      "Ibarra-Espinosa", role = c("aut", "cre"), email =
+      "sergio.ibarra@usp.br", comment = c(ORCID =
+      "0000-0002-3162-1905")))
 License: MIT + file LICENSE
 URL: https://github.com/atmoschem/respeciate
 BugReports: https://github.com/atmoschem/respeciate/issues
-LazyData: no
+LazyData: yes
 Depends: R (>= 3.5.0)
 RoxygenNote: 7.1.1
 Encoding: UTF-8
