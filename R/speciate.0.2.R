@@ -1,6 +1,7 @@
-#' @name respeciate
-#' @title respeciate
+#' @name respeciate.0.2
+#' @title respeciate.0.2
 #' @aliases sp_find_profile sp_profile
+#' @importFrom graphics axis barplot par
 
 #' @description This is respeciate but with object classes...
 
@@ -17,7 +18,7 @@
 #' @return \code{sp_find_profile} returns a object of
 #' \code{respeciate.ref} class, a \code{data.frame} of
 #' profile information.
-#' @rdname respeciate
+#' @rdname respeciate.0.2
 #' @export
 #' @examples \dontrun{
 #' profile <- "Ethanol"
@@ -38,7 +39,7 @@ sp_find_profile <- function(term, by = "Keywords") {
 #' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
 #' speciate profile.
-#' @rdname respeciate
+#' @rdname respeciate.0.2
 #' @export
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
@@ -84,7 +85,7 @@ sp_profile <- function(code) {
 
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{print}} manages its appearance.
-#' @rdname respeciate
+#' @rdname respeciate.0.2
 #' @method print respeciate
 #' @export
 print.respeciate <-
@@ -136,7 +137,7 @@ print.respeciate <-
 #' arguments.
 #' @param ... any extra arguments, mostly ignored except by
 #' \code{plot} which passes them to \code{\link{barplot}}.
-#' @rdname respeciate
+#' @rdname respeciate.0.2
 #' @method plot respeciate
 #' @export
 plot.respeciate <-
@@ -265,7 +266,7 @@ plot.respeciate <-
 #' object, \code{\link{print}} manages its appearance.
 #' @param x the \code{respeciate} or \code{respeciate.ref}
 #' object to be printed, plotted, etc.
-#' @rdname respeciate
+#' @rdname respeciate.0.2
 #' @method print respeciate.ref
 #' @export
 print.respeciate.ref <-

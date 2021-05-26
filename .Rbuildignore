@@ -3,3 +3,6 @@
 ^README.md$
 ^README.Rmd$
 ^figs$
+.github
+pkgdown
+docs

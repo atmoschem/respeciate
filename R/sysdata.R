@@ -13,5 +13,13 @@
 #'   \item{PROFILE_REFERENCE}{[to document]}
 #'   \item{REFERENCES}{[to document]}
 #' }
+
+globalVariables(c("sysdata", "PROFILE_CODE")) #don't like this...
+
 #' @source [to doc]
+#' @references
+#' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
+#' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
+#' The development and uses of EPA SPECIATE database.
+#' Atmospheric Pollution Research, 1(4), pp.196-206.
 "sysdata"
