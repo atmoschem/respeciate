@@ -13,21 +13,6 @@ The installation is:
 remotes::install_github("atmoschem/respeciate")
 ```
 
-Sergio,
-
-I was think about using respeciate on a project and was having a play.
-As part of that, I:
-
--   moved your sysdata.rda to the package data folder
--   reset lazy.data to TRUE  
--   added an object class
--   added sp\_find\_profile (find\_code but making object class)
--   added sp\_profile (spec but making object class)
--   added crude print and plot methods for object classes
--   updated date and version
-
-The new code is in R/speciate.0.2.r
-
 ## example
 
 Find profiles based on search criteria
@@ -70,7 +55,3 @@ plot(p2, beside=TRUE)
 ```
 
 <img src="man/figures/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
-
-> NOTE: The respeciate objects are just data.frames at heart. So, please
-> feel free to use any preferred plotting methods: ggplot2, lattice,
-> etc…

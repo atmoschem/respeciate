@@ -24,19 +24,6 @@ The installation is:
 remotes::install_github("atmoschem/respeciate")
 ```
 
-Sergio, 
-
-I was think about using respeciate on a project and was having a play. As part of that, I: 
-
-* moved your sysdata.rda to the package data folder 
-* reset lazy.data to TRUE  
-* added an object class 
-* added sp_find_profile (find_code but making object class)
-* added sp_profile (spec but making object class)
-* added crude print and plot methods for object classes 
-* updated date and version
-
-The new code is in R/speciate.0.2.r
 
 ## example
 
@@ -72,5 +59,4 @@ p2 <- sp_profile(c(8833, 8850))
 plot(p2, beside=TRUE)
 ```
 
-> NOTE: The respeciate objects are just data.frames at heart. So, please feel free to use any preferred plotting methods: ggplot2, lattice, etc...
 
