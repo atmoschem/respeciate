@@ -18,7 +18,7 @@ utils::globalVariables(c("SPECIES_ID"))
 #' relevant records.
 #' @param by character, the section of the archive to
 #' search, by default \code{'keywords'} for \code{\link{sp_find_profile}} and
-#' \code{'species_names'} for \code{\link{sp_find}_species}.
+#' \code{'species_names'} for \code{\link{sp_find_species}}.
 #' @param partial logical, if \code{TRUE} (default)
 #' \code{sp_find} functions use partial matching.
 #' @return \code{sp_find_profile} returns a object of
