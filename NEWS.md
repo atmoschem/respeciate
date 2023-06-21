@@ -1,6 +1,14 @@
 NEWS
 ===========
 
+### respeciate 0.2.1 (Release date: 2023-06-21)
+
+- updated sysdata (now using SPECIATE 5.2)
+- added sp\_find\_species 
+- extended sp\_find\_profile; now allows by='species_name'
+- simplified plot.respeciate
+
+
 ### respeciate 0.2.0 (Release date: 2021-05-26)
 
 - Karl Ropkins joined
