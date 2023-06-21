@@ -2,16 +2,16 @@
 #' @title sp_ functions
 #' @aliases sp_find_profile sp_find_species sp_profile
 
-#' @description sp_ functions for use with (re)speciate data in R...
+#' @description sp functions for use with (re)speciate data in R...
 
 #reversed order of documentation,
 #started with the find function...
 
-#' @description \code{\link{sp_find}} functions search main data sets
+#' @description \code{sp_find} functions search main data sets
 #' in the (re)SPECIATE archive using supplied search terms.
 #' \code{\link{sp_find_profile}} searches for profile records and
 #' \code{\link{sp_find_species}} searches for species records.
-#' @param ... for \code{\link{sp_find}} functions, character(s), any
+#' @param ... for \code{sp_find} functions, character(s), any
 #' search term(s) to use when searching the local (re)SPECIATE archive for
 #' relevant records.
 #' @param by character, the section of the archive to
@@ -134,6 +134,8 @@ sp_find_species <- function(..., by = "species_name", partial = TRUE) {
 
 #get_profile allows you to get multiple profiles
 #not sure this is staying
+
+utils::globalVariables(c("SPECIES_ID"))
 
 #' @rdname sp.001
 #' @export
