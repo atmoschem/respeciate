@@ -2,6 +2,8 @@
 #' @title sp_ functions
 #' @aliases sp_find_profile sp_find_species sp_profile
 
+utils::globalVariables(c("SPECIES_ID"))
+
 #' @description sp functions for use with (re)speciate data in R...
 
 #reversed order of documentation,
@@ -135,7 +137,7 @@ sp_find_species <- function(..., by = "species_name", partial = TRUE) {
 #get_profile allows you to get multiple profiles
 #not sure this is staying
 
-utils::globalVariables(c("SPECIES_ID"))
+
 
 #' @rdname sp.001
 #' @export

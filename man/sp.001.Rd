@@ -24,6 +24,9 @@ search, by default \code{'keywords'} for \code{\link{sp_find_profile}} and
 
 \item{partial}{logical, if \code{TRUE} (default)
 \code{sp_find} functions use partial matching.}
+
+\item{code}{character or numeric, the SPECIATE code
+of the required profile (EPA SPECIATE term PROFILE_CODE).}
 }
 \value{
 \code{sp_find_profile} returns a object of
@@ -33,6 +36,10 @@ profile information.
 \code{sp_find_species} returns a object of
 \code{respeciate.spcs} class, a \code{data.frame} of
 species information.
+
+\code{sp_profile} returns a object of
+\code{respeciate} class, a \code{data.frame} containing a
+speciate profile.
 }
 \description{
 sp functions for use with (re)speciate data in R...
@@ -41,6 +48,9 @@ sp functions for use with (re)speciate data in R...
 in the (re)SPECIATE archive using supplied search terms.
 \code{\link{sp_find_profile}} searches for profile records and
 \code{\link{sp_find_species}} searches for species records.
+
+\code{\link{sp_profile}} extracts a
+SPECIATE profile from the local (re)SPECIATE archive.
 }
 \examples{
 \dontrun{
@@ -53,4 +63,13 @@ species <- "Ethanol"
 sp <- sp_find_species(species)
 sp}
 
+\dontrun{
+x <- sp_profile(c(8833, 8850))
+plot(x)}
+}
+\references{
+Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
+Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
+The development and uses of EPA SPECIATE database.
+Atmospheric Pollution Research, 1(4), pp.196-206.
 }
