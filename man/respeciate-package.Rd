@@ -6,12 +6,9 @@
 \alias{respeciate-package}
 \title{respeciate: Speciation profiles for gases and aerosols}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Acess to the US.EPA Speciate (v5.1) tool, to
-      generate speciation for gases and particles. More
-      details in Simon et al (2010)
-      <doi:10.5094/APR.2010.026>.
+Acess to the US.EPA Speciate (v5.2) tool, to generate speciation for gases and particles. More details in Simon et al (2010) \doi{10.5094/APR.2010.026}.
 }
 \seealso{
 Useful links:
