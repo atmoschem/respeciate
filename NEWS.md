@@ -1,26 +1,31 @@
-NEWS
-===========
+# Version 0.0 - Release Notes
 
-### respeciate 0.2.1 (Release date: 2023-06-21)
+* [0.2.2] 
+    * released 2023-06-28 
+    * now imports data.table; moving to data.table methods for speed 
+    * changed news format because build_news missing previous md text 
+    * added functions: sp_profile_rescale, sp_profile_dcast, sp_profile_cor, 
+    sp_profile_dist, sp_profile_match
+    
+* [0.2.1] 
+    * released 2023-06-21 
+    * updated sysdata (now using SPECIATE 5.2)
+    * added sp_find_species 
+    * extended sp_find_profile; now searches by species_name
+    * simplified plot.respeciate
 
-- updated sysdata (now using SPECIATE 5.2)
-- added sp\_find\_species 
-- extended sp\_find\_profile; now allows by='species_name'
-- simplified plot.respeciate
+* [0.2.0] 
+    * released 2021-05-26 
+    * Karl Ropkins joined
+    * moved your sysdata.rda to the package data folder
+    * reset lazy.data to TRUE  
+    * added an object class
+    * added sp_find_profile (find_code but making object class)
+    * added sp_profile (spec but making object class)
+    * added crude print and plot methods for object classes
+    * updated date and version
+    * The new code is in R:speciate.0.2.r
 
-
-### respeciate 0.2.0 (Release date: 2021-05-26)
-
-- Karl Ropkins joined
-- moved your sysdata.rda to the package data folder
-- reset lazy.data to TRUE  
-- added an object class
-- added sp\_find\_profile (find\_code but making object class)
-- added sp\_profile (spec but making object class)
-- added crude print and plot methods for object classes
-- updated date and version
-- The new code is in R/speciate.0.2.r
-
-### respeciate 0.1.0 (Release date: 2020-12-20)
-
-- Create respeciate
+* [0.1.0] 
+    * released 2020-12-20  
+    * Created respeciate
