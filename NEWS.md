@@ -1,11 +1,11 @@
 # Version 0.0 - Release Notes
 
 * [0.2.2] 
-    * released 2023-06-28 
+    * released 2023-07-12 
     * now imports data.table; moving to data.table methods for speed 
     * changed news format because build_news missing previous md text 
-    * added functions: sp_profile_rescale, sp_profile_dcast, sp_profile_cor, 
-    sp_profile_dist, sp_profile_match
+    * added functions: sp_rescale_profile, sp_dcast_profile, sp_profile_cor, 
+    sp_profile_dist, sp_match_profile
     
 * [0.2.1] 
     * released 2023-06-21 

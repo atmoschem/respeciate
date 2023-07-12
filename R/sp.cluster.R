@@ -1,4 +1,4 @@
-#' @name sp.profile.cluster
+#' @name sp.cluster
 #' @title sp_profile clustering
 #' @aliases sp_profile_dist
 
@@ -20,7 +20,7 @@
 
 #NOTE
 
-#' @rdname sp.profile.cluster
+#' @rdname sp.cluster
 #' @export
 
 #  using data.table for dcast
@@ -43,6 +43,11 @@
 #   aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
 #   sp_profile_dist(aa)
 
+#think about other functions
+#   variations on current dist
+#   kmeans
+#   others
+
 
 #test
 ######################
@@ -55,7 +60,7 @@ sp_profile_dist <- function(x, output = c("plot", "report")){
   #add .value if missing
   x <- rsp_tidy_profile(x)
   #make by species data.frame
-  .x <- sp_profile_dcast(x, wide = "species")
+  .x <- sp_dcast_profile(x, wide = "species")
 
   .dst <- dist(scale(.x[-1:-2], center = TRUE, scale = TRUE))
   .dst[is.na(.dst)] <- -1

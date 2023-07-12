@@ -1,4 +1,4 @@
-#' @name find.sp
+#' @name sp.find
 #' @title re(SPECIATE) sp_find_ functions
 #' @aliases sp_find_profile sp_find_species
 
@@ -9,7 +9,7 @@
 #    find_sp_profile_info would be better?
 #  like to make it keep these are not profiles..?
 
-#' @description code{sp_find_} functions are for use with (re)speciate
+#' @description \code{sp_find_} functions are for use with (re)SPECIATE
 #' source data in R...
 #' @description \code{sp_find_} functions search main data sets
 #' in the (re)SPECIATE archive using supplied search terms.
@@ -25,7 +25,7 @@
 #' @return \code{sp_find_profile} returns a object of
 #' \code{respeciate.ref} class, a \code{data.frame} of
 #' profile information.
-#' \code{sp_sp_findecies} returns a object of
+#' \code{sp_find_species} returns a object of
 #' \code{respeciate.spcs} class, a \code{data.frame} of
 #' species information.
 
@@ -43,7 +43,7 @@
 #   finds profile containing ethanol?
 
 
-#' @rdname find.sp
+#' @rdname sp.find
 #' @export
 
 sp_find_profile <- function(..., by = "keywords", partial = TRUE) {
@@ -94,7 +94,7 @@ sp_find_profile <- function(..., by = "keywords", partial = TRUE) {
 }
 
 
-#' @rdname find.sp
+#' @rdname sp.find
 #' @export
 
 sp_find_species <- function(..., by = "species_name", partial = TRUE) {

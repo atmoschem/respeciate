@@ -1,4 +1,4 @@
-#' @name sp.profile.cor
+#' @name sp.cor
 #' @title sp_profile correlation
 #' @aliases sp_profile_cor
 
@@ -24,7 +24,7 @@
 
 #NOTE
 
-#' @rdname sp.profile.cor
+#' @rdname sp.cor
 #' @export
 
 #  using data.table for dcast
@@ -61,7 +61,7 @@
 sp_profile_cor <- function(x, min.n = 3,
                            output = c("plot", "report")){
   #if ref missing
-  .x <- sp_profile_dcast(x)
+  .x <- sp_dcast_profile(x)
 
   #no point doing any have less than min.n values?
   .test <- apply(.x, 2, function(x) length(.x[!is.na(x)]))
@@ -80,7 +80,8 @@ sp_profile_cor <- function(x, min.n = 3,
   #   maybe cases where 1 unique case, e.g. x=c(1,1,1,1,1), y=c(2,2,2,2)
   #   or where overlap is low <2 x=c(1,1,1,NA,NA), y=c(NA,NA,1,NA,NA)
 
-  #pokemon cludge...
+  #I'm calling this the pokemon cludge...
+  #got to catch 'em all...
   f <- function(x, y) {
     test <- !is.na(x) & !is.na(y)
     x <- x[test]

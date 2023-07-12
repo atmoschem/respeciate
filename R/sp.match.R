@@ -1,11 +1,11 @@
-#' @name sp.profile.match
-#' @title sp_profile matching
-#' @aliases sp_profile_match
+#' @name sp.match
+#' @title Find nearest matches from reference set of profiles
+#' @aliases sp_match_profile
 
 #' @description sp_profile functions identify nearest matches in a reference
 #' set of (re)SPECIATE profiles for a supplied species profile.
 
-#' @description \code{sp_profile_match} attempts to identify the nearest
+#' @description \code{sp_match_profile} attempts to identify the nearest
 #' matches to a supplied profile from a reference set of (re)SPECIATE profiles
 #' on the basis of correlation coefficient.
 #' @param x A \code{respeciate} object, a \code{data.frame} containing a
@@ -17,14 +17,14 @@
 #' report.
 #' @param rescale Numeric (default 4), the data scaling method to apply before
 #' comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
-#' \code{\link{sp_profile_rescale}}.
-#' @return \code{sp_profile_match} returns a fit report: a \code{data.frame} of
-#' upto \code{n} fit reports for the nearest matches to \code{x} from the
+#' \code{\link{sp_rescale_profile}}.
+#' @return \code{sp_match_profile} returns a fit report: a \code{data.frame} of
+#' up to \code{n} fit reports for the nearest matches to \code{x} from the
 #' reference profile data set, \code{ref}.
 
 #NOTE
 
-#' @rdname sp.profile.match
+#' @rdname sp.match
 #' @export
 
 #  using data.table for dcast
@@ -42,7 +42,7 @@
 
 
 ##aa <- sp_profile(sp_find_profile("composite", by="profile_name"))
-##sp_profile_match(subset(rsp_("41220C")), aa)
+##sp_match_profile(subset(rsp_("41220C")), aa)
 ##assuming 41220C exists
 
 ##NOTE sp_profile code is case sensitive
@@ -75,7 +75,7 @@
 #             weight_percent or .value
 
 
-sp_profile_match <- function(x, ref, n=10, rescale=4){
+sp_match_profile <- function(x, ref, n=10, rescale=4){
 
   #######################
   #if ref missing
@@ -114,7 +114,7 @@ sp_profile_match <- function(x, ref, n=10, rescale=4){
   #          but then maybe need to check requires
   #          cols are there???
 
-  .tmp <- as.data.table(sp_profile_rescale(.tmp, method=rescale))
+  .tmp <- as.data.table(sp_rescale_profile(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -137,7 +137,7 @@ sp_profile_match <- function(x, ref, n=10, rescale=4){
   #              na.rm=TRUE,
   #              value.var = ".value")
 
-  .tmp <- as.data.table(sp_profile_dcast(.tmp, wide="profile"))
+  .tmp <- as.data.table(sp_dcast_profile(.tmp, wide="profile"))
 
   #nb: need the as.data.table() because sp_profile_dcast
   #    currently returns data.frame

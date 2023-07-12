@@ -1,10 +1,8 @@
-#' @name sp.profile.rescale
+#' @name sp.rescale
 #' @title sp_profile data rescaling functions
-#' @aliases sp_profile_rescale
+#' @aliases sp_rescale_profile
 
-
-#' @description sp_profile functions for rescaling (re)SPECIATE profiles
-
+#' @description Functions for rescaling (re)SPECIATE profiles
 
 #' @description \code{\link{sp_profile_rescales}} rescales the percentage
 #' weight information in \code{x}.
@@ -29,7 +27,7 @@
 
 #NOTE
 
-#' @rdname sp.profile.rescale
+#' @rdname sp.rescale
 #' @export
 #' @import data.table
 
@@ -44,7 +42,6 @@
 #issue
 ############################
 
-#not sure why
 #sp_profile_rescale(sp_profile_rescale(aa, method=2), method=1)
 #error but
 #sp_profile_rescale(sp_profile_rescale(aa, method=2), method=0)
@@ -52,7 +49,9 @@
 
 #see error message
 
-sp_profile_rescale <- function(x, method = 1){
+##  THINK this is now fixed...
+
+sp_rescale_profile <- function(x, method = 1){
 
   #################################
   #check x is a respeciate object??
@@ -67,11 +66,13 @@ sp_profile_rescale <- function(x, method = 1){
   #################################
   #calculate stats
   xx <- as.data.table(x)
+  #remove stats if there...
   test <- c(".min",".max",".total", ".mean", ".na", ".n", ".sd")
   test <- test[ test %in% colnames(xx)]
   if(length(test)>0){
     xx <- xx[, (test) := NULL]
   }
+  #and recalculate
   out <- xx[,
             .(#SPECIES_NAME = SPECIES_NAME[1],
               #SPEC_MW = SPEC_MW[1],

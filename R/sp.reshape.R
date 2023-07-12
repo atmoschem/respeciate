@@ -1,18 +1,18 @@
-#' @name sp.profile.dcast
-#' @title sp_profile reshaping functions
-#' @aliases sp_profile_dcast
+#' @name sp.reshape
+#' @title (re)SPECIATE profile reshaping functions
+#' @aliases sp_dcast_profile
 
-#' @description sp_profile functions for reshaping (re)SPECIATE profiles
+#' @description Functions for reshaping (re)SPECIATE profiles
 
-#' @description \code{\link{sp_profile_dcast}} reshapes the supplied
+#' @description \code{\link{sp_dcast_profile}} reshapes the supplied
 #' (re)SPECIATE profile(s), converting it from long to short form. See Notes
 #' for further details.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param wide character, when reshaping \code{x} the data type to 'widen',
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
-#' @return \code{sp_profile_dcast} returns the wide form of the supplied
-#' \code{respeciate} profile.
+#' @return \code{sp_dcast_profile} returns the wide form of the supplied
+#' \code{respeciate} profile as a \code{data.frame}.
 
 #' @note Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 #' be slow and memory inefficient. So, \code{respeciate} uses the
@@ -27,7 +27,7 @@
 #'
 #' Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
 #' \code{.value}, so the EPA source information can easily be recovered. See also
-#' \code{\link{sp_profile_rescale}}
+#' \code{\link{sp_rescale_profile}}
 #'
 #' @references
 #'   Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.
@@ -35,7 +35,7 @@
 
 #NOTE
 
-#' @rdname sp.profile.dcast
+#' @rdname sp.reshape
 #' @export
 #' @import data.table
 
@@ -47,7 +47,7 @@
 #long_to_wide reshape
 ######################
 
-sp_profile_dcast <- function(x, wide = "species"){
+sp_dcast_profile <- function(x, wide = "species"){
 
   ####################
   #see ?data.table::dcast for examples

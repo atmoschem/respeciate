@@ -1,4 +1,4 @@
-#' @name sp.001
+#' @name sp
 #' @title sp_ functions
 #' @aliases sp_profile
 
@@ -27,7 +27,7 @@
 
 #NOTE
 
-#' @rdname sp.001
+#' @rdname sp
 #' @export
 #' @import data.table
 

@@ -156,7 +156,7 @@ spx_n_alkane <- function(x){
 spx_btex <- function(x){
   #group x by is/isn't btex
   tolower(x$SPECIES_NAME) %in% c(
-    #to do....
+    #to test/check...
     "benzene",
     "toluene",
     "ethylbenzene",
