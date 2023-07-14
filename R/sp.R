@@ -5,10 +5,6 @@
 
 #' @description sp function to get profiles from the R (re)SPECIATE archive
 
-#reversed order of documentation,
-#started with the find function...
-
-
 #' @description \code{\link{sp_profile}} extracts a
 #' SPECIATE profile from the local (re)SPECIATE archive.
 #' @param code character or numeric, the SPECIATE code
@@ -25,11 +21,22 @@
 #' x <- sp_profile(c(8833, 8850))
 #' plot(x)}
 
-#NOTE
+#NOTES
+#######################
+
+#to think about
+#######################
+
+#add two functions
+
+## sp_build_profile to make a profile locally
+## sp_import_profile to import a profile from an external source
+
 
 #' @rdname sp
 #' @export
-#' @import data.table
+##     (now importing via xxx.r)
+##     #' @import data.table
 
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
@@ -94,13 +101,17 @@ sp_profile <- function(code) {
 
 
 
+
+
+
 #############################
 #unexported & previous code
 #############################
 
 #sp_profile v 0.1
+#now unexported
 
-sp_profile.old <- function(code) {
+rsp_profile.old <- function(code) {
   #handle numerics/characters
   #######################
   #could replace code with ...???

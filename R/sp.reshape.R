@@ -37,7 +37,9 @@
 
 #' @rdname sp.reshape
 #' @export
-#' @import data.table
+
+##   now imports from xxx.r
+##   #' @import data.table
 
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??

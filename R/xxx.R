@@ -19,13 +19,16 @@ utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
 
 #   data.table used by:
 #         rsp_test_profile,
-#         sp_profile_dcast, and those that use dcast?
+#         sp_dcast_profile, and those that use dcast?
+#               sp_species_cor
+#               sp_profile_distance
 #         and others???
 #               need to identify them
 
 #' @importFrom stats sd
 #' @importFrom utils modifyList
 #' @importFrom graphics axis barplot par
+
 
 
 
@@ -266,5 +269,9 @@ rsp_test_profile <- function(x){
 #  ans <- as.character(ans)
 #  return(ans)
 #}
+
+#ggplot example
+#require(ggplot2)
+#ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
 
 

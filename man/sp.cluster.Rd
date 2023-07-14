@@ -2,10 +2,10 @@
 % Please edit documentation in R/sp.cluster.R
 \name{sp.cluster}
 \alias{sp.cluster}
-\alias{sp_profile_dist}
+\alias{sp_profile_distance}
 \title{sp_profile clustering}
 \usage{
-sp_profile_dist(x, output = c("plot", "report"))
+sp_profile_distance(x, output = c("plot", "report"))
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)

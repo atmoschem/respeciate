@@ -1,6 +1,6 @@
 #' @name sp.cor
-#' @title sp_profile correlation
-#' @aliases sp_profile_cor
+#' @title (re)SPECIATE Species Correlations
+#' @aliases sp_species_cor
 
 #' @description sp_profile functions for studying relationships between
 #' multi-profile (re)SPECIATE data sets
@@ -34,7 +34,9 @@
 #generate correlation matrix
 ######################
 
+########################
 #in development
+#######################
 
 #to do
 #########################
@@ -56,9 +58,9 @@
 
 
 #aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
-#sp_profile_cor(aa)
+#sp_species_cor(aa)
 
-sp_profile_cor <- function(x, min.n = 3,
+sp_species_cor <- function(x, min.n = 3,
                            output = c("plot", "report")){
   #if ref missing
   .x <- sp_dcast_profile(x)

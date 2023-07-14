@@ -8,16 +8,29 @@
 #  wondering if find_profile_info, sp_find_profile_info or
 #    find_sp_profile_info would be better?
 
-#like to include summary(factor(sysdata$PROFILES$PROFILE_TYPE))
-#  or something like that
+#########################
+#to think about
+#########################
 
-#' @description \code{sp_info} provides (re)SPECIATE
-#' source information...
-#' @return \code{sp_info} provide brief source information report on the
+#maybe move sp.find code to this script?
+
+
+#' @description Functions that provide (re)SPECIATE
+#' source information.
+#'
+#' @return \code{sp_info} provides brief source information report on the
 #' currently installed (re)SPECIATE data sets.
+
+
+#######################
+#sp_info
+#######################
 
 # tidy output???
 #    little messy???
+
+#like to include summary(factor(sysdata$PROFILES$PROFILE_TYPE))
+#  or something like that
 
 # this is not currently catchable!!!!
 # a <- sp_info() #a = NULL

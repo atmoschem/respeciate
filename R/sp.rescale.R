@@ -39,17 +39,10 @@
 ######################
 
 ##########################
-#issue
+#issues
 ############################
 
-#sp_profile_rescale(sp_profile_rescale(aa, method=2), method=1)
-#error but
-#sp_profile_rescale(sp_profile_rescale(aa, method=2), method=0)
-#does not
 
-#see error message
-
-##  THINK this is now fixed...
 
 sp_rescale_profile <- function(x, method = 1){
 

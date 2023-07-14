@@ -8,10 +8,10 @@
 sp_info()
 }
 \value{
-\code{sp_info} provide brief source information report on the
+\code{sp_info} provides brief source information report on the
 currently installed (re)SPECIATE data sets.
 }
 \description{
-\code{sp_info} provides (re)SPECIATE
-source information...
+Functions that provide (re)SPECIATE
+source information.
 }

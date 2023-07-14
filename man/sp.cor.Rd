@@ -2,10 +2,10 @@
 % Please edit documentation in R/sp.cor.R
 \name{sp.cor}
 \alias{sp.cor}
-\alias{sp_profile_cor}
-\title{sp_profile correlation}
+\alias{sp_species_cor}
+\title{(re)SPECIATE Species Correlations}
 \usage{
-sp_profile_cor(x, min.n = 3, output = c("plot", "report"))
+sp_species_cor(x, min.n = 3, output = c("plot", "report"))
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)

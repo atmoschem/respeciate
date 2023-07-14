@@ -23,8 +23,9 @@
 
 #like to loose the respeciate.ref and respeciate.spcs classes
 #    maybe merge them into respeciate
-#         with just print outputs?
 
+#         with different print outputs?
+#         only plot for class plot, etc???
 
 #' @rdname respeciate.generics
 #' @method print respeciate

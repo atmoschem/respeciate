@@ -1,6 +1,6 @@
 #' @name sp.cluster
 #' @title sp_profile clustering
-#' @aliases sp_profile_dist
+#' @aliases sp_profile_distance
 
 #' @description sp_profile functions for studying similarities (or
 #' dissimilarities) within multi-profile (re)SPECIATE data sets
@@ -18,6 +18,18 @@
 #' one or more of the following: the correlation matrix, a heat map of the
 #' correlation matrix.
 
+
+########################
+#to think about
+########################
+
+#think about other functions
+#   variations on current dist
+#   kmeans
+#   others
+
+# https://www.statology.org/k-means-clustering-in-r/
+
 #NOTE
 
 #' @rdname sp.cluster
@@ -33,7 +45,7 @@
 #    needs thinking through
 #    needs options/formals
 
-#output like in sp_profile_cor
+#output like in sp_species_cor
 
 #also check through and consider other options in sp_profile_cor
 
@@ -41,22 +53,18 @@
 
 #think about how we handle too-big matrices, e.g.
 #   aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
-#   sp_profile_dist(aa)
+#   sp_profile_distance(aa)
 
-#think about other functions
-#   variations on current dist
-#   kmeans
-#   others
 
 
 #test
 ######################
 
 #aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
-#sp_profile_dist(aa)
+#sp_profile_distance(aa)
 
 
-sp_profile_dist <- function(x, output = c("plot", "report")){
+sp_profile_distance <- function(x, output = c("plot", "report")){
   #add .value if missing
   x <- rsp_tidy_profile(x)
   #make by species data.frame
