@@ -12,7 +12,7 @@ sp_species_cor(x, min.n = 3, output = c("plot", "report"))
 profiles.}
 
 \item{min.n}{Numeric (default 3), the minimum number of species measurements
-needed in a profile for the function to use it in correlation caluclations.
+needed in a profile for the function to use it in correlation calculations.
 Here, it should be noted that this does not guarantee at the three matched
 pairs of measurements needed to calculate a correlation coefficient because
 not all profiles contain all species, so there may still be insufficient
@@ -23,7 +23,7 @@ calculated correlation matrix; \code{'plot'} a heat map of that correlation
 matrix.}
 }
 \value{
-Depending on the \code{output} option, \code{sp_profile_cor} returns
+Depending on the \code{output} option, \code{sp_species_cor} returns
 one or more of the following: the correlation matrix, a heat map of the
 correlation matrix.
 }
@@ -31,6 +31,6 @@ correlation matrix.
 sp_profile functions for studying relationships between
 multi-profile (re)SPECIATE data sets
 
-\code{\link{sp_profile_cor}} generates a correlation matrix
+\code{\link{sp_species_cor}} generates a correlation matrix
 for the supplied (re)SPECIATE data sets.
 }

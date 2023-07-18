@@ -3,15 +3,63 @@
 \name{sp.info}
 \alias{sp.info}
 \alias{sp_info}
+\alias{sp_info_profile}
+\alias{sp_info_species}
+\alias{sp_find_profile}
+\alias{sp_find_species}
 \title{re(SPECIATE) information}
 \usage{
 sp_info()
+
+sp_info_profile(..., by = "keywords", partial = TRUE)
+
+sp_find_profile(...)
+
+sp_info_species(..., by = "species_name", partial = TRUE)
+
+sp_find_species(...)
+}
+\arguments{
+\item{...}{character(s), any search term(s) to use when searching
+the local (re)SPECIATE archive for relevant records using
+\code{sp_info_profile} or \code{sp_info_species}.}
+
+\item{by}{character, the section of the archive to
+search, by default \code{'keywords'} for \code{sp_find_profile} and
+\code{'species_names'} for \code{sp_find_species}.}
+
+\item{partial}{logical, if \code{TRUE} (default)
+\code{sp_find_} functions use partial matching.}
 }
 \value{
-\code{sp_info} provides brief source information report on the
+\code{sp_info} provides a brief version information report on the
 currently installed (re)SPECIATE data sets.
+
+\code{sp_find_profile} returns a object of
+\code{respeciate.ref} class, a \code{data.frame} of
+profile information.
+\code{sp_find_species} returns a object of
+\code{respeciate.spcs} class, a \code{data.frame} of
+species information.
 }
 \description{
 Functions that provide (re)SPECIATE
 source information.
+\code{sp_info} generates a brief version report for the currently installed
+(re)SPECIATE data sets.
+\code{sp_info_profile} searches the currently installed (re)SPECIATE
+data sets for profile records.
+\code{sp_info_species} searches the currently installed (re)SPECIATE
+data sets for species records.
+}
+\examples{
+\dontrun{
+profile <- "Ethanol"
+pr <- sp_find_profile(profile)
+pr
+
+species <- "Ethanol"
+sp <- sp_find_species(species)
+sp}
+
 }

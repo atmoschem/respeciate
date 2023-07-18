@@ -4,7 +4,7 @@
 
 #' @description Functions for rescaling (re)SPECIATE profiles
 
-#' @description \code{\link{sp_profile_rescales}} rescales the percentage
+#' @description \code{\link{sp_rescale_profile}} rescales the percentage
 #' weight information in \code{x}.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
@@ -12,7 +12,7 @@
 #' \code{x/mean(x)}; 2 \code{x-min(x)/max(x)-min(x)}; 3 \code{x-mean(x)/sd(x)};
 #' 4 \code{x/max(x)}.The alternative 0 returns the records to their original
 #' values.
-#' @return \code{sp_profile_rescale} returns the \code{respeciate} profile
+#' @return \code{sp_rescale_profile} returns the \code{respeciate} profile
 #' with the percentage weight records rescaled using the requested method.
 #' @note Data sometimes needs to be normalised, e.g. when applying some
 #' statistical analysis. Rather than modify the EPA records, column

@@ -7,7 +7,7 @@
 
 
 utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
-                         "SPEC_MW", "WEIGHT_PERCENT", "."))
+                         "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
 ########################
 #to think about...
 #######################
@@ -25,11 +25,10 @@ utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
 #         and others???
 #               need to identify them
 
-#' @importFrom stats sd
+#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap
 #' @importFrom utils modifyList
-#' @importFrom graphics axis barplot par
-
-
+#' @importFrom graphics axis barplot par legend
+#' @importFrom grDevices cm.colors
 
 
 ##############################

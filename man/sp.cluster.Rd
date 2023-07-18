@@ -16,7 +16,7 @@ calculated correlation matrix; \code{'plot'} a heat map of that distance
 matrix.}
 }
 \value{
-Depending on the \code{output} option, \code{sp_profile_dist} returns
+Depending on the \code{output} option, \code{sp_profile_distance} returns
 one or more of the following: the correlation matrix, a heat map of the
 correlation matrix.
 }
@@ -24,7 +24,7 @@ correlation matrix.
 sp_profile functions for studying similarities (or
 dissimilarities) within multi-profile (re)SPECIATE data sets
 
-\code{\link{sp_profile_dist}} calculates the statistical distance
+\code{\link{sp_profile_distance}} calculates the statistical distance
 between re(SPECIATE) profiles, and clusters profiles according to nearness.
 }
 \note{

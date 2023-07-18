@@ -17,13 +17,13 @@ profiles.}
 values.}
 }
 \value{
-\code{sp_profile_rescale} returns the \code{respeciate} profile
+\code{sp_rescale_profile} returns the \code{respeciate} profile
 with the percentage weight records rescaled using the requested method.
 }
 \description{
 Functions for rescaling (re)SPECIATE profiles
 
-\code{\link{sp_profile_rescales}} rescales the percentage
+\code{\link{sp_rescale_profile}} rescales the percentage
 weight information in \code{x}.
 }
 \note{

@@ -16,7 +16,8 @@
 
 #' @note Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 #' be slow and memory inefficient. So, \code{respeciate} uses the
-#' \code{\link{data.table::dcast}} method. The default method,
+#' \code{\link[data.table:dcast]{data.table::dcast}}
+#' method. The default method,
 #' applied using \code{wide='species'}, is effectively:
 #'
 #' \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}

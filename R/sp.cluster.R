@@ -5,7 +5,7 @@
 #' @description sp_profile functions for studying similarities (or
 #' dissimilarities) within multi-profile (re)SPECIATE data sets
 
-#' @description \code{\link{sp_profile_dist}} calculates the statistical distance
+#' @description \code{\link{sp_profile_distance}} calculates the statistical distance
 #' between re(SPECIATE) profiles, and clusters profiles according to nearness.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
@@ -14,7 +14,7 @@
 #' matrix.
 #' @note Please note: function in development; structure and arguments may be
 #' subject to change.
-#' @return Depending on the \code{output} option, \code{sp_profile_dist} returns
+#' @return Depending on the \code{output} option, \code{sp_profile_distance} returns
 #' one or more of the following: the correlation matrix, a heat map of the
 #' correlation matrix.
 
