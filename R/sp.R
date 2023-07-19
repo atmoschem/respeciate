@@ -62,8 +62,8 @@ sp_profile <- function(code) {
   #could replace code with ...???
   ######################
 
-  if(class(code)[1] == "respeciate.ref"){
-    code <- code$PROFILE_CODE
+  if(class(code)[1] == "respeciate" && "PROFILE_CODE" %in% names(code)){
+    code <- unique(code$PROFILE_CODE)
   }
   if(is.numeric(code)) code <- as.character(code)
   if(!is.character(code)) stop("unexpected code class")
@@ -116,8 +116,8 @@ rsp_profile.old <- function(code) {
   #######################
   #could replace code with ...???
   ######################
-  if(class(code)[1] == "respeciate.ref"){
-    code <- code$PROFILE_CODE
+  if(class(code)[1] == "respeciate" && "PROFILE_CODE" %in% names(code)){
+    code <- unique(code$PROFILE_CODE)
   }
   if(is.numeric(code)) code <- as.character(code)
   if(!is.character(code)) stop("unexpected code class")

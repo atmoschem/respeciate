@@ -53,37 +53,35 @@ utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
 
 ## could also test for .value
 
-rsp_test_respeciate <- function(x, level = 1){
+rsp_test_respeciate <- function(x, level = 1,
+                                silent = FALSE){
   test <- class(x)
-  if(level == 1){
-    if(test[1] == "respeciate"){
-      if(all(c("SPECIES_NAME", "SPECIES_ID", "PROFILE_NAME", "PROFILE_CODE",
-               "WEIGHT_PERCENT") %in% names(x))){
-        return(TRUE)
-      }
-    }
-    return(FALSE)
+  out <- "bad"
+  test <- test[1]=="respeciate"
+  #order below matters
+  #maybe tidy??
+  if(all(c("SPECIES_NAME", "SPECIES_ID") %in% names(x))){
+    out <- "respeciate.species.ref"
   }
-  if(level==2){
-    if(test[1] == "respeciate"){
-      if(all(c("SPECIES_NAME", "SPECIES_ID", "PROFILE_NAME", "PROFILE_CODE",
-               "WEIGHT_PERCENT") %in% names(x))){
-        return(TRUE)
-      }
-    }
-    if(test[1] == "respeciate.ref"){
-      if(all(c("PROFILE_NAME", "PROFILE_CODE") %in% names(x))){
-        return(TRUE)
-      }
-    }
-    if(test[1] == "respeciate.spcs"){
-      if(all(c("SPECIES_NAME", "SPECIES_ID") %in% names(x))){
-        return(TRUE)
-      }
-    }
-    return(FALSE)
+  if(all(c("PROFILE_NAME", "PROFILE_CODE") %in% names(x))){
+    out <- "respeciate.profile.ref"
   }
-  FALSE
+  if(all(c("SPECIES_NAME", "SPECIES_ID", "PROFILE_NAME", "PROFILE_CODE",
+           "WEIGHT_PERCENT") %in% names(x))){
+    out <- "respeciate"
+  }
+  if(!silent){
+    if(test && out=="bad"){
+      warning("suspect respeciate object!")
+    }
+    if(nrow(x)==0){
+      warning("empty respeciate object!")
+    }
+  }
+  if(level==1){
+    return(test)
+  }
+  return(out)
 }
 
 #######################

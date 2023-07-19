@@ -10,7 +10,7 @@
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param output Character vector, required function output: \code{'report'} the
-#' calculated correlation matrix; \code{'plot'} a heat map of that distance
+#' calculated distance matrix; \code{'plot'} a heat map of that distance
 #' matrix.
 #' @note Please note: function in development; structure and arguments may be
 #' subject to change.
@@ -49,7 +49,7 @@
 
 #also check through and consider other options in sp_profile_cor
 
-#track profiles by name
+#currently tracking
 
 #think about how we handle too-big matrices, e.g.
 #   aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
@@ -69,16 +69,24 @@ sp_profile_distance <- function(x, output = c("plot", "report")){
   x <- rsp_tidy_profile(x)
   #make by species data.frame
   .x <- sp_dcast_profile(x, wide = "species")
-
-  .dst <- dist(scale(.x[-1:-2], center = TRUE, scale = TRUE))
-  .dst[is.na(.dst)] <- -1
+  .tmp <- .x[-1:-2]
+  row.names(.tmp) <- .x[,1]
+  .dst <- dist(scale(.tmp, center = TRUE, scale = TRUE))
+  #names(.dst) <- .x[,1]
+  .dst[is.na(.dst)] <- 0
   .clst <- hclust(.dst, method = "average")
   ord <- order(cutree(.clst, k = 3))
   #print(ord)
   #image(as.matrix(.dst)[ord, ord])
   .cop <- cophenetic(.clst)
+  #names(.dst) <- .x[,1]
   #image(as.matrix(.cop)[ord, ord])
-  heatmap(as.matrix(.cop), Rowv = FALSE, Colv=FALSE, scale="none")
+  if("plot" %in% output){
+    heatmap(as.matrix(.cop), Rowv = FALSE, Colv=FALSE, scale="none")
+  }
+  if("report" %in% output){
+    invisible(.cop)
+  }
 }
 
 #check through below on similarity matrices

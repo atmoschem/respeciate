@@ -5,22 +5,16 @@
 \alias{print.respeciate}
 \alias{plot.respeciate}
 \alias{summary.respeciate}
-\alias{print.respeciate.ref}
-\alias{print.respeciate.spcs}
 \title{respeciate.generics}
 \usage{
-\method{print}{respeciate}(x, n = 6, ...)
+\method{print}{respeciate}(x, n = 10, ...)
 
 \method{plot}{respeciate}(x, n = NULL, id = NULL, order = TRUE, ...)
 
 \method{summary}{respeciate}(object, ...)
-
-\method{print}{respeciate.ref}(x, n = 100, ...)
-
-\method{print}{respeciate.spcs}(x, n = 10, ...)
 }
 \arguments{
-\item{x}{the \code{respeciate} or \code{respeciate.ref}
+\item{x}{the \code{respeciate}
 object to be printed, plotted, etc.}
 
 \item{n}{when plotting or printing a multi-profile object, the
@@ -35,7 +29,7 @@ plotting (nb: \code{id=1:6} is equivalent to \code{n=6}).}
 \item{order}{logical, order the species in the
 profile(s) by relative abundance before plotting.}
 
-\item{object, }{like \code{x} but for \code{summary}.}
+\item{object}{like \code{x} but for \code{summary}.}
 }
 \description{
 \code{respeciate} object classes and generic functions.
@@ -47,9 +41,6 @@ When supplied a \code{respeciate}
 object, \code{\link{plot}} provides a basic plot
 output. This uses base function \code{\link{barplot}};
 also see note.
-
-When supplied a \code{respeciate.ref}
-object, \code{\link{print}} manages its appearance.
 }
 \note{
 \code{respeciate} objects revert to

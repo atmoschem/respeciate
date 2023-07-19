@@ -12,7 +12,7 @@ sp_profile_distance(x, output = c("plot", "report"))
 profiles.}
 
 \item{output}{Character vector, required function output: \code{'report'} the
-calculated correlation matrix; \code{'plot'} a heat map of that distance
+calculated distance matrix; \code{'plot'} a heat map of that distance
 matrix.}
 }
 \value{

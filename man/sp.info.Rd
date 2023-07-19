@@ -3,53 +3,51 @@
 \name{sp.info}
 \alias{sp.info}
 \alias{sp_info}
-\alias{sp_info_profile}
-\alias{sp_info_species}
+\alias{sp_profile_info}
+\alias{sp_species_info}
 \alias{sp_find_profile}
 \alias{sp_find_species}
 \title{re(SPECIATE) information}
 \usage{
 sp_info()
 
-sp_info_profile(..., by = "keywords", partial = TRUE)
+sp_profile_info(..., by = "keywords", partial = TRUE)
 
 sp_find_profile(...)
 
-sp_info_species(..., by = "species_name", partial = TRUE)
+sp_species_info(..., by = "species_name", partial = TRUE)
 
 sp_find_species(...)
 }
 \arguments{
 \item{...}{character(s), any search term(s) to use when searching
 the local (re)SPECIATE archive for relevant records using
-\code{sp_info_profile} or \code{sp_info_species}.}
+\code{sp_profile_info} or \code{sp_species_info}.}
 
 \item{by}{character, the section of the archive to
-search, by default \code{'keywords'} for \code{sp_find_profile} and
-\code{'species_names'} for \code{sp_find_species}.}
+search, by default \code{'keywords'} for \code{sp_profile_info} and
+\code{'species_names'} for \code{sp_species_info}.}
 
 \item{partial}{logical, if \code{TRUE} (default)
-\code{sp_find_} functions use partial matching.}
+\code{sp_profile_info} or \code{sp_profile_info} use partial matching.}
 }
 \value{
 \code{sp_info} provides a brief version information report on the
 currently installed (re)SPECIATE data sets.
 
-\code{sp_find_profile} returns a object of
-\code{respeciate.ref} class, a \code{data.frame} of
-profile information.
-\code{sp_find_species} returns a object of
-\code{respeciate.spcs} class, a \code{data.frame} of
-species information.
+\code{sp_profile_info} returns a \code{data.frame} of
+profile information, as a \code{respeciate} object.
+\code{sp_species_info} returns a \code{data.frame} of
+species information as a \code{respeciate} object.
 }
 \description{
 Functions that provide (re)SPECIATE
 source information.
 \code{sp_info} generates a brief version report for the currently installed
 (re)SPECIATE data sets.
-\code{sp_info_profile} searches the currently installed (re)SPECIATE
+\code{sp_profile_info} searches the currently installed (re)SPECIATE
 data sets for profile records.
-\code{sp_info_species} searches the currently installed (re)SPECIATE
+\code{sp_species_info} searches the currently installed (re)SPECIATE
 data sets for species records.
 }
 \examples{

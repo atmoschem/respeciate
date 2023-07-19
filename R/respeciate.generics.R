@@ -9,20 +9,35 @@
 
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{print}} manages its appearance.
+#' @description When supplied a \code{respeciate}
+#' object, \code{\link{plot}} provides a basic plot
+#' output. This uses base function \code{\link{barplot}};
+#' also see note.
 #' @param x the \code{respeciate}
 #' object to be printed, plotted, etc.
 #' @param n when plotting or printing a multi-profile object, the
 #' maximum number of profiles to report.
 #' @param ... any extra arguments, mostly ignored except by
 #' \code{plot} which passes them to \code{\link{barplot}}.
-#' @param object, like \code{x} but for \code{summary}.
+#' @param object like \code{x} but for \code{summary}.
+#' @param id numeric, indices of profiles to use when
+#' plotting (nb: \code{id=1:6} is equivalent to \code{n=6}).
+#' @param order logical, order the species in the
+#' profile(s) by relative abundance before plotting.
+#' @note \code{respeciate} objects revert to
+#' \code{data.frame}s when not doing anything
+#' package-specific, so you can still
+#' use as previously with \code{lattice} or
+#' \code{ggplot2}, useful if you are pulling multiple
+#' profiles and you exceed the base \code{\link{barplot}}
+#' capacity...
 
 
 #notes
 ##################################
 
-#like to loose the respeciate.ref and respeciate.spcs classes
-#    maybe merge them into respeciate
+#loosing the respeciate.ref and respeciate.spcs classes
+#    testing merge them into respeciate
 
 #         with different print outputs?
 #         only plot for class plot, etc???
@@ -31,49 +46,27 @@
 #' @method print respeciate
 #' @export
 
-print.respeciate <-
-  function(x, n=6, ...){
-    #shifted from REF_Code to PROFILE_Code
-    #   when allowing multipe profiles
-    #   because REF_Code not unique
-    y <- unique(x$PROFILE_CODE)
-    report <- paste("respeciate profile(s): count ",
-                    length(y), "\n", sep="")
-    if(length(y)==0){
-      cat(paste(report,
-                "empty (or bad?) respeciate object\n",
-                sep=""))
-      return(invisible(x))
-    }
-    yy <- if(length(y)>n) {y[1:n]} else {y}
-    for(i in yy){
-      report <- paste(report, "  ", i, " (checksum: ",
-                      sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
-                          na.rm = T), ")\n", sep="")
-    }
-    if(length(y)>n){
-      report <- paste(report, "  ... not showing last ",
-                      length(y)-n, "\n", sep="")
-    }
-    cat(report, sep="")
-    invisible(x)
+print.respeciate <- function(x, n = 10, ...){
+  test <- rsp_test_respeciate(x, level = 2, silent = TRUE)
+  if(test == "respeciate.profile.ref"){
+    return(rsp_print_respeciate_profile(x=x, n=n, ...))
   }
+  if(test == "respeciate.species.ref"){
+    return(rsp_print_respeciate_species(x=x, n=n, ...))
+  }
+  rsp_print_respeciate(x=x, n=n, ...)
+}
 
-#' @description When supplied a \code{respeciate}
-#' object, \code{\link{plot}} provides a basic plot
-#' output. This uses base function \code{\link{barplot}};
-#' also see note.
-#' @note \code{respeciate} objects revert to
-#' \code{data.frame}s when not doing anything
-#' package-specific, so you can still
-#' use as previously with \code{lattice} or
-#' \code{ggplot2}, useful if you are pulling multiple
-#' profiles and you exceed the base \code{\link{barplot}}
-#' capacity...
-#' @param id numeric, indices of profiles to use when
-#' plotting (nb: \code{id=1:6} is equivalent to \code{n=6}).
-#' @param order logical, order the species in the
-#' profile(s) by relative abundance before plotting.
+## rsp_print functions unexported
+##    further down
+##    VVVVVVVVVVVV
+##    VVVVVVVVVVVV
+
+
+
+
+
+
 
 #' @rdname respeciate.generics
 #' @method plot respeciate
@@ -105,6 +98,26 @@ plot.respeciate <-
     #add .value if not there
     ## don't think .value works
     x <- rsp_tidy_profile(x)
+
+    ##test object type
+    test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+    if(test != "respeciate"){
+      if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
+        stop("No plot method for respeciate.reference files.")
+      } else {
+        stop("suspect respeciate object!")
+      }
+    }
+
+    ##test something to plot
+    if(nrow(x)==0){
+      ######################
+      #think about this
+      ######################
+      #maybe stop() instead???
+      #stop("empty respeciate object?")
+      return(invisible(NULL))
+    }
 
     #hold extra args
     #  passing to plot
@@ -248,14 +261,103 @@ summary.respeciate <-
 }
 
 
-#' @description When supplied a \code{respeciate.ref}
-#' object, \code{\link{print}} manages its appearance.
-#' @param x the \code{respeciate} or \code{respeciate.ref}
-#' object to be printed, plotted, etc.
-#' @rdname respeciate.generics
-#' @method print respeciate.ref
-#' @export
-print.respeciate.ref <-
+
+
+#################################
+#unexported code
+#################################
+
+###################################
+#class builds
+###################################
+
+#rsp_build_respeciate.spcs <-
+#  function(x, ...){
+    #build
+    #add .value
+#    x <- rsp_tidy_profile(x)
+#    class(x) <- c("respeciate.spcs", "data.frame")
+#    x
+#  }
+
+#rsp_build_respeciate.ref <-
+#  function(x, ...){
+    #build
+#    class(x) <- c("respeciate.ref", "data.frame")
+#    x
+#  }
+
+rsp_build_respeciate <-
+  function(x, ...){
+    #build
+    class(x) <- c("respeciate", "data.frame")
+    x
+  }
+
+
+###########################
+#split respeciate by profile
+###########################
+
+#currently not exported
+#quick code assumed CODE is unique to profile
+
+#need to test this
+
+#not sure we are using this any more
+#    i think rsp_test, then rsp_test.2 replaced
+#    and code in plot.respeciate.old ???
+
+rsp_split_profile <- function(x){
+  ref <- unique(x$PROFILE_CODE)
+  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
+}
+
+
+########################
+#unexported rsp_print
+########################
+
+## like to tidy this/these
+
+
+rsp_print_respeciate <-
+  function(x, n=6, ...){
+    #shifted from REF_Code to PROFILE_Code
+    #   when allowing multipe profiles
+    #   because REF_Code not unique
+    y <- unique(x$PROFILE_CODE)
+    report <- paste("respeciate profile(s): count ",
+                    length(y), "\n", sep="")
+    if(length(y)==0){
+      cat(paste(report,
+                "empty (or bad?) respeciate object\n",
+                sep=""))
+      return(invisible(x))
+    }
+    yy <- if(length(y)>n) {y[1:n]} else {y}
+    for(i in yy){
+      report <- paste(report, "  ", i, " (checksum: ",
+                      sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
+                          na.rm = T), ")\n", sep="")
+    }
+    if(length(y)>n){
+      report <- paste(report, "  ... not showing last ",
+                      length(y)-n, "\n", sep="")
+    }
+    cat(report, sep="")
+    invisible(x)
+  }
+
+
+## #' @description When supplied a \code{respeciate.ref}
+# #' object, \code{\link{print}} manages its appearance.
+# #' @param x the \code{respeciate} or \code{respeciate.ref}
+# #' object to be printed, plotted, etc.
+# #' @rdname respeciate.generics
+# #' @method print respeciate.ref
+# #' @export
+rsp_print_respeciate_profile <-
   function(x, n = 100, ...){
     xx <- nrow(x)
     wi <- getOption("width")
@@ -280,17 +382,17 @@ print.respeciate.ref <-
   }
 
 
-#' @rdname respeciate.generics
-#' @method print respeciate.spcs
-#' @export
-print.respeciate.spcs <-
+# #' @rdname respeciate.generics
+# #' @method print respeciate.spcs
+# #' @export
+rsp_print_respeciate_species <-
   function(x, n = 10, ...){
     xx <- nrow(x)
     wi <- getOption("width")
     ####################################
     #use of cat might need rethinking?
     ####################################
-    cat("respeciate species\n")
+    cat("respeciate species reference\n")
     if(n>xx){
       n <- xx
     }
@@ -307,60 +409,6 @@ print.respeciate.spcs <-
     invisible(x)
   }
 
-
-
-
-#################################
-#unexported code
-#################################
-
-###################################
-#class builds
-###################################
-
-rsp_build_respeciate.spcs <-
-  function(x, ...){
-    #build
-    #add .value
-    x <- rsp_tidy_profile(x)
-    class(x) <- c("respeciate.spcs", "data.frame")
-    x
-  }
-
-rsp_build_respeciate.ref <-
-  function(x, ...){
-    #build
-    class(x) <- c("respeciate.ref", "data.frame")
-    x
-  }
-
-rsp_build_respeciate <-
-  function(x, ...){
-    #build
-    class(x) <- c("respeciate", "data.frame")
-    x
-  }
-
-
-
-
-###########################
-#split respeciate by profile
-###########################
-
-#currently not exported
-#quick code assumed CODE is unique to profile
-
-#need to test this
-
-#not sure we are using this any more
-#    i think rsp_test, then rsp_test.2 replaced
-#    and code in plot.respeciate.old ???
-
-rsp_split_profile <- function(x){
-  ref <- unique(x$PROFILE_CODE)
-  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
-}
 
 
 

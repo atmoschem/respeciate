@@ -1,13 +1,13 @@
 #' @name sp.info
 #' @title re(SPECIATE) information
-#' @aliases sp_info sp_info_profile sp_info_species sp_find_profile
+#' @aliases sp_info sp_profile_info sp_species_info sp_find_profile
 #' sp_find_species
 
 ###########################
 #keep think about the names
 ###########################
-#  sp_info_profile used to be sp_find_profile
-#  sp_info_species used to be sp_find_species
+#  sp_profile_info used to be sp_find_profile
+#  sp_species_info used to be sp_find_species
 #  both sp_find_ functions are currently sp_info_ wrappers
 #  should remove at some point???
 
@@ -22,28 +22,26 @@
 #' source information.
 #' \code{sp_info} generates a brief version report for the currently installed
 #' (re)SPECIATE data sets.
-#' \code{sp_info_profile} searches the currently installed (re)SPECIATE
+#' \code{sp_profile_info} searches the currently installed (re)SPECIATE
 #' data sets for profile records.
-#' \code{sp_info_species} searches the currently installed (re)SPECIATE
+#' \code{sp_species_info} searches the currently installed (re)SPECIATE
 #' data sets for species records.
 
 #' @param ... character(s), any search term(s) to use when searching
 #' the local (re)SPECIATE archive for relevant records using
-#' \code{sp_info_profile} or \code{sp_info_species}.
+#' \code{sp_profile_info} or \code{sp_species_info}.
 #' @param by character, the section of the archive to
-#' search, by default \code{'keywords'} for \code{sp_find_profile} and
-#' \code{'species_names'} for \code{sp_find_species}.
+#' search, by default \code{'keywords'} for \code{sp_profile_info} and
+#' \code{'species_names'} for \code{sp_species_info}.
 #' @param partial logical, if \code{TRUE} (default)
-#' \code{sp_find_} functions use partial matching.
+#' \code{sp_profile_info} or \code{sp_profile_info} use partial matching.
 
 #' @return \code{sp_info} provides a brief version information report on the
 #' currently installed (re)SPECIATE data sets.
-#' @return \code{sp_find_profile} returns a object of
-#' \code{respeciate.ref} class, a \code{data.frame} of
-#' profile information.
-#' \code{sp_find_species} returns a object of
-#' \code{respeciate.spcs} class, a \code{data.frame} of
-#' species information.
+#' @return \code{sp_profile_info} returns a \code{data.frame} of
+#' profile information, as a \code{respeciate} object.
+#' \code{sp_species_info} returns a \code{data.frame} of
+#' species information as a \code{respeciate} object.
 
 #' @examples \dontrun{
 #' profile <- "Ethanol"
@@ -88,7 +86,7 @@ sp_info <- function() {
 #' @rdname sp.info
 #' @export
 
-sp_info_profile <- function(..., by = "keywords", partial = TRUE) {
+sp_profile_info <- function(..., by = "keywords", partial = TRUE) {
   #extract profile info from archive
   out <- sysdata$PROFILES
   terms <- c(...)
@@ -131,7 +129,7 @@ sp_info_profile <- function(..., by = "keywords", partial = TRUE) {
       }
     }
   }
-  out <- rsp_build_respeciate.ref(out)
+  out <- rsp_build_respeciate(out)
   return(out)
 }
 
@@ -141,13 +139,13 @@ sp_info_profile <- function(..., by = "keywords", partial = TRUE) {
 #wrapper for above
 
 sp_find_profile <- function(...){
-  sp_info_profile(...)
+  sp_profile_info(...)
 }
 
 #' @rdname sp.info
 #' @export
 
-sp_info_species <- function(..., by = "species_name", partial = TRUE) {
+sp_species_info <- function(..., by = "species_name", partial = TRUE) {
   #extract species info from archive
   out <- sysdata$SPECIES_PROPERTIES
   terms <- c(...)
@@ -162,7 +160,7 @@ sp_info_species <- function(..., by = "species_name", partial = TRUE) {
     }
   }
   #out <- PROFILES[grep(term, PROFILES[[by]], ignore.case = TRUE), ]
-  out <- rsp_build_respeciate.spcs(out)
+  out <- rsp_build_respeciate(out)
   return(out)
 }
 
@@ -172,5 +170,5 @@ sp_info_species <- function(..., by = "species_name", partial = TRUE) {
 #wrapper for above
 
 sp_find_species <- function(...){
-  sp_info_species(...)
+  sp_species_info(...)
 }
