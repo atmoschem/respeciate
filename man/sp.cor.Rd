@@ -8,12 +8,12 @@
 sp_species_cor(x, min.n = 3, output = c("plot", "report"))
 }
 \arguments{
-\item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{x}{\code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 profiles.}
 
-\item{min.n}{Numeric (default 3), the minimum number of species measurements
+\item{min.n}{\code{numeric} (default 3), the minimum number of species measurements
 needed in a profile for the function to use it in correlation calculations.
-Here, it should be noted that this does not guarantee at the three matched
+Here, it should be noted that this does not guarantee the three matched
 pairs of measurements needed to calculate a correlation coefficient because
 not all profiles contain all species, so there may still be insufficient
 overlap on a case-by-case basis.}
@@ -28,9 +28,9 @@ one or more of the following: the correlation matrix, a heat map of the
 correlation matrix.
 }
 \description{
-sp_profile functions for studying relationships between
-multi-profile (re)SPECIATE data sets
+sp_species functions for studying relationships between
+species in multi-profile (re)SPECIATE data sets.
 
-\code{\link{sp_species_cor}} generates a correlation matrix
-for the supplied (re)SPECIATE data sets.
+\code{\link{sp_species_cor}} generates a by-species correlation
+matrix of the supplied (re)SPECIATE data sets.
 }

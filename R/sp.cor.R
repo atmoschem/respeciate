@@ -2,22 +2,22 @@
 #' @title (re)SPECIATE Species Correlations
 #' @aliases sp_species_cor
 
-#' @description sp_profile functions for studying relationships between
-#' multi-profile (re)SPECIATE data sets
+#' @description sp_species functions for studying relationships between
+#' species in multi-profile (re)SPECIATE data sets.
 
-#' @description \code{\link{sp_species_cor}} generates a correlation matrix
-#' for the supplied (re)SPECIATE data sets.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @description \code{\link{sp_species_cor}} generates a by-species correlation
+#' matrix of the supplied (re)SPECIATE data sets.
+#' @param x \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
-#' @param min.n Numeric (default 3), the minimum number of species measurements
+#' @param min.n \code{numeric} (default 3), the minimum number of species measurements
 #' needed in a profile for the function to use it in correlation calculations.
-#' Here, it should be noted that this does not guarantee at the three matched
+#' Here, it should be noted that this does not guarantee the three matched
 #' pairs of measurements needed to calculate a correlation coefficient because
 #' not all profiles contain all species, so there may still be insufficient
 #' overlap on a case-by-case basis.
-#' @param output Character vector, required function output: \code{'report'} the
-#' calculated correlation matrix; \code{'plot'} a heat map of that correlation
-#' matrix.
+#' @param output \code{character} vector, required function output, one or more
+#' of : \code{'report'} the calculated correlation matrix; \code{'plot'} a heat
+#' map of that correlation matrix.
 #' @return Depending on the \code{output} option, \code{sp_species_cor} returns
 #' one or more of the following: the correlation matrix, a heat map of the
 #' correlation matrix.
@@ -121,15 +121,19 @@ sp_species_cor <- function(x, min.n = 3,
   #stackover suggests it is hard going modifying
   #https://stackoverflow.com/questions/29893630/r-draw-heatmap-with-clusters-but-hide-dendrogram
 
+  #legend bodge very messy
+  #       needs rethinking
+
   if("plot" %in% output){
     heatmap(as.matrix(.tmp), Rowv = NA, Colv = NA,
+            #cexRow = 0.5, cexCol = 0.5, #axis size
             col =cols,
             scale="none")
     legend(x="topleft",
-           y.intersp = 0.5,
+           y.intersp = 0.25,
            border = NA,
-           legend=c(" 1", "", " 0", "", "-1", "", "na"),
-           fill=cols[c(150, 125, 100, 75, 51, NA, 1)])
+           legend=c(" 1", "", "", "", " 0", "", "", "", "-1", "", "", "", "na"),
+           fill=cols[c(150, 137, 125, 112, 100, 88, 75,64, 51, NA, NA, NA, 1)])
   }
   if("report" %in% output){
     return(invisible(.cor))

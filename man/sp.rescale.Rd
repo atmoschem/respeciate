@@ -11,9 +11,12 @@ sp_rescale_profile(x, method = 1)
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 profiles.}
 
-\item{method}{numeric, the rescaling method to apply: 1 (default)
-\code{x/mean(x)}; 2 \code{x-min(x)/max(x)-min(x)}; 3 \code{x-mean(x)/sd(x)};
-4 \code{x/max(x)}.The alternative 0 returns the records to their original
+\item{method}{numeric, the rescaling method to apply:
+  1 (default) \code{x/mean(x)};
+  2 \code{x-min(x)/max(x)-min(x)};
+  3 \code{x-mean(x)/sd(x)};
+  4 \code{x/max(x)}.
+The alternative 0 returns the records to their original
 values.}
 }
 \value{
@@ -24,18 +27,18 @@ with the percentage weight records rescaled using the requested method.
 Functions for rescaling (re)SPECIATE profiles
 
 \code{\link{sp_rescale_profile}} rescales the percentage
-weight information in \code{x}.
+weight information in a supplied (re)SPECIATE profile.
 }
 \note{
 Data sometimes needs to be normalised, e.g. when applying some
-statistical analysis. Rather than modify the EPA records, column
-\code{WEIGHT_PERCENT}, \code{respeciate} creates a duplicate \code{.value}
-which is modified by operations like \code{sp_profile_rescale}. This means
-rescaling is always applied to the source information, rather than rescaling
-an already rescaled value, the EPA records are retained unaffected and the
-original source information can be easily recovered.
+statistical analyses. Rather than modify the EPA records in the
+\code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
+\code{.value} which is modified by operations like \code{sp_profile_rescale}.
+This means rescaling is always applied to the source information, rather
+than rescaling an already rescaled value, the EPA records are retained
+unaffected and the original source information can be easily recovered.
 }
 \references{
-Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.
-  R package version 1.14.8, <https://CRAN.R-project.org/package=data.table>.
+Dowle M, Srinivasan A (2023). data.table: Extension of `data.frame`.
+  R package version 1.14.8, \url{https://CRAN.R-project.org/package=data.table}.
 }

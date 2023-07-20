@@ -272,3 +272,20 @@ rsp_test_profile <- function(x){
 #ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
 
 
+
+
+###########################
+#diagnostic
+##########################
+
+#https://www.rpubs.com/NYang/ANLY530-IRIS
+
+#devtools::unload(); devtools::load_all()
+#a <- xxx_test(); subset(a, a$.ref)$PROFILE_NAME
+
+xxx_test <- function(){
+  #rethink this!!!!
+  .tmp <- sp_profile(sysdata$PROFILES$PROFILE_CODE)
+  .tmp$.ref <- grepl("fire", tolower(.tmp$Keywords))
+  .tmp
+}

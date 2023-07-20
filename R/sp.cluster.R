@@ -89,8 +89,16 @@ sp_profile_distance <- function(x, output = c("plot", "report")){
   }
 }
 
-#check through below on similarity matrices
-###############################################
+#check through below on similarity matrices notes
+
+
+
+
+
+#####################
+#unexported
+#####################
+
 
 ##from https://stackoverflow.com/questions/5639794/in-r-how-can-i-plot-a-similarity-matrix-like-a-block-graph-after-clustering-d
 
