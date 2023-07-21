@@ -65,22 +65,42 @@
 
 
 sp_profile_distance <- function(x, output = c("plot", "report")){
+
   #add .value if missing
   x <- rsp_tidy_profile(x)
-  #make by species data.frame
+
+  # make by profile (rows) by species (columns) data.frame
+  # move profile_code to row.names for heamap
   .x <- sp_dcast_profile(x, wide = "species")
   .tmp <- .x[-1:-2]
   row.names(.tmp) <- .x[,1]
+
+  #dist calculation
+  #reset NAs to 0
+  #   that might not be best option...
   .dst <- dist(scale(.tmp, center = TRUE, scale = TRUE))
-  #names(.dst) <- .x[,1]
   .dst[is.na(.dst)] <- 0
+
+  #currently not using these two...
+  #   should drop or re-include
+  #      (think this is a shortcut to similar when used with image)
   .clst <- hclust(.dst, method = "average")
   ord <- order(cutree(.clst, k = 3))
+
   #print(ord)
   #image(as.matrix(.dst)[ord, ord])
   .cop <- cophenetic(.clst)
   #names(.dst) <- .x[,1]
   #image(as.matrix(.cop)[ord, ord])
+
+  #######################
+  #output
+  #######################
+
+  #think about
+  #    could handle this like plot or
+  #    using a heatmap and legend argument???
+  #
   if("plot" %in% output){
     heatmap(as.matrix(.cop), Rowv = FALSE, Colv=FALSE, scale="none")
   }

@@ -75,6 +75,7 @@ sp_dcast_profile <- function(x, wide = "species"){
 
   xx <- as.data.table(x)
 
+  #stop if wide optiion not known.
   if(!wide %in% c("species", "profile")){
     stop("unknown wide option")
   }
@@ -93,8 +94,8 @@ sp_dcast_profile <- function(x, wide = "species"){
                  value.var = ".value")
   }
 
-
   #maybe use species_id in species dcast??
+  ########################################
 
   #then add matched species_names, making this unique??
   #   ~species_name makes labeling easier but will be
@@ -106,6 +107,8 @@ sp_dcast_profile <- function(x, wide = "species"){
   #   just outputting as data.frame at moment
   #       not sure if this can be respeciate and
   #          don't want a respeciate wide class
+  #   could use an output arg??? as.is, data.frame, etc...
+
   out <- as.data.frame(out)
   #class(out) <- cls
   out

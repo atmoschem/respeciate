@@ -16,12 +16,13 @@
 #' @param x the \code{respeciate}
 #' object to be printed, plotted, etc.
 #' @param n when plotting or printing a multi-profile object, the
-#' maximum number of profiles to report.
+#' maximum number of profiles to report. (When plotting, \code{n}
+#' is ignored if \code{id} is also set.)
 #' @param ... any extra arguments, mostly ignored except by
 #' \code{plot} which passes them to \code{\link{barplot}}.
 #' @param object like \code{x} but for \code{summary}.
 #' @param id numeric, indices of profiles to use when
-#' plotting (nb: \code{id=1:6} is equivalent to \code{n=6}).
+#' plotting (\code{id=1:6} is equivalent to \code{n=6}).
 #' @param order logical, order the species in the
 #' profile(s) by relative abundance before plotting.
 #' @note \code{respeciate} objects revert to
@@ -46,13 +47,22 @@
 #' @method print respeciate
 #' @export
 
-print.respeciate <- function(x, n = 10, ...){
+print.respeciate <- function(x, n = NULL, ...){
   test <- rsp_test_respeciate(x, level = 2, silent = TRUE)
   if(test == "respeciate.profile.ref"){
+    if(is.null(n)){
+      n <- 100
+    }
     return(rsp_print_respeciate_profile(x=x, n=n, ...))
   }
   if(test == "respeciate.species.ref"){
+    if(is.null(n)){
+      n <- 10
+    }
     return(rsp_print_respeciate_species(x=x, n=n, ...))
+  }
+  if(is.null(n)){
+    n <- 10
   }
   rsp_print_respeciate(x=x, n=n, ...)
 }
@@ -107,6 +117,7 @@ plot.respeciate <-
       } else {
         stop("suspect respeciate object!")
       }
+      #don't stop - respeciate profile
     }
 
     ##test something to plot

@@ -285,7 +285,36 @@ rsp_test_profile <- function(x){
 
 xxx_test <- function(){
   #rethink this!!!!
-  .tmp <- sp_profile(sysdata$PROFILES$PROFILE_CODE)
-  .tmp$.ref <- grepl("fire", tolower(.tmp$Keywords))
-  .tmp
+  .tmp <- sysdata$PROFILES
+  .out <-as.data.table(sp_dcast_profile(sp_profile(.tmp$PROFILE_CODE)))
+  .tmp <- .tmp[c("PROFILE_CODE", "Keywords")]
+  .tmp$.ref <- grepl("wildfire", tolower(.tmp$Keywords)) |
+    grepl("burning", tolower(.tmp$Keywords))
+  .out <- merge(.out, .tmp)
+  .out <- .out[-1599,]
+  #glfit<-glm(as.numeric(.out$.ref)~.out$`Organic carbon` + .out$Nitrate +
+  #             .out$Sulfate, family = 'binomial')
+  glfit<-glm(as.numeric(.out$.ref)~.out$Calcium + .out$Lead +
+                            .out$Zinc +.out$Manganese, family = 'binomial')
+  print(summary(glfit))
+  .out$.pred <- NA
+  .out$.pred[as.numeric(names(predict(glfit)))] <- predict(glfit, type="response")
+  .out
+  #glfit
 }
+
+
+
+######################################
+#matching
+######################################
+
+#Camp Fire
+
+#pb (lead) 0.04 - 0.13 ug/m3
+#zinc      0.15 - 0.45
+#manganese 0.008 - 0.012
+#calcium   0.1-0.2
+#organic carbon 20-100
+
+#
