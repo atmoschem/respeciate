@@ -272,6 +272,76 @@ rsp_test_profile <- function(x){
 #ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
 
 
+############################
+#color key
+############################
+
+#started with:
+#https://stackoverflow.com/questions/9314658/colorbar-from-custom-colorramppalette
+
+#removed dev.new
+
+#see also regarding adding to existing plot
+#https://www.statmethods.net/advgraphs/layout.html
+
+# One figure in row 1 and two figures in row 2
+# row 1 is 1/3 the height of row 2
+# column 2 is 1/4 the width of the column 1
+##attach(mtcars)
+##layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE),
+##       widths=c(3,1), heights=c(1,2))
+##hist(wt)
+##hist(mpg)
+##hist(disp)
+
+# Add boxplots to a scatterplot
+##par(fig=c(0,0.8,0,0.8), new=TRUE)
+##plot(mtcars$wt, mtcars$mpg, xlab="Car Weight",
+##     ylab="Miles Per Gallon")
+##par(fig=c(0,0.8,0.55,1), new=TRUE)
+##boxplot(mtcars$wt, horizontal=TRUE, axes=FALSE)
+##par(fig=c(0.65,1,0,0.8),new=TRUE)
+##boxplot(mtcars$mpg, axes=FALSE)
+##mtext("Enhanced Scatterplot", side=3, outer=TRUE, line=-3)
+
+# Function to plot color bar
+
+color.bar <- function(lut, min, max=-min, ticks=pretty(c(min, max), 4), title='') {
+  nticks <- length(ticks)
+  op <- par(no.readonly = TRUE)
+
+  par(fig=c(0,0.20,0.85,1), mai =c(0.1,0.1,0.1,0.1), new=TRUE)
+  #layout(matrix(1:4,2))
+  scale = (length(lut)-1)/(max-min)
+
+  #dev.new(width=1.75, height=5)
+  plot(c(min-(0.5),max+(1.5)), c(-1,11), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main=title)
+  rect(min-(0.5), -1,max+(1.5), 11,  col="white", border="black")
+  #axis(4, ticks, las=1, bg="green")
+  for (i in 1:(length(lut)-0)) {
+    y = (i-1)/scale + min
+    rect(y,5,y+1/scale,10,col=lut[i], border=NA)
+  }
+  rect(max+(0.35), 5,max+(1.1), 10,  col="grey", border="black")
+  for (i in ticks) {
+    lines(c(i,i), c(5,3),col="black")
+  }
+  text(ticks, rep(1, length(ticks)), labels=ticks,
+       cex=0.75, adj=0.5)
+  text(max+0.75, 1, labels="NA", col="black", cex=0.75)
+  lines(c(min, max), c(5,5), col="black")
+
+  par(op)
+}
+
+plot(iris$Sepal.Length, iris$Sepal.Width)
+color.bar(colorRampPalette(c("light green", "yellow", "orange", "red"))(100), -1, 2)
+
+
+
+
+
+
 
 
 ###########################
@@ -318,3 +388,18 @@ xxx_test <- function(){
 #organic carbon 20-100
 
 #
+
+
+
+########################################
+#pca
+########################################
+
+#see notes at
+#https://www.ime.usp.br/~pavan/pdf/PCA-R-2013
+#on r pca methods
+
+#https://stats.stackexchange.com/questions/59213/how-to-compute-varimax-rotated-principal-components-in-r
+#https://stats.stackexchange.com/questions/56089/using-varimax-rotated-pca-components-as-predictors-in-linear-regression
+#https://stackoverflow.com/questions/34944179/doing-pca-with-varimax-rotation-in-r
+#on varimax rotation
