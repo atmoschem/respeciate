@@ -109,7 +109,9 @@ sp_species_cor <- function(x, min.n = 3,
   #bit of cheat to make a plot with base r graphics
   .tmp <- .cor
   .tmp[is.na(.tmp)] <- -2
-  cols <- c(rep("#CFCFCF", 50), cm.colors(100))
+  cols <- c(rep("#CFCFCF", 100), cm.colors(200))
+
+#print(length(cols))
 
   #output
   ####################
@@ -129,11 +131,14 @@ sp_species_cor <- function(x, min.n = 3,
             #cexRow = 0.5, cexCol = 0.5, #axis size
             col =cols,
             scale="none")
-    legend(x="topleft",
-           y.intersp = 0.25,
-           border = NA,
-           legend=c(" 1", "", "", "", " 0", "", "", "", "-1", "", "", "", "na"),
-           fill=cols[c(150, 137, 125, 112, 100, 88, 75,64, 51, NA, NA, NA, 1)])
+    rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
+                ticks= -1:1, y=0.75,
+                na.col=cols[1])
+    #legend(x="topleft",
+    #       y.intersp = 0.25,
+    #       border = NA,
+    #       legend=c(" 1", "", "", "", " 0", "", "", "", "-1", "", "", "", "na"),
+    #       fill=cols[c(150, 137, 125, 112, 100, 88, 75,64, 51, NA, NA, NA, 1)])
   }
   if("report" %in% output){
     return(invisible(.cor))

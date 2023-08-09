@@ -306,36 +306,203 @@ rsp_test_profile <- function(x){
 
 # Function to plot color bar
 
-color.bar <- function(lut, min, max=-min, ticks=pretty(c(min, max), 4), title='') {
-  nticks <- length(ticks)
-  op <- par(no.readonly = TRUE)
+#currently not exporting
 
-  par(fig=c(0,0.20,0.85,1), mai =c(0.1,0.1,0.1,0.1), new=TRUE)
-  #layout(matrix(1:4,2))
-  scale = (length(lut)-1)/(max-min)
+#notes
+#change min and max or .min and .max
+#move title into plot?
+#add key.style?
+#add key.position?
+#how to set plot range when na is included verus excluded
+#    needs to be a function of min/max range not 0.5, 1.5, etc
+#    maybe 0.25 ish??? maybe tick or half tick range????
 
-  #dev.new(width=1.75, height=5)
-  plot(c(min-(0.5),max+(1.5)), c(-1,11), type='n', bty='n', xaxt='n', xlab='', yaxt='n', ylab='', main=title)
-  rect(min-(0.5), -1,max+(1.5), 11,  col="white", border="black")
-  #axis(4, ticks, las=1, bg="green")
-  for (i in 1:(length(lut)-0)) {
-    y = (i-1)/scale + min
-    rect(y,5,y+1/scale,10,col=lut[i], border=NA)
-  }
-  rect(max+(0.35), 5,max+(1.1), 10,  col="grey", border="black")
-  for (i in ticks) {
-    lines(c(i,i), c(5,3),col="black")
-  }
-  text(ticks, rep(1, length(ticks)), labels=ticks,
-       cex=0.75, adj=0.5)
-  text(max+0.75, 1, labels="NA", col="black", cex=0.75)
-  lines(c(min, max), c(5,5), col="black")
+#key is the data to be color-scaled or its range
+#cols is col.palette to apply
+#x, y is key position
+#na.col color of na's
+#na.cex scaling for na box width
+
+#have type = 1/2 for horizontal/vertical
+#   but title not done in type 2
+#   also col ramp is messy... seems to need border
+
+#type=1 horizontal
+#   move na to other side
+
+rsp_col_key <- function(key, cols, x, y = NULL,
+                        ticks, nticks,
+                        na.col = "grey", na.cex = 0.25,
+                        title = "", axes, bg, border,
+                        type = 2,
+                        ...){
+
+    #setup
+    op <- par(no.readonly = TRUE)
+
+    if(missing(x)){
+      #currently just doing this option
+      #like key.pos "top-left", key.style = 1 (horizontal, annotation below)
+      x <- 0.1
+    }
+    if(is.null(y)){
+      y <- 0.9
+    }
+    .min <- min(key, na.rm=TRUE)
+    .max <- max(key, na.rm=TRUE)
+    if(missing(ticks)){
+      ticks <- pretty(c(.min, .max), 3)
+    }
+    if(missing(nticks)){
+      nticks <- length(ticks)
+    }
+    .na.width <- na.cex * (.max-.min)
+    if(missing(bg)){
+      bg <- "white"
+    }
+    if(missing(border)){
+      border <- "black"
+    }
+    scale <- (length(cols)-1)/(.max-.min)
+
+#print(.max-.min)
+#print(.na.width)
+    #print(.min)
+    #print(.max)
+
+    #key.style 1
+    if(type==1){
+      #horizontal, header before, annotation after
+      #margins
+      .mai <- c(0.1,0.1,0.1,0.1)
+      if(title ==""){
+        #no title
+        .fig <- c(x-0.1, x+0.1, y-0.08, y+0.1)
+        .wdt <- 12
+      } else {
+        #title
+        .fig <- c(x-0.1, x+0.1, y-0.12, y+0.1)
+        .wdt <- 15
+      }
+
+      if(is.na(na.col)){
+        .brd <- c(.na.width, .na.width)
+      } else {
+        .brd <- c(.na.width, .na.width*2)
+      }
+
+      #position col key
+      par(fig = .fig, mai = .mai, new=TRUE)
+
+      #plot col key
+
+      #region
+      plot(c(.min-(.brd[1]*0.5), .max +.brd[2]), c(-1, .wdt),
+           type='n', bty='n', xaxt='n', xlab='',
+           yaxt='n', ylab='', main="", font.main = 1)
+      #bg + border
+      rect(.min-(.brd[1]*0.5), -1, .max+.brd[2],  .wdt,
+           col=bg, border=border)
+      #title
+      if(title !=""){
+        text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title, col="black", cex=0.75)
+      }
+      #col scale
+      for (i in 1:(length(cols)-0)) {
+        x <- (i-1)/scale + .min
+        rect(x,5,x+1/scale,10,col=cols[i], border=NA)
+      }
+      #axes
+      lines(c(.min, .max), c(5,5), col="black")
+      for (i in ticks) {
+        lines(c(i,i), c(5,4),col="black")
+      }
+      #axes annotation
+      text(ticks, rep(2, length(ticks)), labels=ticks,
+           cex=0.75, adj=0.5)
+      #na block
+      if(!is.na(na.col)){
+        rect(.max+(.na.width*0.5), 5,.max+(.na.width*1.5), 10,  col=na.col, border="black")
+        text(.max+.na.width, 2, labels="NA", col="black", cex=0.75)
+      }
+
+    }
+
+    if(type==2){
+      #horizontal, header before, annotation after
+      #margins
+      .mai <- c(0.1,0.1,0.1,0.1)
+      if(title ==""){
+        #no title
+        .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
+        .wdt <- 12
+      } else {
+        #title
+        .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
+        .wdt <- 15
+      }
+
+      if(is.na(na.col)){
+        .brd <- c(.na.width, .na.width)
+      } else {
+        .brd <- c(.na.width, .na.width*2)
+      }
+
+      #position col key
+      par(fig = .fig, mai = .mai, new=TRUE)
+
+      #plot col key
+
+      #region
+      plot(c(-1, .wdt), c(.min-.brd[2], .max+(.brd[1]*0.5)),
+           type='n', bty='n', xaxt='n', xlab='',
+           yaxt='n', ylab='', main="", font.main = 1)
+      #bg + border
+      rect(-1, .min-.brd[2], .wdt, .max+(.brd[1]*0.5),
+           col=bg, border=border)
+      #title
+      if(title !=""){
+        text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title,
+             col="black", cex=0.75)
+      }
+
+      #for (i in 1:(length(lut)-1)) {
+      #  y = (i-1)/scale + min
+      #  rect(0,y,10,y+1/scale, col=lut[i], border=NA)
+      #}
+
+      #col scale
+      ####################
+      #note
+      ####################
+      #this needs work because rect needs colored border
+      #which kills transparent ranges...
+      #does that matter
+      for (i in 1:(length(cols))) {
+        y <- (i-1)/scale + .min
+        rect(5,y-(1/scale),10,y,col=cols[i], border=cols[i])
+      }
+      #axes
+      lines(c(5,5), c(.min, .max), col="black")
+      for (i in ticks) {
+        lines(c(5,4), c(i,i), col="black")
+      }
+      #axes annotation
+      text(rep(2, length(ticks)), ticks, labels=ticks,
+           cex=0.75, adj=0.5)
+      #na block
+      if(!is.na(na.col)){
+        rect(5, .min-(.na.width*0.5), 10, .min-(.na.width*1.5), col=na.col, border="black")
+        text(2, .min-.na.width, labels="NA", col="black", cex=0.75)
+      }
+
+    }
 
   par(op)
 }
 
-plot(iris$Sepal.Length, iris$Sepal.Width)
-color.bar(colorRampPalette(c("light green", "yellow", "orange", "red"))(100), -1, 2)
+#plot(iris$Sepal.Length, iris$Sepal.Width)
+#rsp_col_key(c(1,-1), colorRampPalette(c("light green", "yellow", "orange", "red"))(100), title="testing")
 
 
 
