@@ -7,7 +7,7 @@
 \alias{summary.respeciate}
 \title{respeciate.generics}
 \usage{
-\method{print}{respeciate}(x, n = 10, ...)
+\method{print}{respeciate}(x, n = NULL, ...)
 
 \method{plot}{respeciate}(x, n = NULL, id = NULL, order = TRUE, ...)
 
@@ -18,13 +18,14 @@
 object to be printed, plotted, etc.}
 
 \item{n}{when plotting or printing a multi-profile object, the
-maximum number of profiles to report.}
+maximum number of profiles to report. (When plotting, \code{n}
+is ignored if \code{id} is also set.)}
 
 \item{...}{any extra arguments, mostly ignored except by
 \code{plot} which passes them to \code{\link{barplot}}.}
 
 \item{id}{numeric, indices of profiles to use when
-plotting (nb: \code{id=1:6} is equivalent to \code{n=6}).}
+plotting (\code{id=1:6} is equivalent to \code{n=6}).}
 
 \item{order}{logical, order the species in the
 profile(s) by relative abundance before plotting.}

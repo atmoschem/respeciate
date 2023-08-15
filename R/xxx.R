@@ -276,6 +276,13 @@ rsp_test_profile <- function(x){
 #color key
 ############################
 
+########################
+#using this in:
+########################
+
+#sp_species_cor
+
+
 #started with:
 #https://stackoverflow.com/questions/9314658/colorbar-from-custom-colorramppalette
 

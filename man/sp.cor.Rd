@@ -5,7 +5,13 @@
 \alias{sp_species_cor}
 \title{(re)SPECIATE Species Correlations}
 \usage{
-sp_species_cor(x, min.n = 3, output = c("plot", "report"))
+sp_species_cor(
+  x,
+  min.n = 3,
+  cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
+  na.col = "#CFCFCF",
+  output = c("plot", "report")
+)
 }
 \arguments{
 \item{x}{\code{respeciate} object, a \code{data.frame} of re(SPECIATE)
@@ -18,9 +24,18 @@ pairs of measurements needed to calculate a correlation coefficient because
 not all profiles contain all species, so there may still be insufficient
 overlap on a case-by-case basis.}
 
-\item{output}{Character vector, required function output: \code{'report'} the
-calculated correlation matrix; \code{'plot'} a heat map of that correlation
-matrix.}
+\item{cols}{a series of \code{numeric}, \code{character} or other class values
+that can be translated into a color gradient, used to color valid cases when
+generating plots and color keys, default \code{c("#80FFFF", "#FFFFFF", "#FF80FF")}
+equivalent to \code{\link{cm.colors}} output.}
+
+\item{na.col}{\code{numeric}, \code{character} or other class that can be
+translated into a single color, used to color \code{NA}s when generating
+plots and color keys, default grey \code{"#CFCFCF"}.}
+
+\item{output}{\code{character} vector, required function output, one or more
+of : \code{'report'} the calculated correlation matrix; \code{'plot'} a heat
+map of that correlation matrix.}
 }
 \value{
 Depending on the \code{output} option, \code{sp_species_cor} returns
