@@ -5,6 +5,14 @@
 
 #currently no hooks, etc...
 
+#####################
+#to check
+#####################
+
+# I think all build/check issues associate with
+#     xxx_test and its depends...
+#        (not keeping unless we can get it to work better)
+
 
 utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
@@ -27,9 +35,11 @@ utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
 
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap
 #' @importFrom utils modifyList
-#' @importFrom graphics axis barplot par legend
-#' @importFrom grDevices cm.colors
+#' @importFrom graphics axis barplot par legend lines rect text
+#' @importFrom grDevices cm.colors colorRampPalette
 
+#might be able to drop legend?
+#   check plot.respeciate
 
 ##############################
 #common unexported
@@ -522,30 +532,37 @@ rsp_col_key <- function(key, cols, x, y = NULL,
 #diagnostic
 ##########################
 
+#######################
+##rethink this!!!!
+#######################
+
+#parking for now
+
+
 #https://www.rpubs.com/NYang/ANLY530-IRIS
 
 #devtools::unload(); devtools::load_all()
 #a <- xxx_test(); subset(a, a$.ref)$PROFILE_NAME
 
-xxx_test <- function(){
-  #rethink this!!!!
-  .tmp <- sysdata$PROFILES
-  .out <-as.data.table(sp_dcast_profile(sp_profile(.tmp$PROFILE_CODE)))
-  .tmp <- .tmp[c("PROFILE_CODE", "Keywords")]
-  .tmp$.ref <- grepl("wildfire", tolower(.tmp$Keywords)) |
-    grepl("burning", tolower(.tmp$Keywords))
-  .out <- merge(.out, .tmp)
-  .out <- .out[-1599,]
-  #glfit<-glm(as.numeric(.out$.ref)~.out$`Organic carbon` + .out$Nitrate +
-  #             .out$Sulfate, family = 'binomial')
-  glfit<-glm(as.numeric(.out$.ref)~.out$Calcium + .out$Lead +
-                            .out$Zinc +.out$Manganese, family = 'binomial')
-  print(summary(glfit))
-  .out$.pred <- NA
-  .out$.pred[as.numeric(names(predict(glfit)))] <- predict(glfit, type="response")
-  .out
-  #glfit
-}
+#xxx_test <- function(){
+#
+#  .tmp <- sysdata$PROFILES
+#  .out <-as.data.table(sp_dcast_profile(sp_profile(.tmp$PROFILE_CODE)))
+#  .tmp <- .tmp[c("PROFILE_CODE", "Keywords")]
+#  .tmp$.ref <- grepl("wildfire", tolower(.tmp$Keywords)) |
+#    grepl("burning", tolower(.tmp$Keywords))
+#  .out <- merge(.out, .tmp)
+#  .out <- .out[-1599,]
+#  #glfit<-glm(as.numeric(.out$.ref)~.out$`Organic carbon` + .out$Nitrate +
+#  #             .out$Sulfate, family = 'binomial')
+#  glfit<-glm(as.numeric(.out$.ref)~.out$Calcium + .out$Lead +
+#                            .out$Zinc +.out$Manganese, family = 'binomial')
+#  print(summary(glfit))
+#  .out$.pred <- NA
+#  .out$.pred[as.numeric(names(predict(glfit)))] <- predict(glfit, type="response")
+#  .out
+#  #glfit
+#}
 
 
 
