@@ -27,11 +27,18 @@
 #to think about
 #######################
 
-#add two functions
+#add functions???
 
 ## sp_build_profile to make a profile locally
-## sp_import_profile to import a profile from an external source
+##     needs profile_name, profile_code
+##           species_name, species_id
+##           weight_percent (and possibly .value)
 
+## sp_import_profile to import a profile from an external source
+##     extension of above to import data from specifc sources
+##           might be very code intensive..?
+
+## local function to pad data using database???
 
 #' @rdname sp
 #' @export

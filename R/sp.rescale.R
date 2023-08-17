@@ -37,6 +37,9 @@
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
 
+# may need to think about additional local scaling
+#      e.g. within in profile [species conc]/[sum of all species concs]
+
 ######################
 #rescale data
 ######################

@@ -45,6 +45,11 @@
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
 
+# need melt to go with dcast
+#    maybe just to reverse the dcast action for now
+#    see e.g.
+#    https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
+
 ######################
 #dcast
 #long_to_wide reshape

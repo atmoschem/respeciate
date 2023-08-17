@@ -5,7 +5,7 @@
 \alias{sp_match_profile}
 \title{Find nearest matches from reference set of profiles}
 \usage{
-sp_match_profile(x, ref, n = 10, rescale = 4)
+sp_match_profile(x, ref, n = 10, rescale = 4, test.x = FALSE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} containing a
@@ -21,6 +21,10 @@ report.}
 \item{rescale}{Numeric (default 4), the data scaling method to apply before
 comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
 \code{\link{sp_rescale_profile}}.}
+
+\item{test.x}{Logical (default FALSE). The match process self-tests by adding
+\code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
+\code{test.x} to \code{TRUE} retains this as an extra record.}
 }
 \value{
 \code{sp_match_profile} returns a fit report: a \code{data.frame} of

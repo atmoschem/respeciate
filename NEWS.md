@@ -4,7 +4,7 @@
     * released 2023-07-19 
     * now imports data.table; moving to data.table methods for speed 
     * changed news format because build_news missing previous md text 
-    * added functions: sp_rescale_profile, sp_dcast_profile, sp_profile_cor, 
+    * added functions: sp_rescale_profile, sp_dcast_profile, sp_species_cor, 
     sp_profile_dist, sp_match_profile
     * reduced object classes
     

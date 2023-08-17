@@ -18,6 +18,9 @@
 #' @param rescale Numeric (default 4), the data scaling method to apply before
 #' comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
 #' \code{\link{sp_rescale_profile}}.
+#' @param test.x Logical (default FALSE). The match process self-tests by adding
+#' \code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
+#' \code{test.x} to \code{TRUE} retains this as an extra record.
 #' @return \code{sp_match_profile} returns a fit report: a \code{data.frame} of
 #' up to \code{n} fit reports for the nearest matches to \code{x} from the
 #' reference profile data set, \code{ref}.
@@ -74,8 +77,22 @@
 #             species_name and species_id
 #             weight_percent or .value
 
+#renaming appears to trip up when profile_name/id are factors
+#    current fix is to force .tmp.pf.cd and .tmp.pf.nm to character
+#          when extracting them...
+#    maybe think about better?
 
-sp_match_profile <- function(x, ref, n=10, rescale=4){
+#at the moment we error (stop()) function if no correlation outputs
+#    so far this appears to be mostly because number of species in x
+#         is less than min.bin for correlation.
+#              1. this is currently hard-coded
+#              2. not really looked at this in detail...
+#                  could return a NULL and warning instead?
+#                  could also do this earlier if min.bin set in formals
+#                     but might need to rethink n, min.bin, etc???
+
+sp_match_profile <- function(x, ref, n=10, rescale=4,
+                             test.x=FALSE){
 
   #######################
   #if ref missing
@@ -86,6 +103,17 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
 
   #add .value if not there
   x <- rsp_tidy_profile(x)
+
+  #tidy x for testing
+  #.x.pr.cd <- as.character(x$PROFILE_CODE)
+  #.x.pr.nm <- as.character(x$PROFILE_NAME)
+  #note
+  #   assuming only one profile
+  x$PROFILE_CODE <- "test"
+  x$PROFILE_NAME <- paste("test>", x$PROFILE_NAME, sep="")
+  if(test.x){
+    n <- n + 1
+  }
 
   x <- as.data.table(x)
   ref <- as.data.table(ref)
@@ -118,9 +146,11 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
 
   ###################
   #keep species names and ids for renaming
+  #    as.character to stop rename tripping on factors
+  #         not ideal...
   ###################
-  .tmp.pr.nm <- .tmp$PROFILE_NAME
-  .tmp.pr.cd <- .tmp$PROFILE_CODE
+  .tmp.pr.nm <- as.character(.tmp$PROFILE_NAME)
+  .tmp.pr.cd <- as.character(.tmp$PROFILE_CODE)
 
   ##################
   #dcast to reshape for search
@@ -154,6 +184,7 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
   .cols <- names(.tmp)[3:(ncol(.tmp))]
 
   #get x back as a test case...
+  #need a better way to handle test
   .test <- .tmp[, "test"]
 
   ###########################
@@ -170,6 +201,7 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
   #to do
   #   currently hard coded in f
   #   as 6
+  #   if/when we deal with this stop message will need to be updated
 
   f <- function(x) {
     if(length(x[!is.na(x) & !is.na(.test)])>6){
@@ -200,6 +232,12 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
   #this is a pain because some profile names are replicated
   #    (several profile codes seem to have same profile name)
 
+  if(length(.out)<1){
+    #see notes....
+    #sometimes this is because there are less than min.bin species in the x profile
+    stop("sp_match_profile> No (6 point) matches for x", call. = FALSE)
+  }
+
   .tmp <- names(.out)
   for(i in 1:length(.tmp)){
     if(.tmp[i] %in% .tmp.pr.cd){
@@ -214,6 +252,14 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
                      fit=.out,
                      row.names = 1:length(.out))
 
+  if(!test.x){
+    if("test" %in% x$PROFILE_CODE){
+      .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
+    } else {
+      .out <- .out[1:(n-1),]
+    }
+  }
+
   #######################
   #output
   #######################
@@ -227,6 +273,11 @@ sp_match_profile <- function(x, ref, n=10, rescale=4){
 
 
 #need something to replace this that helps users build local profiles
+
+#basic build needs
+#   profile_name and profile_code
+#   species_name and species_id
+#   weight_percent (and possibly .value)
 
 rsp_ <- function(x){
   .o <- sp_profile(x)
