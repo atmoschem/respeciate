@@ -35,7 +35,7 @@
 ##           weight_percent (and possibly .value)
 
 ## sp_import_profile to import a profile from an external source
-##     extension of above to import data from specifc sources
+##     extension of above to import data from specific sources
 ##           might be very code intensive..?
 
 ## local function to pad data using database???
