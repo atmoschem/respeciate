@@ -3,27 +3,39 @@
 \name{sp.reshape}
 \alias{sp.reshape}
 \alias{sp_dcast_profile}
+\alias{sp_melt_wide}
 \title{(re)SPECIATE profile reshaping functions}
 \usage{
 sp_dcast_profile(x, wide = "species")
+
+sp_melt_wide(x, pad = TRUE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
-profiles.}
+profiles in standard long form or widened form for
+\code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}, respectively.}
 
-\item{wide}{character, when reshaping \code{x} the data type to 'widen',
+\item{wide}{character, when widening \code{x} with
+\code{\link{sp_dcast_profile}}, the data type to \code{dcast},
 currently \code{'species'} (default) or \code{'profile'}. See Note.}
+
+\item{pad}{logical, when \code{melt}ing a previously widened data set,
+should \code{x} be re-populated with species and/or profile meta-data,
+discarded when widening.}
 }
 \value{
 \code{sp_dcast_profile} returns the wide form of the supplied
-\code{respeciate} profile as a \code{data.frame}.
+\code{respeciate} profile as a \code{data.frame}. \code{sp_dcast_profile}
+returns the (standard) long form of a previously widened profile.
 }
 \description{
 Functions for reshaping (re)SPECIATE profiles
 
-\code{\link{sp_dcast_profile}} reshapes the supplied
-(re)SPECIATE profile(s), converting it from long to short form. See Notes
-for further details.
+\code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}
+reshape supplied (re)SPECIATE profile(s). \code{\link{sp_dcast_profile}}
+converts these from their supplied long form to a widened form, widening the
+data set by either species or profiles. \code{\link{sp_melt_wide}} attempts
+to return a previously widened data set to the original long form.
 }
 \note{
 Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
@@ -36,11 +48,11 @@ applied using \code{wide='species'}, is effectively:
 
 And, the alternative \code{wide='profile'}:
 
-\code{dcast(..., SPECIES_ID + SPECIES_NAME ~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
+\code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
 
 Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
 \code{.value}, so the EPA source information can easily be recovered. See also
-\code{\link{sp_rescale_profile}}
+\code{\link{sp_rescale_profile}}.
 }
 \references{
 Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.

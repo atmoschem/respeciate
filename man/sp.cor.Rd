@@ -10,7 +10,9 @@ sp_species_cor(
   min.n = 3,
   cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
   na.col = "#CFCFCF",
-  output = c("plot", "report")
+  heatmap = TRUE,
+  key = TRUE,
+  report = "silent"
 )
 }
 \arguments{
@@ -33,14 +35,25 @@ equivalent to \code{\link{cm.colors}} output.}
 translated into a single color, used to color \code{NA}s when generating
 plots and color keys, default grey \code{"#CFCFCF"}.}
 
-\item{output}{\code{character} vector, required function output, one or more
-of : \code{'report'} the calculated correlation matrix; \code{'plot'} a heat
-map of that correlation matrix.}
+\item{heatmap}{\code{logical} or \code{list}, heatmap settings. Options
+include \code{TRUE} (default) to generate the heat map without modification;
+\code{FALSE} to not plot it; or a list of heat map options to alter the plot
+appearance.}
+
+\item{key}{\code{logical} or \code{list}, color key settings if plotting
+the correlation matrix heat map. Options include \code{TRUE} (default) to
+generate the key without modification; \code{FALSE} to not include the key;
+or a list of options to alter the key appearance.}
+
+\item{report}{\code{logical} or \code{character}, the required function
+output. Options include: \code{'silent'} (default), to return the
+correlation matrix invisibly; \code{TRUE} to return the matrix
+(visibly); and, \code{FALSE} to not return it.}
 }
 \value{
-Depending on the \code{output} option, \code{sp_species_cor} returns
-one or more of the following: the correlation matrix, a heat map of the
-correlation matrix.
+By default \code{sp_species_cor} invisibly returns the calculated
+correlation matrix a plots it as a heat map, but arguments including
+\code{heatmap} and \code{report} can be used to modify function outputs.
 }
 \description{
 sp_species functions for studying relationships between

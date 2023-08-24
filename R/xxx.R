@@ -335,17 +335,41 @@ rsp_test_profile <- function(x){
 #    maybe 0.25 ish??? maybe tick or half tick range????
 
 #key is the data to be color-scaled or its range
-#cols is col.palette to apply
-#x, y is key position
+#     currently just used for range
+
+#cols is col.palette to apply to key range
+#   the col ramp is messy... seems to need border
+#        that could be issue if transparency using...
+
+#x, y are key (proportional, 0 to 1) positions
+
 #na.col color of na's
 #na.cex scaling for na box width
+#    do we need any other NA controls??
+#          e.g. na.border if needed to be different to main border???
+
+#axes to do
+#    not using at moment
+#        but would separate axes and border colours
+#             not sure it is wanted/needed...
+
+#ticks, nticks axes tick positions and number of ticks, respectively
+#     think about these
+
+#title still work in progress
+#     not nice version on type=1
+
 
 #have type = 1/2 for horizontal/vertical
-#   but title not done in type 2
-#   also col ramp is messy... seems to need border
+#   think about types 3 and 4
+#        horizontal with text at top
+#        vertical with text on other side
 
-#type=1 horizontal
-#   move na to other side
+#think about exporting this once sorted???
+#   or passing to another package/better home
+#       (not sure how that fits with package remit)
+
+
 
 rsp_col_key <- function(key, cols, x, y = NULL,
                         ticks, nticks,
@@ -394,7 +418,7 @@ rsp_col_key <- function(key, cols, x, y = NULL,
       .mai <- c(0.1,0.1,0.1,0.1)
       if(title ==""){
         #no title
-        .fig <- c(x-0.1, x+0.1, y-0.08, y+0.1)
+        .fig <- c(x-0.1, x+0.1, y-0.04, y+0.1)
         .wdt <- 12
       } else {
         #title
@@ -414,11 +438,11 @@ rsp_col_key <- function(key, cols, x, y = NULL,
       #plot col key
 
       #region
-      plot(c(.min-(.brd[1]*0.5), .max +.brd[2]), c(-1, .wdt),
+      plot(c(.min -.brd[2], .max+(.brd[1]*0.5)), c(-1, .wdt),
            type='n', bty='n', xaxt='n', xlab='',
            yaxt='n', ylab='', main="", font.main = 1)
       #bg + border
-      rect(.min-(.brd[1]*0.5), -1, .max+.brd[2],  .wdt,
+      rect(.min -.brd[2], -1, .max+(.brd[1]*0.5),  .wdt,
            col=bg, border=border)
       #title
       if(title !=""){
@@ -439,8 +463,8 @@ rsp_col_key <- function(key, cols, x, y = NULL,
            cex=0.75, adj=0.5)
       #na block
       if(!is.na(na.col)){
-        rect(.max+(.na.width*0.5), 5,.max+(.na.width*1.5), 10,  col=na.col, border="black")
-        text(.max+.na.width, 2, labels="NA", col="black", cex=0.75)
+        rect(.min-(.na.width*0.5), 5,.min-(.na.width*1.5), 10,  col=na.col, border="black")
+        text(.min-.na.width, 2, labels="NA", col="black", cex=0.75)
       }
 
     }

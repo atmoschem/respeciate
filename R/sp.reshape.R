@@ -1,18 +1,26 @@
 #' @name sp.reshape
 #' @title (re)SPECIATE profile reshaping functions
-#' @aliases sp_dcast_profile
+#' @aliases sp_dcast_profile sp_melt_wide
 
 #' @description Functions for reshaping (re)SPECIATE profiles
 
-#' @description \code{\link{sp_dcast_profile}} reshapes the supplied
-#' (re)SPECIATE profile(s), converting it from long to short form. See Notes
-#' for further details.
+#' @description \code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}
+#' reshape supplied (re)SPECIATE profile(s). \code{\link{sp_dcast_profile}}
+#' converts these from their supplied long form to a widened form, widening the
+#' data set by either species or profiles. \code{\link{sp_melt_wide}} attempts
+#' to return a previously widened data set to the original long form.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
-#' profiles.
-#' @param wide character, when reshaping \code{x} the data type to 'widen',
+#' profiles in standard long form or widened form for
+#' \code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}, respectively.
+#' @param wide character, when widening \code{x} with
+#' \code{\link{sp_dcast_profile}}, the data type to \code{dcast},
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
+#' @param pad logical, when \code{melt}ing a previously widened data set,
+#' should \code{x} be re-populated with species and/or profile meta-data,
+#' discarded when widening.
 #' @return \code{sp_dcast_profile} returns the wide form of the supplied
-#' \code{respeciate} profile as a \code{data.frame}.
+#' \code{respeciate} profile as a \code{data.frame}. \code{sp_dcast_profile}
+#' returns the (standard) long form of a previously widened profile.
 
 #' @note Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 #' be slow and memory inefficient. So, \code{respeciate} uses the
@@ -24,11 +32,11 @@
 #'
 #' And, the alternative \code{wide='profile'}:
 #'
-#' \code{dcast(..., SPECIES_ID + SPECIES_NAME ~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
+#' \code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
 #'
 #' Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
 #' \code{.value}, so the EPA source information can easily be recovered. See also
-#' \code{\link{sp_rescale_profile}}
+#' \code{\link{sp_rescale_profile}}.
 #'
 #' @references
 #'   Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.
@@ -45,10 +53,9 @@
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
 
-# need melt to go with dcast
-#    maybe just to reverse the dcast action for now
-#    see e.g.
-#    https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
+#in development sp_melt_wide below
+
+#maybe think about padding sp_dcast_profile
 
 ######################
 #dcast
@@ -120,7 +127,107 @@ sp_dcast_profile <- function(x, wide = "species"){
 }
 
 
+#' @rdname sp.reshape
+#' @export
 
+##   now imports from xxx.r
+##   #' @import data.table
+
+# may need to set data.table specifically??
+#      data.table::as.data.table, etc??
+
+# wanted melt to go with dcast
+#    curently just to reverse the dcast action
+#    see e.g.
+#    https://cran.r-project.org/web/packages/data.table/vignettes/datatable-reshape.html
+
+#padding needs work
+#
+
+######################
+#melt
+#wide_to_long reshape
+######################
+
+sp_melt_wide <- function(x, pad = TRUE){
+
+  ####################
+  #see ?data.table::melt for examples
+  ####################
+
+  #adds .value if missing
+  ## using .value rather the WEIGHT_PERCENT in case rescaled
+  x <- rsp_tidy_profile(x)
+
+  #save class
+  cls <- class(x)
+
+  xx <- as.data.table(x)
+
+  #################
+  #test log/wide
+  ####################
+  #should be able to simplify this a lot
+  .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_ID", "SPECIES_NAME",
+             "WEIGHT_PERCENT", ".value")
+  .test <- .test[.test %in% names(xx)]
+  if(length(.test)>2){
+    stop("sp_melt_wide halted; x already looks like a long profile.", call.=FALSE)
+  }
+  .test.sp <- length(grep("PROFILE", .test))
+  .test.pr <- length(grep("SPECIES", .test))
+  if(.test.pr>0 & .test.sp>0){
+    stop("sp_melt_wide halted; x already looks suspect.", call.=FALSE)
+  }
+  .long <- "bad"
+  if(.test.pr>0 & length(.test)==.test.pr){
+    .id.vars <- .test
+    .long <- "PROFILE_CODE"
+  }
+  if(.test.sp>0 & length(.test)==.test.sp){
+    .id.vars <- .test
+    .long <- "SPECIES_NAME"
+  }
+  if(.long=="bad"){
+    stop("sp_melt_wide halted; x already looks suspect.", call.=FALSE)
+  }
+
+  #should only be species.wide or profile.wide
+  #   if we get to here
+
+  out <- melt(xx, id.vars = .id.vars)
+  names(out)[names(out)=="variable"] <- .long
+  names(out)[names(out)=="value"] <- "WEIGHT_PERCENT"
+  out$.value <- out$WEIGHT_PERCENT
+
+  #merge if padding
+  #####################
+  #might not be best way of doing it
+  #maybe a 'pad what is missing'
+  #
+  if(pad){
+    PROFILES <- as.data.table(sysdata$PROFILES)
+    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
+    if(.long=="PROFILE_CODE"){
+      out <- merge(out, PROFILES, by = .long, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+      .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
+      out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    } else {
+      #.long must be "SPECIES_NAME"
+      out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
+                  all.x=TRUE, allow.cartesian=TRUE)
+      .tmp <- intersect(names(out), names(PROFILES))
+      out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+  }
+
+  out <- as.data.frame(out)
+  #class(out) <- cls
+  out
+}
 
 
 ########################
@@ -134,23 +241,27 @@ sp_dcast_profile <- function(x, wide = "species"){
 
 #I don't think I am using it anywhere...
 
-rsp_build_wide_profile <- function(x){
-  .usp <- unique(x$SPECIES_NAME)
-  .upr <- unique(x$PROFILE_CODE)
-  ref <- data.frame(t(rep(NA, length(.usp))))
-  names(ref) <- .usp
-  ans <- lapply(.upr, function(.pr){
-    temp <- x[x$PROFILE_CODE==.pr,]
-    out <- data.frame(t(temp$WEIGHT_PERCENT))
-    names(out) <- temp$SPECIES_NAME
-    out<- modifyList(ref, out)
-    out$PROFILE_CODE <- .pr
-    out$PROFILE_NAME <- temp$PROFILE_NAME[1]
-    out
-    #ref
-  })
-  do.call(rbind, ans)
-}
+#########################
+#testing getting rid of this
+#########################
+
+#rsp_build_wide_profile <- function(x){
+#  .usp <- unique(x$SPECIES_NAME)
+#  .upr <- unique(x$PROFILE_CODE)
+#  ref <- data.frame(t(rep(NA, length(.usp))))
+#  names(ref) <- .usp
+#  ans <- lapply(.upr, function(.pr){
+#    temp <- x[x$PROFILE_CODE==.pr,]
+#    out <- data.frame(t(temp$WEIGHT_PERCENT))
+#    names(out) <- temp$SPECIES_NAME
+#    out<- modifyList(ref, out)
+#    out$PROFILE_CODE <- .pr
+#    out$PROFILE_NAME <- temp$PROFILE_NAME[1]
+#    out
+#    #ref
+#  })
+#  do.call(rbind, ans)
+#}
 
 #require(dplyr)
 

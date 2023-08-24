@@ -22,14 +22,26 @@
 #' @param na.col \code{numeric}, \code{character} or other class that can be
 #' translated into a single color, used to color \code{NA}s when generating
 #' plots and color keys, default grey \code{"#CFCFCF"}.
-#' @param output \code{character} vector, required function output, one or more
-#' of : \code{'report'} the calculated correlation matrix; \code{'plot'} a heat
-#' map of that correlation matrix.
-#' @return Depending on the \code{output} option, \code{sp_species_cor} returns
-#' one or more of the following: the correlation matrix, a heat map of the
-#' correlation matrix.
+#' @param heatmap \code{logical} or \code{list}, heatmap settings. Options
+#' include \code{TRUE} (default) to generate the heat map without modification;
+#' \code{FALSE} to not plot it; or a list of heat map options to alter the plot
+#' appearance.
+#' @param key \code{logical} or \code{list}, color key settings if plotting
+#' the correlation matrix heat map. Options include \code{TRUE} (default) to
+#' generate the key without modification; \code{FALSE} to not include the key;
+#' or a list of options to alter the key appearance.
+#' @param report \code{logical} or \code{character}, the required function
+#' output. Options include: \code{'silent'} (default), to return the
+#' correlation matrix invisibly; \code{TRUE} to return the matrix
+#' (visibly); and, \code{FALSE} to not return it.
+#' @return By default \code{sp_species_cor} invisibly returns the calculated
+#' correlation matrix a plots it as a heat map, but arguments including
+#' \code{heatmap} and \code{report} can be used to modify function outputs.
+
 
 #NOTE
+
+# list options to do for heatmap and key!!!
 
 #' @rdname sp.cor
 #' @export
@@ -56,13 +68,14 @@
 #formals for cor calculation control
 #   include cor:use, etc???
 
+
 #plot handling could be tidier
 #   at moment plot handling is in an if/else
 #       with/without NAs handled differently
 #       but think this could be passed down into key and plot
 #            holding for now until key is in other plots
 #            and have an idea how it'll work
-#                (see also col key)
+#                (see also key)
 
 #col key
 #   currently using local function rsp_col_key
@@ -76,6 +89,18 @@
 #      font size, scale position, style/type, range
 #         currently holding (see plot handling and col key)
 
+#starting thinking about above
+#   see output control below
+
+#output control
+#    currently uses lots of settings:
+#       heatmap TRUE/FALSE to plot heatmap of correlation matrix
+#           or list of heatmap plot settings
+#       key TRUE/FALSE to add a col key to the heatmap
+#           or list of col key plot settings
+#       report "silent" to return the correlation matrix invisibly,
+#           or TRUE/FALSE to return it visibly or not at all.
+#    The list options are not yet done...
 
 
 #aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
@@ -83,8 +108,8 @@
 
 sp_species_cor <- function(x, min.n = 3,
                            cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
-                           na.col = "#CFCFCF",
-                           output = c("plot", "report")){
+                           na.col = "#CFCFCF", heatmap = TRUE,
+                           key = TRUE, report = "silent"){
   #if ref missing
   .x <- sp_dcast_profile(x)
 
@@ -147,8 +172,7 @@ sp_species_cor <- function(x, min.n = 3,
   #stackover suggests it is hard going modifying
   #https://stackoverflow.com/questions/29893630/r-draw-heatmap-with-clusters-but-hide-dendrogram
 
-
-  if("plot" %in% output){
+  if((is.logical(heatmap) && heatmap) | (is.list(heatmap))){
     .cols.max <- 300
     if(max(.cor, na.rm=TRUE) < 1){
       .z <- (1 - max(.cor, na.rm=TRUE))*100
@@ -164,9 +188,12 @@ sp_species_cor <- function(x, min.n = 3,
               #cexRow = 0.5, cexCol = 0.5, #axis size
               col =cols[1:.cols.max],
               scale="none")
-      rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
-                  ticks= -1:1, y=0.75,
-                  na.col = na.col)
+
+      if((is.logical(key) && key) | (is.list(key))){
+        rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
+                    ticks= -1:1, y=0.75,
+                    na.col = na.col)
+      }
     } else {
       #plot when
       #.cor has no NAs
@@ -180,14 +207,21 @@ sp_species_cor <- function(x, min.n = 3,
               #cexRow = 0.5, cexCol = 0.5, #axis size
               col =cols[.cols.min:.cols.max],
               scale="none")
-      rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
-                  ticks= -1:1, y=0.75,
-                  na.col = NA)
+      if((is.logical(key) && key) | (is.list(key))){
+        rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
+                    ticks= -1:1, y=0.75,
+                    na.col = NA)
+      }
     }
   }
 
-  if("report" %in% output){
-    return(invisible(.cor))
+  #report handling
+  if((is.logical(report) && report) | (is.character(report))){
+    if(is.character(report) && report=="silent"){
+      return(invisible(.cor))
+    } else {
+      return(.cor)
+    }
   } else {
     return(invisible(NULL))
   }
