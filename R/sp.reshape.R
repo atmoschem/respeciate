@@ -1,31 +1,33 @@
 #' @name sp.reshape
 #' @title (re)SPECIATE profile reshaping functions
-#' @aliases sp_dcast_profile sp_melt_wide
+#' @aliases sp_dcast sp_dcast_profile sp_dcast_species sp_melt_wide
 
 #' @description Functions for reshaping (re)SPECIATE profiles
 
-#' @description \code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}
-#' reshape supplied (re)SPECIATE profile(s). \code{\link{sp_dcast_profile}}
-#' converts these from their supplied long form to a widened form, widening the
-#' data set by either species or profiles. \code{\link{sp_melt_wide}} attempts
-#' to return a previously widened data set to the original long form.
+#' @description \code{sp_dcast} and \code{sp_melt_wide} reshape supplied
+#' (re)SPECIATE profile(s). \code{sp_dcast} converts these from their supplied
+#' long form to a widened form, \code{dcast}ing the data set by either species
+#' or profiles depending on the \code{widen} setting applied.
+#' \code{sp_dcast_profile} and \code{sp_dcast_species} are wrappers for these
+#' options. \code{sp_melt_wide} attempts to return a previously widened data
+#' set to the original long form.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles in standard long form or widened form for
-#' \code{\link{sp_dcast_profile}} and \code{\link{sp_melt_wide}}, respectively.
-#' @param wide character, when widening \code{x} with
-#' \code{\link{sp_dcast_profile}}, the data type to \code{dcast},
+#' \code{\link{sp_dcast}} and \code{\link{sp_melt_wide}}, respectively.
+#' @param widen character, when widening \code{x} with
+#' \code{\link{sp_dcast}}, the data type to \code{dcast},
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
 #' @param pad logical, when \code{melt}ing a previously widened data set,
 #' should \code{x} be re-populated with species and/or profile meta-data,
 #' discarded when widening.
-#' @return \code{sp_dcast_profile} returns the wide form of the supplied
-#' \code{respeciate} profile as a \code{data.frame}. \code{sp_dcast_profile}
+#' @return \code{sp_dcast} returns the wide form of the supplied
+#' \code{respeciate} profile. \code{sp_melt_wide}
 #' returns the (standard) long form of a previously widened profile.
 
 #' @note Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 #' be slow and memory inefficient. So, \code{respeciate} uses the
 #' \code{\link[data.table:dcast]{data.table::dcast}}
-#' method. The default method,
+#' method. The \code{sp_dcast_species} method,
 #' applied using \code{wide='species'}, is effectively:
 #'
 #' \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
@@ -62,7 +64,7 @@
 #long_to_wide reshape
 ######################
 
-sp_dcast_profile <- function(x, wide = "species"){
+sp_dcast <- function(x, widen = "species"){
 
   ####################
   #see ?data.table::dcast for examples
@@ -87,18 +89,18 @@ sp_dcast_profile <- function(x, wide = "species"){
 
   xx <- as.data.table(x)
 
-  #stop if wide optiion not known.
-  if(!wide %in% c("species", "profile")){
+  #stop if wide option not known.
+  if(!widen %in% c("species", "profile")){
     stop("unknown wide option")
   }
-  if(wide=="species"){
+  if(widen=="species"){
     out <- dcast(xx,
                  PROFILE_CODE + PROFILE_NAME ~ SPECIES_NAME,
                  mean,
                  na.rm=TRUE,
                  value.var = ".value")
   }
-  if(wide=="profile"){
+  if(widen=="profile"){
     out <- dcast(xx,
                  SPECIES_ID + SPECIES_NAME ~PROFILE_CODE,
                  mean,
@@ -125,6 +127,24 @@ sp_dcast_profile <- function(x, wide = "species"){
   #class(out) <- cls
   out
 }
+
+#' @rdname sp.reshape
+#' @export
+
+sp_dcast_profile <- function(x, widen = "profile"){
+  sp_dcast(x=x, widen=widen)
+}
+
+
+
+#' @rdname sp.reshape
+#' @export
+
+sp_dcast_species <- function(x, widen = "species"){
+  sp_dcast(x=x, widen=widen)
+}
+
+
 
 
 #' @rdname sp.reshape

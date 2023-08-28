@@ -111,7 +111,7 @@ sp_species_cor <- function(x, min.n = 3,
                            na.col = "#CFCFCF", heatmap = TRUE,
                            key = TRUE, report = "silent"){
   #if ref missing
-  .x <- sp_dcast_profile(x)
+  .x <- sp_dcast(x, wide="species")
 
   #no point doing any have less than min.n values?
   .test <- apply(.x, 2, function(x) length(.x[!is.na(x)]))

@@ -1,6 +1,11 @@
 # Version 0.0 - Release Notes
 
 * [0.2.2] 
+    * released 2023-08-28 
+    * added functions: sp_rescale_species, sp_dcast, sp_dcast_species  
+    * 
+
+* [0.2.2] 
     * released 2023-08-24 
     * now imports data.table; moving to data.table methods for speed 
     * changed news format because build_news missing previous md text 

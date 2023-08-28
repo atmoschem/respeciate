@@ -70,8 +70,8 @@ sp_profile_distance <- function(x, output = c("plot", "report")){
   x <- rsp_tidy_profile(x)
 
   # make by profile (rows) by species (columns) data.frame
-  # move profile_code to row.names for heamap
-  .x <- sp_dcast_profile(x, wide = "species")
+  # move profile_code to row.names for heatmap
+  .x <- sp_dcast(x, wide = "species")
   .tmp <- .x[-1:-2]
   row.names(.tmp) <- .x[,1]
 

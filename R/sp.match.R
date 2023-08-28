@@ -15,9 +15,9 @@
 #' matches with \code{x}.
 #' @param n Numeric (default 10), the maximum number of profile matches to
 #' report.
-#' @param rescale Numeric (default 4), the data scaling method to apply before
+#' @param rescale Numeric (default 5), the data scaling method to apply before
 #' comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
-#' \code{\link{sp_rescale_profile}}.
+#' \code{\link{sp_rescale_species}}.
 #' @param test.x Logical (default FALSE). The match process self-tests by adding
 #' \code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
 #' \code{test.x} to \code{TRUE} retains this as an extra record.
@@ -91,7 +91,7 @@
 #                  could also do this earlier if min.bin set in formals
 #                     but might need to rethink n, min.bin, etc???
 
-sp_match_profile <- function(x, ref, n=10, rescale=4,
+sp_match_profile <- function(x, ref, n=10, rescale=5,
                              test.x=FALSE){
 
   #######################
@@ -135,14 +135,14 @@ sp_match_profile <- function(x, ref, n=10, rescale=4,
   #      (but it means we have to reset and I am guessing there is
   #       a time/memory penalty for that??)
 
-  #might handle sp_profile_rescale in/output
+  #might handle sp_rescale_species in/output
   #   either returns object in class it is given
   #      or errors if not respeciate
   #      or errors if not respeciate unless forced
   #          but then maybe need to check requires
   #          cols are there???
 
-  .tmp <- as.data.table(sp_rescale_profile(.tmp, method=rescale))
+  .tmp <- as.data.table(sp_rescale_species(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -167,7 +167,7 @@ sp_match_profile <- function(x, ref, n=10, rescale=4,
   #              na.rm=TRUE,
   #              value.var = ".value")
 
-  .tmp <- as.data.table(sp_dcast_profile(.tmp, wide="profile"))
+  .tmp <- as.data.table(sp_dcast(.tmp, wide="profile"))
 
   #nb: need the as.data.table() because sp_profile_dcast
   #    currently returns data.frame

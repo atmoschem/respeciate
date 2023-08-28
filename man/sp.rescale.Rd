@@ -3,40 +3,47 @@
 \name{sp.rescale}
 \alias{sp.rescale}
 \alias{sp_rescale_profile}
-\title{sp_profile data rescaling functions}
+\alias{sp_rescale_species}
+\title{(re)SPECIATE profile rescaling functions}
 \usage{
 sp_rescale_profile(x, method = 1)
+
+sp_rescale_species(x, method = 2)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 profiles.}
 
 \item{method}{numeric, the rescaling method to apply:
-  1 (default) \code{x/mean(x)};
-  2 \code{x-min(x)/max(x)-min(x)};
-  3 \code{x-mean(x)/sd(x)};
-  4 \code{x/max(x)}.
+  1 \code{x/total(x)};
+  2 \code{x/mean(x)};
+  3 \code{x-min(x)/max(x)-min(x)};
+  4 \code{x-mean(x)/sd(x)};
+  5 \code{x/max(x)}.
 The alternative 0 returns the records to their original
 values.}
 }
 \value{
-\code{sp_rescale_profile} returns the \code{respeciate} profile
-with the percentage weight records rescaled using the requested method.
+\code{sp_rescale_profile} and \code{sp_rescale_species} return the
+\code{respeciate} profile with the percentage weight records rescaled using
+the requested method.
 }
 \description{
-Functions for rescaling (re)SPECIATE profiles
+Functions for rescaling
 
-\code{\link{sp_rescale_profile}} rescales the percentage
-weight information in a supplied (re)SPECIATE profile.
+\code{sp_rescale_profile} and \code{sp_rescale_species} rescale
+the percentage weight records in a supplied (re)SPECIATE profile dataset by
+profile and species subsets, respectively.
 }
 \note{
 Data sometimes needs to be normalised, e.g. when applying some
 statistical analyses. Rather than modify the EPA records in the
 \code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
-\code{.value} which is modified by operations like \code{sp_profile_rescale}.
-This means rescaling is always applied to the source information, rather
-than rescaling an already rescaled value, the EPA records are retained
-unaffected and the original source information can be easily recovered.
+\code{.value} which is modified by operations like \code{sp_rescale_profile}
+and \code{sp_rescale_species}. This means rescaling is always applied to
+the source information, rather than rescaling an already rescaled value,
+and the EPA records are retained unaffected. So, the original source
+information can be easily recovered.
 }
 \references{
 Dowle M, Srinivasan A (2023). data.table: Extension of `data.frame`.
