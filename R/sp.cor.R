@@ -22,11 +22,13 @@
 #' @param na.col \code{numeric}, \code{character} or other class that can be
 #' translated into a single color, used to color \code{NA}s when generating
 #' plots and color keys, default grey \code{"#CFCFCF"}.
-#' @param heatmap \code{logical} or \code{list}, heat map settings. Options
+#' @param heatmap.args \code{logical} or \code{list}, heat map settings. Options
 #' include \code{TRUE} (default) to generate the heat map without modification;
 #' \code{FALSE} to not plot it; or a list of heat map options to alter the plot
-#' appearance.
-#' @param key \code{logical} or \code{list}, color key settings if plotting
+#' default appearance. The plot, a standard heat map with the dendrograms
+#' removed, is generated using \code{\link{stat::heatmap}}, so see associated
+#' documentation for valid options.
+#' @param key.args \code{logical} or \code{list}, color key settings if plotting
 #' the correlation matrix heat map. Options include \code{TRUE} (default) to
 #' generate the key without modification; \code{FALSE} to not include the key;
 #' or a list of options to alter the key appearance.
@@ -41,7 +43,10 @@
 
 #NOTE
 
-# list options to do for heatmap and key!!!
+# provisional list options done for heatmap.args and key.args!!!
+#      but will need tidying
+#      PLUS when done maybe for make local function so same
+#          can be used in other similar functions
 
 #' @rdname sp.cor
 #' @export
@@ -108,8 +113,8 @@
 
 sp_species_cor <- function(x, min.n = 3,
                            cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
-                           na.col = "#CFCFCF", heatmap = TRUE,
-                           key = TRUE, report = "silent"){
+                           na.col = "#CFCFCF", heatmap.args = TRUE,
+                           key.args = TRUE, report = "silent"){
   #if ref missing
   .x <- sp_dcast(x, wide="species")
 
@@ -172,7 +177,7 @@ sp_species_cor <- function(x, min.n = 3,
   #stackover suggests it is hard going modifying
   #https://stackoverflow.com/questions/29893630/r-draw-heatmap-with-clusters-but-hide-dendrogram
 
-  if((is.logical(heatmap) && heatmap) | (is.list(heatmap))){
+  if((is.logical(heatmap.args) && heatmap.args) | (is.list(heatmap.args))){
     .cols.max <- 300
     if(max(.cor, na.rm=TRUE) < 1){
       .z <- (1 - max(.cor, na.rm=TRUE))*100
@@ -184,34 +189,35 @@ sp_species_cor <- function(x, min.n = 3,
     if(any(is.na(.cor))){
       #plot when
       #.cor includes nas
-      heatmap(as.matrix(.tmp), Rowv = NA, Colv = NA,
-              #cexRow = 0.5, cexCol = 0.5, #axis size
-              col =cols[1:.cols.max],
-              scale="none")
+      .hm.cols <- cols[1:.cols.max]
+      .k.na <- na.col
 
-      if((is.logical(key) && key) | (is.list(key))){
-        rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
-                    ticks= -1:1, y=0.75,
-                    na.col = na.col)
-      }
     } else {
       #plot when
-      #.cor has no NAs
+      #.cor DOES NOT includes nas
       .cols.min <- 101
       if(min(.cor, na.rm=TRUE) < 1){
         .z <- (1 + min(.cor, na.rm=TRUE))*100
         .cols.min <- .cols.min + .z
-        print(.cols.min)
+        #print(.cols.min)
       }
-      heatmap(as.matrix(.tmp), Rowv = NA, Colv = NA,
-              #cexRow = 0.5, cexCol = 0.5, #axis size
-              col =cols[.cols.min:.cols.max],
-              scale="none")
-      if((is.logical(key) && key) | (is.list(key))){
-        rsp_col_key(c(-1,1), cols=cols[101:300], #type=1,
-                    ticks= -1:1, y=0.75,
-                    na.col = NA)
+      .hm.cols <- cols[.cols.min:.cols.max]
+      .k.na <- NA
+    }
+    .hm <- list(x = as.matrix(.tmp), Rowv = NA, Colv = NA,
+                col = .hm.cols, scale = "none")
+    if(is.list(heatmap.args)){
+      .hm[names(heatmap.args)] <- heatmap.args
+    }
+    do.call(heatmap, .hm)
+    if((is.logical(key.args) && key.args) | (is.list(key.args))){
+      .k <- list(key = c(-1,1), cols=cols[101:300],
+                 #type=1,
+                 ticks= -1:1, y=0.75, na.col = .k.na)
+      if(is.list(key.args)){
+        .k[names(key.args)] <- key.args
       }
+      do.call(rsp_col_key, .k)
     }
   }
 

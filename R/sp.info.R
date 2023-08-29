@@ -37,7 +37,7 @@
 #' \code{sp_profile_info} or \code{sp_profile_info} use partial matching.
 
 #' @return \code{sp_info} provides a brief version information report on the
-#' currently installed (re)SPECIATE data sets.
+#' currently installed (re)SPECIATE archive.
 #' @return \code{sp_profile_info} returns a \code{data.frame} of
 #' profile information, as a \code{respeciate} object.
 #' \code{sp_species_info} returns a \code{data.frame} of

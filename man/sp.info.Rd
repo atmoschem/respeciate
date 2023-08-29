@@ -33,7 +33,7 @@ search, by default \code{'keywords'} for \code{sp_profile_info} and
 }
 \value{
 \code{sp_info} provides a brief version information report on the
-currently installed (re)SPECIATE data sets.
+currently installed (re)SPECIATE archive.
 
 \code{sp_profile_info} returns a \code{data.frame} of
 profile information, as a \code{respeciate} object.

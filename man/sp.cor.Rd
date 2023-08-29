@@ -10,8 +10,8 @@ sp_species_cor(
   min.n = 3,
   cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
   na.col = "#CFCFCF",
-  heatmap = TRUE,
-  key = TRUE,
+  heatmap.args = TRUE,
+  key.args = TRUE,
   report = "silent"
 )
 }
@@ -35,12 +35,14 @@ equivalent to \code{\link{cm.colors}} output.}
 translated into a single color, used to color \code{NA}s when generating
 plots and color keys, default grey \code{"#CFCFCF"}.}
 
-\item{heatmap}{\code{logical} or \code{list}, heat map settings. Options
+\item{heatmap.args}{\code{logical} or \code{list}, heat map settings. Options
 include \code{TRUE} (default) to generate the heat map without modification;
 \code{FALSE} to not plot it; or a list of heat map options to alter the plot
-appearance.}
+default appearance. The plot, a standard heat map with the dendrograms
+removed, is generated using \code{\link{stat::heatmap}}, so see associated
+documentation for valid options.}
 
-\item{key}{\code{logical} or \code{list}, color key settings if plotting
+\item{key.args}{\code{logical} or \code{list}, color key settings if plotting
 the correlation matrix heat map. Options include \code{TRUE} (default) to
 generate the key without modification; \code{FALSE} to not include the key;
 or a list of options to alter the key appearance.}

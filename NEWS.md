@@ -1,9 +1,12 @@
 # Version 0.0 - Release Notes
 
-* [0.2.2] 
-    * released 2023-08-28 
+* [0.2.3] 
+    * released 2023-08-29 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species  
     * sp_profile update: references not included by default 
+    * sp_match: changed n to matches and added min.n (so more consistent 
+    other args)
+    * sp_species_cor: added heatmap and key list options 
 
 * [0.2.2] 
     * released 2023-08-24 
