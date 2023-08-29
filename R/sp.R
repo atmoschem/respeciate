@@ -9,9 +9,19 @@
 #' SPECIATE profile from the local (re)SPECIATE archive.
 #' @param code character or numeric, the SPECIATE code
 #' of the required profile (EPA SPECIATE term PROFILE_CODE).
+#' @param include.refs logical, include profile reference information when
+#' getting the requested profile(s) from the archive, default \code{FALSE}.
 #' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
-#' speciate profile.
+#' (re)SPECIATE profile.
+#' @note The option \code{include.refs} adds profile source reference
+#' information to the returned \code{respeciate} data set. The default option
+#' is to not include these because some profiles have several associated
+#' references and including these replicates records, once per reference.
+#' \code{respeciate} code is written to handle this but if you are developing
+#' own methods or code and include references in any profile build you may be
+#' biasing some analyses in favor of those multiple-reference profile unless
+#' you check and account such cases.
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
@@ -52,6 +62,9 @@
 #to think about
 #####################
 # not sure but I think something in the main build:
+#    (default; include.refs = FALSE)
+#    PROFILES>>SPECIES>>SPECIES_PROPERTIES
+#    (full build; include.refs = TRUE)
 #    PROFILES>>SPECIES>>SPECIES_PROPERTIES>>PROFILE_REFERENCE>>REFERENCES
 # is replicating profiles.
 #
@@ -60,7 +73,7 @@
 #   based on previous sp_profile but using data.table
 #   (0.1 version currently unexported sp_profile.old)
 
-sp_profile <- function(code) {
+sp_profile <- function(code, include.refs=FALSE) {
 
   # code currently handles:
   # respeciate.ref, numerics and characters characters
@@ -90,10 +103,12 @@ sp_profile <- function(code) {
               allow.cartesian=TRUE)
   df <- merge(df, SPECIES_PROPERTIES, by = "SPECIES_ID", all.y=FALSE,
               all.x=TRUE, allow.cartesian=TRUE)
-  df <- merge(df, PROFILE_REFERENCE, by = "PROFILE_CODE", all.y=FALSE,
-              all.x=TRUE, allow.cartesian=TRUE)
-  df <- merge(df, REFERENCES, by = "REF_Code", all.y=FALSE, all.x=TRUE,
-              allow.cartesian=TRUE)
+  if(include.refs){
+    df <- merge(df, PROFILE_REFERENCE, by = "PROFILE_CODE", all.y=FALSE,
+                all.x=TRUE, allow.cartesian=TRUE)
+    df <- merge(df, REFERENCES, by = "REF_Code", all.y=FALSE, all.x=TRUE,
+                allow.cartesian=TRUE)
+  }
   df <- df[order(df$PROFILE_CODE, decreasing = FALSE),]
 
   #build

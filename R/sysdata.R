@@ -14,7 +14,6 @@
 #'   \item{REFERENCES}{[to document]}
 #' }
 
-globalVariables(c("sysdata", "PROFILE_CODE")) #don't like this...
 
 #' @source [to doc]
 #' @references

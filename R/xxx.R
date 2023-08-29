@@ -14,8 +14,11 @@
 #        (not keeping unless we can get it to work better)
 
 
-utils::globalVariables(c("SPECIES_ID", "SPECIES_NAME", "PROFILE_NAME",
+utils::globalVariables(c("sysdata",
+                         "PROFILE_CODE", "PROFILE_NAME",
+                         "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
+
 ########################
 #to think about...
 #######################

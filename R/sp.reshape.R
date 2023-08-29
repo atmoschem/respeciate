@@ -28,11 +28,11 @@
 #' be slow and memory inefficient. So, \code{respeciate} uses the
 #' \code{\link[data.table:dcast]{data.table::dcast}}
 #' method. The \code{sp_dcast_species} method,
-#' applied using \code{wide='species'}, is effectively:
+#' applied using \code{widen='species'}, is effectively:
 #'
 #' \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
 #'
-#' And, the alternative \code{wide='profile'}:
+#' And, the alternative \code{widen='profile'}:
 #'
 #' \code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
 #'
@@ -89,7 +89,7 @@ sp_dcast <- function(x, widen = "species"){
 
   xx <- as.data.table(x)
 
-  #stop if wide option not known.
+  #stop if widen option not known.
   if(!widen %in% c("species", "profile")){
     stop("unknown wide option")
   }

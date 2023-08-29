@@ -50,11 +50,11 @@ Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 be slow and memory inefficient. So, \code{respeciate} uses the
 \code{\link[data.table:dcast]{data.table::dcast}}
 method. The \code{sp_dcast_species} method,
-applied using \code{wide='species'}, is effectively:
+applied using \code{widen='species'}, is effectively:
 
 \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
 
-And, the alternative \code{wide='profile'}:
+And, the alternative \code{widen='profile'}:
 
 \code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
 

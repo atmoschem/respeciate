@@ -35,7 +35,7 @@ equivalent to \code{\link{cm.colors}} output.}
 translated into a single color, used to color \code{NA}s when generating
 plots and color keys, default grey \code{"#CFCFCF"}.}
 
-\item{heatmap}{\code{logical} or \code{list}, heatmap settings. Options
+\item{heatmap}{\code{logical} or \code{list}, heat map settings. Options
 include \code{TRUE} (default) to generate the heat map without modification;
 \code{FALSE} to not plot it; or a list of heat map options to alter the plot
 appearance.}

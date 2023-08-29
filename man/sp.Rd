@@ -5,22 +5,35 @@
 \alias{sp_profile}
 \title{sp_ functions}
 \usage{
-sp_profile(code)
+sp_profile(code, include.refs = FALSE)
 }
 \arguments{
 \item{code}{character or numeric, the SPECIATE code
 of the required profile (EPA SPECIATE term PROFILE_CODE).}
+
+\item{include.refs}{logical, include profile reference information when
+getting the requested profile(s) from the archive, default \code{FALSE}.}
 }
 \value{
 \code{sp_profile} returns a object of
 \code{respeciate} class, a \code{data.frame} containing a
-speciate profile.
+(re)SPECIATE profile.
 }
 \description{
 sp function to get profiles from the R (re)SPECIATE archive
 
 \code{\link{sp_profile}} extracts a
 SPECIATE profile from the local (re)SPECIATE archive.
+}
+\note{
+The option \code{include.refs} adds profile source reference
+information to the returned \code{respeciate} data set. The default option
+is to not include these because some profiles have several associated
+references and including these replicates records, once per reference.
+\code{respeciate} code is written to handle this but if you are developing
+own methods or code and include references in any profile build you may be
+biasing some analyses in favor of those multiple-reference profile unless
+you check and account such cases.
 }
 \examples{
 \dontrun{
