@@ -5,7 +5,7 @@
 #' @name sysdata
 #' @description splat_packed data [to be described]
 #'
-#' @format A ( 5  long) 'list' object
+#' @format A (5  long) 'list' object
 #' \describe{
 #'   \item{PROFILES}{[to document]}
 #'   \item{SPECIES}{[to document]}
@@ -14,6 +14,13 @@
 #'   \item{REFERENCES}{[to document]}
 #' }
 
+##################################
+##################################
+## IMPORTANT
+##################################
+##################################
+
+# this documentation needs doing
 
 #' @source [to doc]
 #' @references

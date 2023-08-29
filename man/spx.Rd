@@ -23,12 +23,4 @@ profiles.}
 \description{
 \code{spx_} functions generate a vector of assignment
 terms and can be used to subset or condition a supplied
-\code{respeciate} object. Most commonly, the \code{spx_} functions
-return a logical vector of length = nrow(x), identifying
-species of interest as \code{TRUE}. For example:
-
-\code{subset(x, spx_n_alkane(x))}
-
-... to extract just n-alkane records from \code{respeciate} object
-\code{x}.
 }

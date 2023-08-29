@@ -3,7 +3,7 @@
 * [0.2.2] 
     * released 2023-08-28 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species  
-    * 
+    * sp_profile update: references not included by default 
 
 * [0.2.2] 
     * released 2023-08-24 

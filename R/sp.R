@@ -114,6 +114,9 @@ sp_profile <- function(code, include.refs=FALSE) {
   #build
   #note: currently adding .value in rsp_build_respeciate
   #      could do it here?
+  #          leaving there for now... because we would
+  #          still have to do it there for self-build or
+  #          imported profiles...
   df <- rsp_build_respeciate(as.data.frame(df))
   return(df)
 }

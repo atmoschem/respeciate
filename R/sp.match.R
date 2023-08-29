@@ -2,22 +2,23 @@
 #' @title Find nearest matches from reference set of profiles
 #' @aliases sp_match_profile
 
-#' @description sp_profile functions identify nearest matches in a reference
-#' set of (re)SPECIATE profiles for a supplied species profile.
-
-#' @description \code{sp_match_profile} attempts to identify the nearest
-#' matches to a supplied profile from a reference set of (re)SPECIATE profiles
-#' on the basis of correlation coefficient.
+#' @description \code{sp_match_profile} compares a supplied species
+#' (re)SPECIATE profile and a reference set of supplied profiles and
+#' attempt to identify nearest matches on the basis of correlation
+#' coefficient.
 #' @param x A \code{respeciate} object, a \code{data.frame} containing a
 #' species profile to be compared with profiles in \code{ref}.
 #' @param ref A \code{respeciate} object, a \code{data.frame} containing a
 #' multiple species profiles, to be used as reference library when identifying
-#' matches with \code{x}.
-#' @param n Numeric (default 10), the maximum number of profile matches to
+#' nearest matches for \code{x}.
+#' @param matches Numeric (default 10), the maximum number of profile matches to
 #' report.
 #' @param rescale Numeric (default 5), the data scaling method to apply before
-#' comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
-#' \code{\link{sp_rescale_species}}.
+#' comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
+#' \code{\link{sp_rescale}}.
+#' @param min.n \code{numeric} (default 6), the minimum number of paired
+#' species measurements in two profiles required for a match to be assessed.
+#' See also \code{\link{sp_species_cor}}.
 #' @param test.x Logical (default FALSE). The match process self-tests by adding
 #' \code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
 #' \code{test.x} to \code{TRUE} retains this as an extra record.
@@ -55,6 +56,11 @@
 #to think about
 #########################
 
+#match is giving warning
+#   In min(WEIGHT_PERCENT, na.rm = TRUE) :
+#   no non-missing arguments to min; returning Inf
+#       when (I guess) nothing there to compare...
+
 #default for ref
 #    using sp_profile(sp_find_profile("composite", by="profile_name"))
 #        in example.
@@ -91,8 +97,8 @@
 #                  could also do this earlier if min.bin set in formals
 #                     but might need to rethink n, min.bin, etc???
 
-sp_match_profile <- function(x, ref, n=10, rescale=5,
-                             test.x=FALSE){
+sp_match_profile <- function(x, ref, matches=10, rescale=5,
+                             min.n=6, test.x=FALSE){
 
   #######################
   #if ref missing
@@ -112,7 +118,7 @@ sp_match_profile <- function(x, ref, n=10, rescale=5,
   x$PROFILE_CODE <- "test"
   x$PROFILE_NAME <- paste("test>", x$PROFILE_NAME, sep="")
   if(test.x){
-    n <- n + 1
+    matches <- matches + 1
   }
 
   x <- as.data.table(x)
@@ -196,15 +202,14 @@ sp_match_profile <- function(x, ref, n=10, rescale=5,
   #          so only one pair or (all xs same and all ys sames)???
 
   #########################
-  #min bin
+  #min n
   #########################
   #to do
-  #   currently hard coded in f
-  #   as 6
-  #   if/when we deal with this stop message will need to be updated
+  #   compare this and code in sp_species_cor
+  #   if/when we deal with this stop message this code may need to be updated
 
   f <- function(x) {
-    if(length(x[!is.na(x) & !is.na(.test)])>6){
+    if(length(x[!is.na(x) & !is.na(.test)])>min.n){
       suppressWarnings(cor(x, .test, use ="pairwise.complete.obs"))
     } else {
       NA
@@ -222,8 +227,8 @@ sp_match_profile <- function(x, ref, n=10, rescale=5,
 
   .out <- as.data.frame(.out[1, -1:-2])
   .out <- sort(unlist(.out), decreasing = TRUE)
-  if(length(.out) > n){
-    .out <- .out[1:n]
+  if(length(.out) > matches){
+    .out <- .out[1:matches]
   }
 
   #could be better way to do next bit
@@ -234,8 +239,8 @@ sp_match_profile <- function(x, ref, n=10, rescale=5,
 
   if(length(.out)<1){
     #see notes....
-    #sometimes this is because there are less than min.bin species in the x profile
-    stop("sp_match_profile> No (6 point) matches for x", call. = FALSE)
+    #sometimes this is because there are less than min.n species in the x profile
+    stop("sp_match_profile> No (", min.n, " point) matches for x", call. = FALSE)
   }
 
   .tmp <- names(.out)
@@ -256,7 +261,7 @@ sp_match_profile <- function(x, ref, n=10, rescale=5,
     if("test" %in% x$PROFILE_CODE){
       .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
     } else {
-      .out <- .out[1:(n-1),]
+      .out <- .out[1:(matches-1),]
     }
   }
 

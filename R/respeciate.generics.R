@@ -74,10 +74,6 @@ print.respeciate <- function(x, n = NULL, ...){
 
 
 
-
-
-
-
 #' @rdname respeciate.generics
 #' @method plot respeciate
 #' @export
@@ -88,18 +84,18 @@ print.respeciate <- function(x, n = NULL, ...){
 #like....
 #better handling of factor axis labels
 #better handling of axes and legend font sizes
-#    (I think previous may have handled this a little better)
+#    (I think previous code may have handled this a little better)
 #    (but not perfectly...)
 #like horiz=total scales to be other way around?
-#    could also mean rethinking the legend position for
+#    could also mean rethinking the legend position for this?
 
 ############################
 #added warning/handling for
 #  duplicate species in profiles (handling merge/mean)
 #  duplicated profile names (handling make unique)
-#but might want data.table or dplyr
-#  to handle test because it'll really slow
-#  plots down
+
+#test is now set up to use data.table
+
 
 
 plot.respeciate <-

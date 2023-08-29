@@ -2,11 +2,16 @@
 % Please edit documentation in R/sp.rescale.R
 \name{sp.rescale}
 \alias{sp.rescale}
+\alias{sp_rescale}
 \alias{sp_rescale_profile}
 \alias{sp_rescale_species}
 \title{(re)SPECIATE profile rescaling functions}
 \usage{
-sp_rescale_profile(x, method = 1)
+sp_rescale(x, method = 2, by = "species")
+
+sp_rescale_profile(x, method = 1, by = "profile")
+
+sp_rescale_species(x, method = 2)
 
 sp_rescale_species(x, method = 2)
 }
@@ -22,18 +27,23 @@ profiles.}
   5 \code{x/max(x)}.
 The alternative 0 returns the records to their original
 values.}
+
+\item{by}{character, when rescaling \code{x} with
+\code{\link{sp_rescale}}, the data type to group and rescale,
+currently \code{'species'} (default) or \code{'profile'}.}
 }
 \value{
-\code{sp_rescale_profile} and \code{sp_rescale_species} return the
+\code{sp_rescale} and \code{sp_rescale} return the
 \code{respeciate} profile with the percentage weight records rescaled using
-the requested method.
+the requested method. See Note.
 }
 \description{
 Functions for rescaling
 
-\code{sp_rescale_profile} and \code{sp_rescale_species} rescale
-the percentage weight records in a supplied (re)SPECIATE profile dataset by
-profile and species subsets, respectively.
+\code{sp_rescale} rescales the percentage weight records in
+a supplied (re)SPECIATE profile data set. This can be by profile or species
+subsets, and \code{sp_rescale_profile} and \code{sp_rescale_species} provide
+short-cuts to these options.
 }
 \note{
 Data sometimes needs to be normalised, e.g. when applying some

@@ -1,12 +1,13 @@
 #' @name sp.rescale
 #' @title (re)SPECIATE profile rescaling functions
-#' @aliases sp_rescale_profile sp_rescale_species
+#' @aliases sp_rescale sp_rescale_profile sp_rescale_species
 
 #' @description Functions for rescaling
 
-#' @description \code{sp_rescale_profile} and \code{sp_rescale_species} rescale
-#' the percentage weight records in a supplied (re)SPECIATE profile dataset by
-#' profile and species subsets, respectively.
+#' @description \code{sp_rescale} rescales the percentage weight records in
+#' a supplied (re)SPECIATE profile data set. This can be by profile or species
+#' subsets, and \code{sp_rescale_profile} and \code{sp_rescale_species} provide
+#' short-cuts to these options.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param method numeric, the rescaling method to apply:
@@ -17,9 +18,12 @@
 #'   5 \code{x/max(x)}.
 #' The alternative 0 returns the records to their original
 #' values.
-#' @return \code{sp_rescale_profile} and \code{sp_rescale_species} return the
+#' @param by character, when rescaling \code{x} with
+#' \code{\link{sp_rescale}}, the data type to group and rescale,
+#' currently \code{'species'} (default) or \code{'profile'}.
+#' @return \code{sp_rescale} and \code{sp_rescale} return the
 #' \code{respeciate} profile with the percentage weight records rescaled using
-#' the requested method.
+#' the requested method. See Note.
 #' @note Data sometimes needs to be normalised, e.g. when applying some
 #' statistical analyses. Rather than modify the EPA records in the
 #' \code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
@@ -42,14 +46,6 @@
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
 
-# may need to think about additional local scaling
-#      e.g. within in profile [species conc]/[sum of all species concs]
-#            currently testing doing this with sp_rescale_profile and
-#                  sp_rescale_species versions of function
-#                  this duplicates code, so might want to simplify that?
-
-# not actually sure anyone would anything but first rescale for profiles...
-
 
 ######################
 #rescale by profile
@@ -59,11 +55,15 @@
 #issues
 ############################
 
-#at the moment this is just sp_rescale_species
-#    BUT for profile(s), and default 5
+#think about...
+
+# maybe rethink options for sp_rescale() when user sets by but NOT method...
+
+# not actually sure anyone would want anything but method 1 for profiles...
 
 
-sp_rescale_profile <- function(x, method = 1){
+
+sp_rescale <- function(x, method = 2, by = "species"){
 
   #################################
   #check x is a respeciate object??
@@ -84,22 +84,47 @@ sp_rescale_profile <- function(x, method = 1){
   if(length(test)>0){
     xx <- xx[, (test) := NULL]
   }
-  #and recalculate
-  out <- xx[,
-            .(#SPECIES_NAME = SPECIES_NAME[1],
-              #SPEC_MW = SPEC_MW[1],
-              .min = min(WEIGHT_PERCENT, na.rm = TRUE),
-              .max = max(WEIGHT_PERCENT, na.rm = TRUE),
-              .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
-              .mean = mean(WEIGHT_PERCENT, na.rm = TRUE),
-              .na = length(WEIGHT_PERCENT[is.na(WEIGHT_PERCENT)]),
-              .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
-              .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
-            ),
-            by=.(PROFILE_CODE)]
 
-  out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
-               allow.cartesian=TRUE)
+  #and recalculate
+
+  #stop if by option not known.
+  if(!by %in% c("species", "profile")){
+    stop("unknown by option")
+  }
+
+  if(by == "profile"){
+    out <- xx[,
+              .(#SPECIES_NAME = SPECIES_NAME[1],
+                #SPEC_MW = SPEC_MW[1],
+                .min = min(WEIGHT_PERCENT, na.rm = TRUE),
+                .max = max(WEIGHT_PERCENT, na.rm = TRUE),
+                .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
+                .mean = mean(WEIGHT_PERCENT, na.rm = TRUE),
+                .na = length(WEIGHT_PERCENT[is.na(WEIGHT_PERCENT)]),
+                .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
+                .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
+              ),
+              by=.(PROFILE_CODE)]
+
+    out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+                 allow.cartesian=TRUE)
+  }
+  if(by == "species"){
+    out <- xx[,
+              .(.min = min(WEIGHT_PERCENT, na.rm = TRUE),
+                .max = max(WEIGHT_PERCENT, na.rm = TRUE),
+                .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
+                .mean = mean(WEIGHT_PERCENT, na.rm = TRUE),
+                .na = length(WEIGHT_PERCENT[is.na(WEIGHT_PERCENT)]),
+                .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
+                .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
+              ),
+              by=.(SPECIES_ID)]
+
+    out <- merge(xx, out, by="SPECIES_ID", all.x=TRUE, all.y=FALSE,
+                 allow.cartesian=TRUE)
+  }
+
 
   #################
   #need to decide how to handle this
@@ -144,7 +169,6 @@ sp_rescale_profile <- function(x, method = 1){
     out$.value<- out$WEIGHT_PERCENT / out$.max
   }
 
-
   #output
   #
   out <- as.data.frame(out)
@@ -153,7 +177,19 @@ sp_rescale_profile <- function(x, method = 1){
 }
 
 
+#' @rdname sp.rescale
+#' @export
 
+sp_rescale_profile <- function(x, method = 1, by ="profile"){
+  sp_rescale(x=x, method=method, by=by)
+}
+
+#' @rdname sp.rescale
+#' @export
+
+sp_rescale_species <- function(x, method = 2, by ="species"){
+  sp_rescale(x=x, method=method, by=by)
+}
 
 
 ######################

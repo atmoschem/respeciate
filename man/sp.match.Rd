@@ -5,7 +5,7 @@
 \alias{sp_match_profile}
 \title{Find nearest matches from reference set of profiles}
 \usage{
-sp_match_profile(x, ref, n = 10, rescale = 5, test.x = FALSE)
+sp_match_profile(x, ref, matches = 10, rescale = 5, test.x = FALSE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} containing a
@@ -13,18 +13,22 @@ species profile to be compared with profiles in \code{ref}.}
 
 \item{ref}{A \code{respeciate} object, a \code{data.frame} containing a
 multiple species profiles, to be used as reference library when identifying
-matches with \code{x}.}
+nearest matches for \code{x}.}
 
-\item{n}{Numeric (default 10), the maximum number of profile matches to
+\item{matches}{Numeric (default 10), the maximum number of profile matches to
 report.}
 
 \item{rescale}{Numeric (default 5), the data scaling method to apply before
-comparing \code{x} and profiles in \code{ref}: options 0 to 4 handled by
-\code{\link{sp_rescale_species}}.}
+comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
+\code{\link{sp_rescale}}.}
 
 \item{test.x}{Logical (default FALSE). The match process self-tests by adding
 \code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
 \code{test.x} to \code{TRUE} retains this as an extra record.}
+
+\item{min.n}{\code{numeric} (default 6), the minimum number of paired
+species measurements in two profiles required for a match to be assessed.
+See also \code{\link{sp_species_cor}}.}
 }
 \value{
 \code{sp_match_profile} returns a fit report: a \code{data.frame} of
@@ -32,10 +36,8 @@ up to \code{n} fit reports for the nearest matches to \code{x} from the
 reference profile data set, \code{ref}.
 }
 \description{
-sp_profile functions identify nearest matches in a reference
-set of (re)SPECIATE profiles for a supplied species profile.
-
-\code{sp_match_profile} attempts to identify the nearest
-matches to a supplied profile from a reference set of (re)SPECIATE profiles
-on the basis of correlation coefficient.
+\code{sp_match_profile} compares a supplied species
+(re)SPECIATE profile and a reference set of supplied profiles and
+attempt to identify nearest matches on the basis of correlation
+coefficient.
 }

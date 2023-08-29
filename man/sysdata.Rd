@@ -5,7 +5,7 @@
 \alias{sysdata}
 \title{sysdata}
 \format{
-A ( 5  long) 'list' object
+A (5  long) 'list' object
 \describe{
   \item{PROFILES}{[to document]}
   \item{SPECIES}{[to document]}

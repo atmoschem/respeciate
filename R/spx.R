@@ -5,6 +5,8 @@
 
 #' @description \code{spx_} functions generate a vector of assignment
 #' terms and can be used to subset or condition a supplied
+#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' profiles.
 #' \code{respeciate} object. Most commonly, the \code{spx_} functions
 #' return a logical vector of length = nrow(x), identifying
 #' species of interest as \code{TRUE}. For example:
@@ -27,19 +29,25 @@
 
 #still not sure this is best way of doing this
 #   but it did not seem to be slowing things down
-#   and other approaches seems likely to got messy
+#   and other approaches seems likely to get messy
 #   really quick...
 
 # others to do????
 
-# the BTEXs  - doing
+# the BTEXs  - doing/testing
 
 # others to consider???
+
 #     PAHs different groups
 #     VOCs HC network.
 #     elementals???
 #     monitoring network relevant subsets of species
 
+# special cases???
+
+#     spx_ref(x, ref, by="")
+#           where x is respeciate object, ref is a reference
+#           by is column in ref; case is x$by %in% unique(ref$by)
 
 
 
@@ -131,15 +139,19 @@ spx_n_alkane <- function(x){
 #####################
 
 #might need more thinking about
+
+#    toluene is sometimes reported as a mixture of toulene and another compound
+#    maybe not separated by GC???
+
 #    ethyl benzene and xylenes might have several names
 #    subset(a, a$Molecular.Formula=="C8H10")
 
 #    are xylenes in as 1,2-, 1,3- and 1,4-dimethyl benzene???
 #    are spaces an issue???
 
-
 #    if several names for btex, might need to think about how to
 #    sample (CAS? etc), merge and compare???
+
 
 
 #tests

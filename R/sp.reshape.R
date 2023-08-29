@@ -91,7 +91,7 @@ sp_dcast <- function(x, widen = "species"){
 
   #stop if widen option not known.
   if(!widen %in% c("species", "profile")){
-    stop("unknown wide option")
+    stop("unknown widen option")
   }
   if(widen=="species"){
     out <- dcast(xx,
