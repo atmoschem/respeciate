@@ -166,13 +166,6 @@ sp_species_cor <- function(x, min.n = 3,
   #.cor[is.na(.cor)] <- -0.5
   #.cor <- .cor/2
 
-  #output
-  ####################
-  #currently aiming for
-  #   report (invisible), plot or both
-  #   report class data.frame
-  #   output plot only does not mean anything...
-
   #NB: plot is heatmap without the dendrograms
   #stackover suggests it is hard going modifying
   #https://stackoverflow.com/questions/29893630/r-draw-heatmap-with-clusters-but-hide-dendrogram
@@ -222,6 +215,14 @@ sp_species_cor <- function(x, min.n = 3,
   }
 
   #report handling
+
+  #output
+  ####################
+  #currently aiming for
+  #   report (invisible), plot or both
+  #   report class data.frame
+  #   output plot only does not mean anything...
+
   if((is.logical(report) && report) | (is.character(report))){
     if(is.character(report) && report=="silent"){
       return(invisible(.cor))
