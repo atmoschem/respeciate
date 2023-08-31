@@ -12,10 +12,10 @@ sp_pad(x, pad = "species", drop.nas = TRUE)
 profiles.}
 
 \item{pad}{character, type of meta data padding, current options
-\code{'profile'}, \code{species} or \code{weight}.}
+\code{'profile'}, \code{'species'} or \code{'weight'}.}
 
-\item{drop.nas}{logical, dicard any rows where \code{WEIGHT_PERCENT} is
-\code{NA}}
+\item{drop.nas}{logical, discard any rows where \code{WEIGHT_PERCENT} is
+\code{NA}, default \code{TRUE}.}
 }
 \value{
 \code{sp_pad} returns \code{x}, with requested additional profile

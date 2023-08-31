@@ -1,8 +1,10 @@
 # Version 0.0 - Release Notes
 
 * [0.2.3] 
-    * released 2023-08-29 
-    * added functions: sp_rescale_species, sp_dcast, sp_dcast_species  
+    * released 2023-08-31 
+    * added functions: sp_rescale_species, sp_dcast, sp_dcast_species 
+    sp_pad
+    * added draft spx_ quick profile build  functions 
     * sp_profile update: references not included by default 
     * sp_match: changed n to matches and added min.n (so more consistent 
     other args)

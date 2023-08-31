@@ -1,27 +1,40 @@
 #' @name spx
 #' @title spx_ functions for grouping and subsetting
-#' @aliases spx_n_alkane spx_btex
+#' @aliases spx_ spx_copy spx_n_alkane spx_btex
 
 
 #' @description \code{spx_} functions generate a vector of assignment
-#' terms and can be used to subset or condition a supplied
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
-#' profiles.
-#' \code{respeciate} object. Most commonly, the \code{spx_} functions
-#' return a logical vector of length = nrow(x), identifying
-#' species of interest as \code{TRUE}. For example:
+#' terms and can be used to subset or condition a supplied re(SPECIATE)
+#' \code{data.frame}.
+#'
+#' Most commonly, the \code{spx_} functions accept a single input, a
+#' re(SPECIATE) \code{data.frame} and return a logical vector of
+#' length \code{nrow(x)}, identifying species of interest as
+#' \code{TRUE}. So, for example, they can be used when
+#' \code{\link{subset}}ting in the form:
 #'
 #' \code{subset(x, spx_n_alkane(x))}
 #'
-#' ... to extract just n-alkane records from \code{respeciate} object
+#' ... to extract just n-alkane records from a \code{respeciate} object
 #' \code{x}.
+#'
+#' However, some accept additional arguments. For example, \code{spx_copy}
+#' also accepts a reference data set, \code{ref}, and a column identifier,
+#' \code{by}, and tests \code{x$by \%in\% unique(ref$by)}.
 #'
 #' @param x a \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
-#' @return \code{spx_n_alkane} identifies C1 to C40 n-alkanes.
+#' @param ref (\code{spx_copy} only) a second \code{respeciate} object, to
+#' be used as reference when testing \code{x}.
+#' @param by (\code{spx_copy} only) character, the name of the column
+#' in \code{ref} to copy when testing \code{x}.
+#' @return \code{spx_copy} outputs can be modified but, by default, it
+#' identifies all species in the supplied reference data set.
+#'
+#' \code{spx_n_alkane} identifies C1 to C40 n-alkanes.
 #'
 #' \code{spx_btex} identifies the BTEX group of aromatic hydrocarbons
-#' (benzene, toulene, ethylbenzene, and M-, O- and P-xylene).
+#' (benzene, toluene, ethyl benzene, and M-, O- and P-xylene).
 
 #############################
 #NOTE
@@ -50,8 +63,21 @@
 #           by is column in ref; case is x$by %in% unique(ref$by)
 
 
+#' @rdname spx
+#' @export
 
+spx_copy <- function(x, ref = NULL, by="species_id"){
 
+  #maybe warn???
+  if(is.null(ref)){
+    ref <- x
+  }
+  names(x) <- tolower(names(x))
+  names(ref) <- tolower(names(ref))
+  .tmp <- unique(ref[, by])
+  x[, by] %in% .tmp
+
+}
 
 #####################
 #spx_n_alkanes
