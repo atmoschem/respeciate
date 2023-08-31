@@ -217,14 +217,17 @@ sp_melt_wide <- function(x, pad = TRUE){
 
   out <- melt(xx, id.vars = .id.vars)
   names(out)[names(out)=="variable"] <- .long
-  names(out)[names(out)=="value"] <- "WEIGHT_PERCENT"
-  out$.value <- out$WEIGHT_PERCENT
+  names(out)[names(out)=="value"] <- ".value"
+
+  #out$WEIGHT_PERCENT <- out$.value
 
   #merge if padding
   #####################
   #might not be best way of doing it
-  #maybe a 'pad what is missing'
-  #
+  #could also think about replacing this with sp_pad or similar???
+  #     first need to standardise method, decide where to drop.nas,
+  #        finalise formals, decide best data.table methods, etc
+
   if(pad){
     PROFILES <- as.data.table(sysdata$PROFILES)
     SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
@@ -242,11 +245,24 @@ sp_melt_wide <- function(x, pad = TRUE){
       out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
                    all.x=TRUE, allow.cartesian=TRUE)
     }
+    #to get weight_percentage etc
+    SPECIES <- as.data.table(sysdata$SPECIES)
+    .tmp <- intersect(names(out), names(SPECIES))
+    print(.tmp)
+    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
+                 all.x=TRUE, allow.cartesian=TRUE)
+  } else {
+    #not great but...
+    #if not padding WEIGHT_PERCENT has to be .value
+    out$WEIGHT_PERCENT <- out$.value
   }
-
+  #drop.nas...
+  out <- out[!is.na(out$WEIGHT_PERCENT),]
   out <- as.data.frame(out)
-  #class(out) <- cls
-  out
+
+
+  rsp_build_respeciate(out)
+
 }
 
 
