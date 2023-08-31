@@ -39,7 +39,7 @@ plots and color keys, default grey \code{"#CFCFCF"}.}
 include \code{TRUE} (default) to generate the heat map without modification;
 \code{FALSE} to not plot it; or a list of heat map options to alter the plot
 default appearance. The plot, a standard heat map with the dendrograms
-removed, is generated using \code{\link{stat::heatmap}}, so see associated
+removed, is generated using \code{\link[stats]{heatmap}}, so see associated
 documentation for valid options.}
 
 \item{key.args}{\code{logical} or \code{list}, color key settings if plotting

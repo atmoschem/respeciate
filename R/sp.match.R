@@ -164,7 +164,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   ##################
 
   #testing: using sp_profile_dcast
-  #         code is set up for sp_profile_dcast(.tmp, wide="profile")
+  #         code is set up for sp_profile_dcast(.tmp, widen="profile")
 
   ##previous code
   #.tmp <- dcast(.tmp,
@@ -173,7 +173,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #              na.rm=TRUE,
   #              value.var = ".value")
 
-  .tmp <- as.data.table(sp_dcast(.tmp, wide="profile"))
+  .tmp <- as.data.table(sp_dcast(.tmp, widen="profile"))
 
   #nb: need the as.data.table() because sp_profile_dcast
   #    currently returns data.frame

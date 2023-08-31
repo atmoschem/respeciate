@@ -26,7 +26,7 @@
 #' include \code{TRUE} (default) to generate the heat map without modification;
 #' \code{FALSE} to not plot it; or a list of heat map options to alter the plot
 #' default appearance. The plot, a standard heat map with the dendrograms
-#' removed, is generated using \code{\link{stat::heatmap}}, so see associated
+#' removed, is generated using \code{\link[stats]{heatmap}}, so see associated
 #' documentation for valid options.
 #' @param key.args \code{logical} or \code{list}, color key settings if plotting
 #' the correlation matrix heat map. Options include \code{TRUE} (default) to
@@ -116,7 +116,7 @@ sp_species_cor <- function(x, min.n = 3,
                            na.col = "#CFCFCF", heatmap.args = TRUE,
                            key.args = TRUE, report = "silent"){
   #if ref missing
-  .x <- sp_dcast(x, wide="species")
+  .x <- sp_dcast(x, widen="species")
 
   #no point doing any have less than min.n values?
   .test <- apply(.x, 2, function(x) length(.x[!is.na(x)]))
