@@ -17,9 +17,11 @@
 #' @param widen character, when widening \code{x} with
 #' \code{\link{sp_dcast}}, the data type to \code{dcast},
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
-#' @param pad logical, when \code{melt}ing a previously widened data set,
-#' should \code{x} be re-populated with species and/or profile meta-data,
-#' discarded when widening.
+#' @param pad logical, when \code{melt}ing a previously widened
+#' data set, should \code{x} be re-populated with species and/or profile
+#' meta-data, discarded when widening. This is currently handled by
+#' \code{\link{sp_pad}} applying standard settings, so reference meta-data
+#' is not included.
 #' @return \code{sp_dcast} returns the wide form of the supplied
 #' \code{respeciate} profile. \code{sp_melt_wide}
 #' returns the (standard) long form of a previously widened profile.
@@ -224,37 +226,39 @@ sp_melt_wide <- function(x, pad = TRUE){
   #merge if padding
   #####################
   #might not be best way of doing it
-  #could also think about replacing this with sp_pad or similar???
+  #testing sp_pad as an alternative to previous remarked code???
   #     first need to standardise method, decide where to drop.nas,
   #        finalise formals, decide best data.table methods, etc
 
   if(pad){
-    PROFILES <- as.data.table(sysdata$PROFILES)
-    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
-    if(.long=="PROFILE_CODE"){
-      out <- merge(out, PROFILES, by = .long, all.y=FALSE,
-                   all.x=TRUE, allow.cartesian=TRUE)
-      .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
-      out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
-                   all.x=TRUE, allow.cartesian=TRUE)
-    } else {
-      #.long must be "SPECIES_NAME"
-      out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
-                  all.x=TRUE, allow.cartesian=TRUE)
-      .tmp <- intersect(names(out), names(PROFILES))
-      out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
-                   all.x=TRUE, allow.cartesian=TRUE)
-    }
-    #to get weight_percentage etc
-    SPECIES <- as.data.table(sysdata$SPECIES)
-    .tmp <- intersect(names(out), names(SPECIES))
-    print(.tmp)
-    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
-                 all.x=TRUE, allow.cartesian=TRUE)
-  } else {
-    #not great but...
-    #if not padding WEIGHT_PERCENT has to be .value
-    out$WEIGHT_PERCENT <- out$.value
+    out <- sp_pad(out)
+
+#    PROFILES <- as.data.table(sysdata$PROFILES)
+#    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
+#    if(.long=="PROFILE_CODE"){
+#      out <- merge(out, PROFILES, by = .long, all.y=FALSE,
+#                   all.x=TRUE, allow.cartesian=TRUE)
+#      .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
+#      out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
+#                   all.x=TRUE, allow.cartesian=TRUE)
+#    } else {
+#      #.long must be "SPECIES_NAME"
+#      out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
+#                  all.x=TRUE, allow.cartesian=TRUE)
+#      .tmp <- intersect(names(out), names(PROFILES))
+#      out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
+#                   all.x=TRUE, allow.cartesian=TRUE)
+#    }
+#    #to get weight_percentage etc
+#    SPECIES <- as.data.table(sysdata$SPECIES)
+#    .tmp <- intersect(names(out), names(SPECIES))
+#    print(.tmp)
+#    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
+#                 all.x=TRUE, allow.cartesian=TRUE)
+#  } else {
+#    #not great but...
+#    #if not padding WEIGHT_PERCENT has to be .value
+#    out$WEIGHT_PERCENT <- out$.value
   }
   #drop.nas...
   out <- out[!is.na(out$WEIGHT_PERCENT),]

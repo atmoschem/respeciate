@@ -9,7 +9,9 @@
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param pad character, type of meta data padding, current options
-#' \code{'profile'}, \code{'species'} or \code{'weight'}.
+#' \code{'profile'}, \code{'species'}, \code{'weight'}, \code{reference},
+#' \code{'standard'} (default; all but \code{'reference'}) and \code{'all'}
+#' ('all').
 #' @param drop.nas logical, discard any rows where \code{WEIGHT_PERCENT} is
 #' \code{NA}, default \code{TRUE}.
 #' @return \code{sp_pad} returns \code{x}, with requested additional profile
@@ -34,12 +36,17 @@
 ## think about
 
 # improving the respeciate class handling
-# dcast -> melt -> out
+# in -> dcast -> melt -> out
 
 #I do not think this needs the pad argument!!!!
 #    or we add an 'all' default???
 #        I think it just needs to check with common columns
 #            and merge by those
+#   testing this with current version of sp_pad
+#        true default is sp_pad(x, pad="standard")
+#            SO refs would be lost with dcast then melt
+#        could allow pad as logical or character
+
 
 # then a reset function would just remove a column and re-pad???
 
@@ -73,8 +80,89 @@
 #x <- sp_pad(c)
 
 
+sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
 
-sp_pad <- function(x, pad = "species", drop.nas = TRUE){
+  #tidy x
+  x <- rsp_tidy_profile(x)
+  #save class
+  .cls <- class(x)
+  out <- as.data.table(x)
+
+  #profile
+  if(any(c("profile", "profiles", "standard", "all") %in% tolower(pad))){
+    PROFILES <- as.data.table(sysdata$PROFILES)
+    .tmp <- intersect(names(out), names(PROFILES))
+    if(length(.tmp)>0){
+      out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+  }
+
+  #species
+  if(any(c("species", "standard", "all") %in% tolower(pad))){
+    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
+    .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
+    if(length(.tmp) >0){
+      out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+  }
+
+  #species weights
+  if(any(c("weight", "weights", "standard", "all") %in% tolower(pad))){
+    SPECIES <- as.data.table(sysdata$SPECIES)
+    .tmp <- intersect(names(out), names(SPECIES))
+    if(length(.tmp) >0){
+      out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+  }
+
+  #references
+  if(any(c("reference", "references", "all") %in% tolower(pad))){
+    PROFILE_REFERENCE <- as.data.table(sysdata$PROFILE_REFERENCE)
+    REFERENCES <- as.data.table(sysdata$REFERENCES)
+    .tmp <- intersect(names(out), names(PROFILE_REFERENCE))
+    if(length(.tmp) >0){
+      out <- merge(out, PROFILE_REFERENCE, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+    .tmp <- intersect(names(out), names(REFERENCES))
+    if(length(.tmp) >0){
+      out <- merge(out, REFERENCES, by = .tmp, all.y=FALSE,
+                   all.x=TRUE, allow.cartesian=TRUE)
+    }
+  }
+
+  #drop.nas.
+  if(drop.nas){
+    out <- out[!is.na(out$WEIGHT_PERCENT),]
+  }
+
+  #sp_profile reorders
+  #   not sure if it is a good idea but could add as option
+  #      here would be
+  #      out <- out[order(out$PROFILE_CODE, decreasing = FALSE),]
+
+  #not sure how to handle output...
+  # could return as input class
+  # see notes
+  out <- as.data.frame(out)
+  rsp_build_respeciate(out)
+
+}
+
+
+
+############################
+#not exporting
+############################
+
+#earlier versions
+
+#holding until testing on new code finished
+
+sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
 
   #tidy x
   x <- rsp_tidy_profile(x)
@@ -130,9 +218,6 @@ sp_pad <- function(x, pad = "species", drop.nas = TRUE){
   out <- as.data.frame(out)
   rsp_build_respeciate(out)
 }
-
-
-
 
 
 

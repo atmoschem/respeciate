@@ -98,6 +98,8 @@ sp_profile <- function(code, include.refs=FALSE) {
   #testing tolower below
   #   as a fix for code arg case sensitivity
   ##########################
+  #  could test replacing some of this with sp_pad???
+  #      IF sp_pad stays
   df <- PROFILES[tolower(PROFILES$PROFILE_CODE) %in% tolower(code),]
   df <- merge(df, SPECIES, by = "PROFILE_CODE", all.y=FALSE, all.x=TRUE,
               allow.cartesian=TRUE)

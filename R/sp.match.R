@@ -113,10 +113,14 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #tidy x for testing
   #.x.pr.cd <- as.character(x$PROFILE_CODE)
   #.x.pr.nm <- as.character(x$PROFILE_NAME)
+
   #note
   #   assuming only one profile
-  x$PROFILE_CODE <- "test"
-  x$PROFILE_NAME <- paste("test>", x$PROFILE_NAME, sep="")
+  #   might think about changing this in future
+
+  x <- sp_average_profile(x, code = "test",
+                          name = paste("test>", x$PROFILE_NAME, sep=""))
+
   if(test.x){
     matches <- matches + 1
   }
