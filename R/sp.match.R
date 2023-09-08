@@ -31,19 +31,18 @@
 #' @rdname sp.match
 #' @export
 
-#  using data.table for dcast
-
 ######################
 #match
 #find ref profile 'most similar to x
 ######################
 
+#  the sp_dcast uses data.table
+#      sp_match uses rbindlist from data.table
+
 #in development
 
 #to do
 #########################
-
-
 
 ##aa <- sp_profile(sp_find_profile("composite", by="profile_name"))
 ##sp_match_profile(subset(rsp_("41220C")), aa)
@@ -118,8 +117,12 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #   assuming only one profile
   #   might think about changing this in future
 
-  x <- sp_average_profile(x, code = "test",
-                          name = paste("test>", x$PROFILE_NAME, sep=""))
+  if(length(unique(x$PROFILE_CODE))>1){
+    x <- sp_average_profile(x, code = "test")
+  } else {
+    x <- sp_average_profile(x, code = "test",
+                            name = paste("test>", x$PROFILE_NAME[1], sep=""))
+  }
 
   if(test.x){
     matches <- matches + 1

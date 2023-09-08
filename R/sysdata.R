@@ -3,15 +3,26 @@
 ############################################
 #'
 #' @name sysdata
-#' @description splat_packed data [to be described]
+#' @description the re(SPECIATE) sysdata, a local versions of SPECIATE,
+#' the EPA's repository of organic gas and particulate matter (PM) speciation
+#' profiles of air pollution sources.
 #'
-#' @format A (5  long) 'list' object
+#' @format A (long) list, containing:
 #' \describe{
-#'   \item{PROFILES}{[to document]}
-#'   \item{SPECIES}{[to document]}
-#'   \item{SPECIES_PROPERTIES}{[to document]}
-#'   \item{PROFILE_REFERENCE}{[to document]}
-#'   \item{REFERENCES}{[to document]}
+#'   \item{PROFILES}{The main \code{data.frame} of profile-specific meta-data,
+#'   with one row per profile, key term \code{PROFILE_CODE}.}
+#'   \item{SPECIES}{The main \code{data.frame} of individual record meta-data,
+#'   with one row per species in each profile, key terms \code{PROFILE_CODE}
+#'   and \code{SPECIES_ID} linking \code{PROFILES} and
+#'   \code{SPECIES_PROPERTIES}.}
+#'   \item{SPECIES_PROPERTIES}{The main \code{data.frame} of species-specific
+#'   meta-data, with one row per species, key term \code{SPECIES_ID}.}
+#'   \item{PROFILE_REFERENCE}{The \code{data.frame} linking profile and
+#'   reference meta-data, one row per references per profile, key terms
+#'   \code{PROFILE_CODE} and \code{REF_Code}.}
+#'   \item{REFERENCES}{The main \code{data.frame} of references for profile
+#'   source meta-data, one row per reference, key term \code{REF_Code}.}
+#'   \item{And others}{Currently not documented.}
 #' }
 
 ##################################
@@ -22,7 +33,7 @@
 
 # this documentation needs doing
 
-#' @source [to doc]
+#' @source https://www.epa.gov/air-emissions-modeling/speciate
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.

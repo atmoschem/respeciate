@@ -5,14 +5,16 @@
 \alias{sp_pad}
 \title{(re)SPECIATE profile padding functions}
 \usage{
-sp_pad(x, pad = "species", drop.nas = TRUE)
+sp_pad(x, pad = "standard", drop.nas = TRUE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 profiles.}
 
 \item{pad}{character, type of meta data padding, current options
-\code{'profile'}, \code{'species'} or \code{'weight'}.}
+\code{'profile'}, \code{'species'}, \code{'weight'}, \code{reference},
+\code{'standard'} (default; all but \code{'reference'}), and \code{'all'}
+('all').}
 
 \item{drop.nas}{logical, discard any rows where \code{WEIGHT_PERCENT} is
 \code{NA}, default \code{TRUE}.}

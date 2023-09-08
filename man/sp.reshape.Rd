@@ -14,7 +14,7 @@ sp_dcast_profile(x, widen = "profile")
 
 sp_dcast_species(x, widen = "species")
 
-sp_melt_wide(x, pad = TRUE)
+sp_melt_wide(x, pad = TRUE, drop.nas = TRUE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
@@ -25,9 +25,20 @@ profiles in standard long form or widened form for
 \code{\link{sp_dcast}}, the data type to \code{dcast},
 currently \code{'species'} (default) or \code{'profile'}. See Note.}
 
-\item{pad}{logical, when \code{melt}ing a previously widened data set,
-should \code{x} be re-populated with species and/or profile meta-data,
-discarded when widening.}
+\item{pad}{logical or character, when \code{melt}ing a previously widened
+data set, should output be re-populated with species and/or profile
+meta-data, discarded when widening. This is currently handled by
+\code{\link{sp_pad}}. The default \code{TRUE} applies standard settings,
+so does not include profile sources reference meta-data. (See
+\code{\link{sp_pad}} for other options).}
+
+\item{drop.nas}{logical, when \code{melt}ing a previously widened
+data set, should output be stripped of any rows containing empty
+weight/value columns. Because not all profile contains all species, the
+\code{dcast}/\code{melt} process can generate empty rows, and this step
+attempt account for that when working with standard re(SPECIATE)
+profiles. It is, however, sometimes useful to check first, e.g. when
+building profiles yourself.}
 }
 \value{
 \code{sp_dcast} returns the wide form of the supplied

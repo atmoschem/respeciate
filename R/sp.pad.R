@@ -10,7 +10,7 @@
 #' profiles.
 #' @param pad character, type of meta data padding, current options
 #' \code{'profile'}, \code{'species'}, \code{'weight'}, \code{reference},
-#' \code{'standard'} (default; all but \code{'reference'}) and \code{'all'}
+#' \code{'standard'} (default; all but \code{'reference'}), and \code{'all'}
 #' ('all').
 #' @param drop.nas logical, discard any rows where \code{WEIGHT_PERCENT} is
 #' \code{NA}, default \code{TRUE}.
@@ -81,6 +81,10 @@
 
 
 sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
+
+
+  #should pad allow TRUE/FALSE???
+  #should argument within sp_pad be method??
 
   #tidy x
   x <- rsp_tidy_profile(x)

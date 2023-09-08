@@ -17,11 +17,19 @@
 #' @param widen character, when widening \code{x} with
 #' \code{\link{sp_dcast}}, the data type to \code{dcast},
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
-#' @param pad logical, when \code{melt}ing a previously widened
-#' data set, should \code{x} be re-populated with species and/or profile
+#' @param pad logical or character, when \code{melt}ing a previously widened
+#' data set, should output be re-populated with species and/or profile
 #' meta-data, discarded when widening. This is currently handled by
-#' \code{\link{sp_pad}} applying standard settings, so reference meta-data
-#' is not included.
+#' \code{\link{sp_pad}}. The default \code{TRUE} applies standard settings,
+#' so does not include profile sources reference meta-data. (See
+#' \code{\link{sp_pad}} for other options).
+#' @param drop.nas logical, when \code{melt}ing a previously widened
+#' data set, should output be stripped of any rows containing empty
+#' weight/value columns. Because not all profile contains all species, the
+#' \code{dcast}/\code{melt} process can generate empty rows, and this step
+#' attempt account for that when working with standard re(SPECIATE)
+#' profiles. It is, however, sometimes useful to check first, e.g. when
+#' building profiles yourself.
 #' @return \code{sp_dcast} returns the wide form of the supplied
 #' \code{respeciate} profile. \code{sp_melt_wide}
 #' returns the (standard) long form of a previously widened profile.
@@ -171,7 +179,7 @@ sp_dcast_species <- function(x, widen = "species"){
 #wide_to_long reshape
 ######################
 
-sp_melt_wide <- function(x, pad = TRUE){
+sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
 
   ####################
   #see ?data.table::melt for examples
@@ -230,7 +238,11 @@ sp_melt_wide <- function(x, pad = TRUE){
   #     first need to standardise method, decide where to drop.nas,
   #        finalise formals, decide best data.table methods, etc
 
-  if(pad){
+  if(is.logical(pad) && pad){
+    pad <- "standard"
+  }
+  if(is.character(pad)){
+
     out <- sp_pad(out)
 
 #    PROFILES <- as.data.table(sysdata$PROFILES)
@@ -261,10 +273,20 @@ sp_melt_wide <- function(x, pad = TRUE){
 #    out$WEIGHT_PERCENT <- out$.value
   }
   #drop.nas...
-  out <- out[!is.na(out$WEIGHT_PERCENT),]
+  if(drop.nas){
+    if(".value" %in% names(out)){
+      out <- out[!is.na(out$.value),]
+    } else {
+      if("WEIGHT_PERCENT" %in% names(out)){
+        out <- out[!is.na(out$WEIGHT_PERCENT),]
+      }
+        #do we want to warn if nothing to strip
+        #if so, in else here??
+    }
+  }
   out <- as.data.frame(out)
 
-
+  #need to rationalise outputs!!!
   rsp_build_respeciate(out)
 
 }

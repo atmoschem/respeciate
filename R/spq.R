@@ -17,11 +17,9 @@
 #'
 #' The special PM types are subsets of PM profiles intended for special
 #' applications, and these include \code{sqr_pm.ae6} (type \code{PM-AE6}),
-#' \code{sqr_pm.ae8} (type \code{PM-AE8}), \code{sqr_pm.cr1} (type \code{PM-CR1})
-#' and \code{sqr_pm.simplified} (type \code{PM-Simplified}).
-#'
-#' \code{sqr_other} returns all profiles that are not classified as either
-#' gaseous or a PM type (\code{PROFILE_TYPE == 'OTHER'}).
+#' \code{sqr_pm.ae8} (type \code{PM-AE8}), \code{sqr_pm.cr1} (type
+#' \code{PM-CR1}), \code{sqr_pm.simplified} (type \code{PM-Simplified})
+#' ans \code{sqr_other} (\code{PROFILE_TYPE == 'OTHER'}).
 #'
 
 
