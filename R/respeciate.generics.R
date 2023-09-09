@@ -259,13 +259,23 @@ plot.respeciate <-
 #' @method summary respeciate
 #' @export
 
+
+# see below about alternative summary output
+#   including check sum?
+
+#   maybe table
+#   profile (code); (name); type; n.species (count); checksum; comments
+#   just show some but send all
+
 summary.respeciate <-
   function(object, ...){
     #v0.1 summary
     n <- object$PROFILE_TYPE
     n <- n[!duplicated(object$PROFILE_CODE)]
     summary(factor(n))
-}
+  }
+
+
 
 
 
@@ -273,6 +283,60 @@ summary.respeciate <-
 #################################
 #unexported code
 #################################
+
+
+# like to do something like this for summary
+#     but code very messy
+#     AND run time for 100+ profiles is too slow...
+
+#     try with data.table...
+
+rsp_summary_v2 <-
+  function(object, ...){
+    #v0.2 summary
+    if(!"PROFILE_CODE" %in% names(object)){
+      object$PROFILE_CODE <- "{{NA}}"
+    }
+    ref <- unique(object$PROFILE_CODE)
+    if(length(ref)>10){
+      ref <- ref[1:100]
+    }
+    .out <- lapply(ref, function(x){
+      .tmp <- subset(object, PROFILE_CODE==x)
+      .x <- if(x=="{{NA}}") {NA} else {x}
+      .pt <- if("PROFILE_TYPE" %in% names(.tmp)){
+        .tmp$PROFILE_TYPE[1]
+      } else {
+        NA
+      }
+      .pn <- if("PROFILE_NAME" %in% names(.tmp)){
+        .tmp$PROFILE_NAME[1]
+      } else {
+        NA
+      }
+      .ns <- if("SPECIES_ID" %in% names(.tmp)){
+        length(unique(.tmp$SPECIES_ID))
+      } else {
+        NA
+      }
+      .cs <- if("WEIGHT_PERCENT" %in% names(.tmp)){
+        sum(.tmp$WEIGHT_PERCENT, na.rm=TRUE)
+      } else {
+        NA
+      }
+      data.frame(profile=.x,
+                 type=.pt,
+                 name=.pn,
+                 n.species=.ns,
+                 checksum=.cs)
+    })
+    .out <- do.call(rbind, .out)
+    print(.out[c("profile", "type", "n.species", "checksum")], max=40)
+    return(invisible(.out))
+  }
+
+
+
 
 ###################################
 #class builds
@@ -327,12 +391,27 @@ rsp_split_profile <- function(x){
 
 ## like to tidy this/these
 
+# respeciate profile(s)
+#    [profile_code] [check sum] [profile_name] < width limited
+#    ... showing n
+
+# added profile_name to output
+
+# could move check sum to summary and
+#      replace with species count???
+
+# doing this... previous
+###.msg <- paste("  ", i, " (checksum: ",
+##round(sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
+##          na.rm = T), digits=2),
+##") ", i2, "\n", sep="")
+
+# could make other respeciate print outputs
+#      look like this?
 
 rsp_print_respeciate <-
   function(x, n=6, ...){
-    #shifted from REF_Code to PROFILE_Code
-    #   when allowing multipe profiles
-    #   because REF_Code not unique
+    #profile_code is (I think) only term unique to a profile
     y <- unique(x$PROFILE_CODE)
     report <- paste("respeciate profile(s): count ",
                     length(y), "\n", sep="")
@@ -342,11 +421,25 @@ rsp_print_respeciate <-
                 sep=""))
       return(invisible(x))
     }
+    .tmp <- getOption("width")
     yy <- if(length(y)>n) {y[1:n]} else {y}
     for(i in yy){
-      report <- paste(report, "  ", i, " (checksum: ",
-                      sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
-                          na.rm = T), ")\n", sep="")
+      if("PROFILE_NAME" %in% names(x)){
+        i2 <- x$PROFILE_NAME[x$PROFILE_CODE==i][1]
+      } else {
+        i2 <- "[unknown]"
+      }
+      if("SPECIES_ID" %in% names(x)){
+        .spe <- length(unique(x$SPECIES_ID[x$PROFILE_CODE==i]))
+      } else {
+        .spe <- "0!"
+      }
+      .msg <- paste("  ", i, " (", .spe, " species) ",
+                    i2, "\n", sep="")
+      if(nchar(.msg)>.tmp){
+        .msg <- paste(substring(.msg, 1, .tmp-3), "...\n")
+      }
+      report <- paste(report, .msg, sep="")
     }
     if(length(y)>n){
       report <- paste(report, "  ... not showing last ",

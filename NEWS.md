@@ -1,7 +1,7 @@
 # Version 0.0 - Release Notes
 
 * [0.2.3] 
-    * released 2023-09-06 
+    * released 2023-09-09 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species 
     sp_pad
     * added draft spq_ quick profile build  functions 

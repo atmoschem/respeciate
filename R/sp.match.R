@@ -277,6 +277,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #######################
 
   #think about options?
+  rownames(.out) <- NULL
   return(as.data.frame(.out))
 }
 

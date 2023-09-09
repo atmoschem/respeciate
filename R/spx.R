@@ -62,6 +62,8 @@
 #           where x is respeciate object, ref is a reference
 #           by is column in ref; case is x$by %in% unique(ref$by)
 
+#           could ref also be a vector of terms???
+
 
 #' @rdname spx
 #' @export
