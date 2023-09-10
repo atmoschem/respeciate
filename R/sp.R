@@ -7,8 +7,11 @@
 
 #' @description \code{\link{sp_profile}} extracts a
 #' SPECIATE profile from the local (re)SPECIATE archive.
-#' @param code character or numeric, the SPECIATE code
-#' of the required profile (EPA SPECIATE term PROFILE_CODE).
+#' @param code character, numeric or data.frame, the SPECIATE code
+#' of the required profile (EPA SPECIATE identifier PROFILE_CODE). This is
+#' typically one or concatenated character or numeric entries, but can also
+#' be a \code{respeciate} object or similar \code{data.frame} containing
+#' the \code{code}s as a named \code{PROFILE_NAME} column.
 #' @param include.refs logical, include profile reference information when
 #' getting the requested profile(s) from the archive, default \code{FALSE}.
 #' @return \code{sp_profile} returns a object of
@@ -82,11 +85,14 @@ sp_profile <- function(code, include.refs=FALSE) {
   #could replace code with ...???
   ######################
 
-  if(class(code)[1] == "respeciate" && "PROFILE_CODE" %in% names(code)){
+  if(is.data.frame(x) && "PROFILE_CODE" %in% names(code)){
     code <- unique(code$PROFILE_CODE)
   }
   if(is.numeric(code)) code <- as.character(code)
-  if(!is.character(code)) stop("unexpected code class")
+  if(!is.character(code)) {
+    stop("unexpected 'code' class",
+         call.=FALSE)
+  }
 
   PROFILES <- as.data.table(sysdata$PROFILES)
   SPECIES <- as.data.table(sysdata$SPECIES)

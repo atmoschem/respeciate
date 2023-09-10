@@ -6,8 +6,10 @@
 #' (re)SPECIATE profile and a reference set of supplied profiles and
 #' attempt to identify nearest matches on the basis of correlation
 #' coefficient.
-#' @param x A \code{respeciate} object, a \code{data.frame} containing a
-#' species profile to be compared with profiles in \code{ref}.
+#' @param x A \code{respeciate} object or similar \code{data.frame} containing
+#' a species profile to be compared with profiles in \code{ref}. If \code{x}
+#' contains more than one profile, these are averaged (using
+#' \code{\link{sp_average_profile}}), and the average compared.
 #' @param ref A \code{respeciate} object, a \code{data.frame} containing a
 #' multiple species profiles, to be used as reference library when identifying
 #' nearest matches for \code{x}.
