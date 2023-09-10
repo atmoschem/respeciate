@@ -75,6 +75,17 @@ sp_rescale <- function(x, method = 2, by = "species"){
   #    thinking about this
   tmp <- class(x)
 
+  #was testing/thinking about
+  #################################
+  #backdoor
+  #################################
+  #could save species and profile identifiers, and
+  #weight_percent then overwrite weight_percent with .value here
+  #then copy back weight_percent after calculations
+  #    then you could do multiple rescales without touching
+  #    weight_percent???
+
+
   #################################
   #calculate stats
   xx <- as.data.table(x)
@@ -89,7 +100,8 @@ sp_rescale <- function(x, method = 2, by = "species"){
 
   #stop if by option not known.
   if(!by %in% c("species", "profile")){
-    stop("unknown by option")
+    stop("unknown 'by' option",
+         call.= FALSE)
   }
 
   if(by == "profile"){
@@ -168,6 +180,14 @@ sp_rescale <- function(x, method = 2, by = "species"){
   if(method==5){
     out$.value<- out$WEIGHT_PERCENT / out$.max
   }
+
+  ############################
+  #backdoor end
+  ############################
+  #this would need careful thinking about
+  #     handling for method = 0 might be an issue
+  #     maybe a sp_reset() would be better
+  #         remove weight_percent and apply sp_pad(out, "weight")?
 
   #output
   #

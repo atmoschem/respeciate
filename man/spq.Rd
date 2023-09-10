@@ -36,11 +36,11 @@ For example:
 \code{sqr_pm} returns all particulate matter (PM) profiles not classified
 as a special PM type (\code{PROFILE_TYPE == 'PM'}).
 
-The special PM types are subsets of PM profiles intended for special
+The special PM types are subsets profiles intended for special
 applications, and these include \code{sqr_pm.ae6} (type \code{PM-AE6}),
 \code{sqr_pm.ae8} (type \code{PM-AE8}), \code{sqr_pm.cr1} (type
 \code{PM-CR1}), \code{sqr_pm.simplified} (type \code{PM-Simplified})
-ans \code{sqr_other} (\code{PROFILE_TYPE == 'OTHER'}).
+and \code{sqr_other} (\code{PROFILE_TYPE == 'OTHER'}).
 }
 \description{
 \code{spq_} functions are quick access wrappers to commonly

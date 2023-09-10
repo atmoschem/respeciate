@@ -8,8 +8,10 @@
 sp_match_profile(x, ref, matches = 10, rescale = 5, min.n = 6, test.x = FALSE)
 }
 \arguments{
-\item{x}{A \code{respeciate} object, a \code{data.frame} containing a
-species profile to be compared with profiles in \code{ref}.}
+\item{x}{A \code{respeciate} object or similar \code{data.frame} containing
+a species profile to be compared with profiles in \code{ref}. If \code{x}
+contains more than one profile, these are averaged (using
+\code{\link{sp_average_profile}}), and the average compared.}
 
 \item{ref}{A \code{respeciate} object, a \code{data.frame} containing a
 multiple species profiles, to be used as reference library when identifying

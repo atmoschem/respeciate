@@ -267,12 +267,89 @@ plot.respeciate <-
 #   profile (code); (name); type; n.species (count); checksum; comments
 #   just show some but send all
 
+# replacing previous
+
 summary.respeciate <-
   function(object, ...){
     #v0.1 summary
-    n <- object$PROFILE_TYPE
-    n <- n[!duplicated(object$PROFILE_CODE)]
-    summary(factor(n))
+    #n <- object$PROFILE_TYPE
+    #n <- n[!duplicated(object$PROFILE_CODE)]
+    #summary(factor(n))
+
+    #v0.3 summary
+
+    xx <- as.data.table(object)
+
+    .xargs <- list(...)
+    .max.n <- if("max.n" %in% names(.xargs)){
+      .xargs$max.n
+    } else {
+      10
+    }
+    .silent <- if("silent" %in% names(.xargs)){
+      .xargs$silent
+    } else {
+      FALSE
+    }
+
+    #check what we have
+    test <- c("WEIGHT_PERCENT","PROFILE_NAME","PROFILE_TYPE",
+              "SPECIES_ID")
+    test <- test[ test %in% colnames(xx)]
+    if(!"PROFILE_CODE" %in% colnames(xx)){
+      xx$PROFILE_CODE <- "{{ICK}}"
+    }
+
+    out <- xx[,
+              .(#SPECIES_NAME = SPECIES_NAME[1],
+                #SPEC_MW = SPEC_MW[1],
+                .checksum = if("WEIGHT_PERCENT" %in% names(xx)){
+                  sum(WEIGHT_PERCENT, na.rm = TRUE)
+                } else {
+                  NA
+                },
+                .checkname = if("PROFILE_NAME" %in% names(xx)){
+                  length(unique(PROFILE_NAME))}
+                else {
+                  NA
+                },
+                .name = if("PROFILE_NAME" %in% names(xx)){
+                  PROFILE_NAME[1]
+                } else {
+                  NA
+                },
+                .type = if("PROFILE_TYPE" %in% names(xx)){
+                  PROFILE_TYPE[1]
+                } else {
+                  NA
+                },
+                .nspecies = if("SPECIES_ID" %in% names(xx)){
+                  length(unique(SPECIES_ID))
+                } else {
+                  NA
+                }
+              ),
+              by=.(PROFILE_CODE)]
+
+    #out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+    #             allow.cartesian=TRUE)
+
+    out$PROFILE_CODE[out$PROFILE_CODE=="{{ICK}}"] <- NA
+    out <- as.data.frame(out)
+    if(!.silent){
+      if(nrow(out) > .max.n){
+        print(head(out[c(1,2,5,6)], n = .max.n))
+        cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]",
+            sep="")
+      } else {
+        print(out[c(1,2,5,6)])
+      }
+    }
+    invisible(out)
+
+
+
+
   }
 
 
@@ -291,49 +368,124 @@ summary.respeciate <-
 
 #     try with data.table...
 
-rsp_summary_v2 <-
-  function(object, ...){
-    #v0.2 summary
-    if(!"PROFILE_CODE" %in% names(object)){
-      object$PROFILE_CODE <- "{{NA}}"
-    }
-    ref <- unique(object$PROFILE_CODE)
-    if(length(ref)>10){
-      ref <- ref[1:100]
-    }
-    .out <- lapply(ref, function(x){
-      .tmp <- subset(object, PROFILE_CODE==x)
-      .x <- if(x=="{{NA}}") {NA} else {x}
-      .pt <- if("PROFILE_TYPE" %in% names(.tmp)){
-        .tmp$PROFILE_TYPE[1]
-      } else {
-        NA
-      }
-      .pn <- if("PROFILE_NAME" %in% names(.tmp)){
-        .tmp$PROFILE_NAME[1]
-      } else {
-        NA
-      }
-      .ns <- if("SPECIES_ID" %in% names(.tmp)){
-        length(unique(.tmp$SPECIES_ID))
-      } else {
-        NA
-      }
-      .cs <- if("WEIGHT_PERCENT" %in% names(.tmp)){
-        sum(.tmp$WEIGHT_PERCENT, na.rm=TRUE)
-      } else {
-        NA
-      }
-      data.frame(profile=.x,
-                 type=.pt,
-                 name=.pn,
-                 n.species=.ns,
-                 checksum=.cs)
-    })
-    .out <- do.call(rbind, .out)
-    print(.out[c("profile", "type", "n.species", "checksum")], max=40)
-    return(invisible(.out))
-  }
+
+#rsp_summary_v3 <- function(object, ...){
+
+#  xx <- as.data.table(object)
+
+#  .xargs <- list(...)
+#  .max.n <- if("max.n" %in% names(.xargs)){
+#    .xargs$max.n
+#  } else {
+#    10
+#  }
+#  .silent <- if("silent" %in% names(.xargs)){
+#    .xargs$silent
+#  } else {
+#    FALSE
+#  }
+
+
+  #check what we have
+#  test <- c("WEIGHT_PERCENT","PROFILE_NAME","PROFILE_TYPE",
+#            "SPECIES_ID")
+#  test <- test[ test %in% colnames(xx)]
+#  if(!"PROFILE_CODE" %in% colnames(xx)){
+#    xx$PROFILE_CODE <- "{{ICK}}"
+#  }
+
+#  out <- xx[,
+#            .(#SPECIES_NAME = SPECIES_NAME[1],
+#              #SPEC_MW = SPEC_MW[1],
+#              .checksum = if("WEIGHT_PERCENT" %in% names(xx)){
+#                sum(WEIGHT_PERCENT, na.rm = TRUE)
+#              } else {
+#                NA
+#              },
+#              .checkname = if("PROFILE_NAME" %in% names(xx)){
+#                length(unique(PROFILE_NAME))}
+#              else {
+#                NA
+#              },
+#              .name = if("PROFILE_NAME" %in% names(xx)){
+#                PROFILE_NAME[1]
+#              } else {
+#                NA
+#              },
+#              .type = if("PROFILE_TYPE" %in% names(xx)){
+#                PROFILE_TYPE[1]
+#              } else {
+#                NA
+#              },
+#              .nspecies = if("SPECIES_ID" %in% names(xx)){
+#                length(unique(SPECIES_ID))
+#              } else {
+#                NA
+#              }
+#            ),
+#            by=.(PROFILE_CODE)]
+
+  #out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+  #             allow.cartesian=TRUE)
+
+#  out$PROFILE_CODE[out$PROFILE_CODE=="{{ICK}}"] <- NA
+#  out <- as.data.frame(out)
+#  if(!.silent){
+#    if(nrow(out) > .max.n){
+#      print(head(out[c(1,2,5,6)], n = .max.n))
+#      cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]",
+#          sep="")
+#    } else {
+#      print(out[c(1,2,5,6)])
+#    }
+#  }
+#  invisible(out)
+
+#}
+
+#rsp_summary_v2 <-
+#  function(object, ...){
+#    #v0.2 summary
+#    if(!"PROFILE_CODE" %in% names(object)){
+#      object$PROFILE_CODE <- "{{NA}}"
+#    }
+#    ref <- unique(object$PROFILE_CODE)
+#    if(length(ref)>10){
+#      ref <- ref[1:100]
+#    }
+#    .out <- lapply(ref, function(x){
+#      .tmp <- subset(object, PROFILE_CODE==x)
+#      .x <- if(x=="{{NA}}") {NA} else {x}
+#      .pt <- if("PROFILE_TYPE" %in% names(.tmp)){
+#        .tmp$PROFILE_TYPE[1]
+#      } else {
+#        NA
+#      }
+#      .pn <- if("PROFILE_NAME" %in% names(.tmp)){
+#        .tmp$PROFILE_NAME[1]
+#      } else {
+#        NA
+#      }
+#      .ns <- if("SPECIES_ID" %in% names(.tmp)){
+#        length(unique(.tmp$SPECIES_ID))
+#      } else {
+#        NA
+#      }
+#      .cs <- if("WEIGHT_PERCENT" %in% names(.tmp)){
+#        sum(.tmp$WEIGHT_PERCENT, na.rm=TRUE)
+#      } else {
+#        NA
+#      }
+#      data.frame(profile=.x,
+#                 type=.pt,
+#                 name=.pn,
+#                 n.species=.ns,
+#                 checksum=.cs)
+#    })
+#    .out <- do.call(rbind, .out)
+#    print(.out[c("profile", "type", "n.species", "checksum")], max=40)
+#    return(invisible(.out))
+#  }
 
 
 

@@ -85,7 +85,7 @@ sp_profile <- function(code, include.refs=FALSE) {
   #could replace code with ...???
   ######################
 
-  if(is.data.frame(x) && "PROFILE_CODE" %in% names(code)){
+  if(is.data.frame(code) && "PROFILE_CODE" %in% names(code)){
     code <- unique(code$PROFILE_CODE)
   }
   if(is.numeric(code)) code <- as.character(code)

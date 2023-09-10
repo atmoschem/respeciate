@@ -8,8 +8,11 @@
 sp_profile(code, include.refs = FALSE)
 }
 \arguments{
-\item{code}{character or numeric, the SPECIATE code
-of the required profile (EPA SPECIATE term PROFILE_CODE).}
+\item{code}{character, numeric or data.frame, the SPECIATE code
+of the required profile (EPA SPECIATE identifier PROFILE_CODE). This is
+typically one or concatenated character or numeric entries, but can also
+be a \code{respeciate} object or similar \code{data.frame} containing
+the \code{code}s as a named \code{PROFILE_NAME} column.}
 
 \item{include.refs}{logical, include profile reference information when
 getting the requested profile(s) from the archive, default \code{FALSE}.}

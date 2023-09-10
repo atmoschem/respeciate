@@ -5,7 +5,7 @@
 \alias{sysdata}
 \title{sysdata}
 \format{
-A (long) 'list' object containing:
+A (long) list, containing:
 \describe{
   \item{PROFILES}{The main \code{data.frame} of profile-specific meta-data,
   with one row per profile, key term \code{PROFILE_CODE}.}
@@ -20,6 +20,7 @@ A (long) 'list' object containing:
   \code{PROFILE_CODE} and \code{REF_Code}.}
   \item{REFERENCES}{The main \code{data.frame} of references for profile
   source meta-data, one row per reference, key term \code{REF_Code}.}
+  \item{And others}{Currently not documented.}
 }
 }
 \source{
