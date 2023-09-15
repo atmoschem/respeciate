@@ -266,12 +266,10 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
                      fit=.out,
                      row.names = 1:length(.out))
 
-  if(!test.x){
-    if("test" %in% x$PROFILE_CODE){
-      .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
-    } else {
-      .out <- .out[1:(matches-1),]
-    }
+  if(!test.x && "test" %in% x$PROFILE_CODE){
+    .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
+  } else {
+    .out <- .out[1:(matches-1),]
   }
 
   #######################
