@@ -269,6 +269,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
                      fit=.out,
                      row.names = 1:length(.out))
 
+  #conflicted!!!
   if(!test.x){
     matches <- matches - 1
     if("test" %in% x$PROFILE_CODE){
