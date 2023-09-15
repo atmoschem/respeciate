@@ -126,9 +126,12 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
                             name = paste("test>", x$PROFILE_NAME[1], sep=""))
   }
 
-  if(test.x){
+  ###############
+  #do test anyway
+  ###############
+  #if(test.x){
     matches <- matches + 1
-  }
+  #}
 
   x <- as.data.table(x)
   ref <- as.data.table(ref)
@@ -266,11 +269,17 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
                      fit=.out,
                      row.names = 1:length(.out))
 
-  if(!test.x && "test" %in% x$PROFILE_CODE){
-    .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
-  } else {
-    .out <- .out[1:(matches-1),]
+  if(!test.x){
+    matches <- matches - 1
+    if("test" %in% x$PROFILE_CODE)){
+      .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
+    }
+    if(nrow(.out) > (matches){
+      .out <- .out[1:matches,]
+    }
   }
+
+
 
   #######################
   #output
