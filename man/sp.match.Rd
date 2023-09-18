@@ -5,7 +5,7 @@
 \alias{sp_match_profile}
 \title{Find nearest matches from reference set of profiles}
 \usage{
-sp_match_profile(x, ref, matches = 10, rescale = 5, min.n = 6, test.x = FALSE)
+sp_match_profile(x, ref, matches = 10, rescale = 5, min.n = 8, test.x = FALSE)
 }
 \arguments{
 \item{x}{A \code{respeciate} object or similar \code{data.frame} containing
@@ -24,7 +24,7 @@ report.}
 comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
 \code{\link{sp_rescale}}.}
 
-\item{min.n}{\code{numeric} (default 6), the minimum number of paired
+\item{min.n}{\code{numeric} (default 8), the minimum number of paired
 species measurements in two profiles required for a match to be assessed.
 See also \code{\link{sp_species_cor}}.}
 

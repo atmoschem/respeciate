@@ -11,9 +11,7 @@ sp_rescale(x, method = 2, by = "species")
 
 sp_rescale_profile(x, method = 1, by = "profile")
 
-sp_rescale_species(x, method = 2)
-
-sp_rescale_species(x, method = 2)
+sp_rescale_species(x, method = 2, by = "species")
 }
 \arguments{
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)

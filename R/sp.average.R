@@ -97,7 +97,11 @@ sp_average_profile <- function(x, code = NULL, name = NULL, method = 1,
   xx$PROFILE_CODE <- code
 
   xx$PROFILE_NAME <- if(is.null(name)){
-    paste("average of:", paste(test, collapse = ","), sep="")
+    if(length(test)>10){
+      "average of multiple cases"
+    } else {
+      paste("average of:", paste(test, collapse = ","), sep="")
+    }
   } else {
     name
   }

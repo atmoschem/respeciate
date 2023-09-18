@@ -18,7 +18,7 @@
 #' @param rescale Numeric (default 5), the data scaling method to apply before
 #' comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
 #' \code{\link{sp_rescale}}.
-#' @param min.n \code{numeric} (default 6), the minimum number of paired
+#' @param min.n \code{numeric} (default 8), the minimum number of paired
 #' species measurements in two profiles required for a match to be assessed.
 #' See also \code{\link{sp_species_cor}}.
 #' @param test.x Logical (default FALSE). The match process self-tests by adding
@@ -47,7 +47,7 @@
 #########################
 
 ##aa <- sp_profile(sp_find_profile("composite", by="profile_name"))
-##sp_match_profile(subset(rsp_("41220C")), aa)
+##sp_match_profile(sp_profile("41220C"), aa)
 ##assuming 41220C exists
 
 ##NOTE sp_profile code is case sensitive
@@ -99,7 +99,7 @@
 #                     but might need to rethink n, min.bin, etc???
 
 sp_match_profile <- function(x, ref, matches=10, rescale=5,
-                             min.n=6, test.x=FALSE){
+                             min.n=8, test.x=FALSE){
 
   #######################
   #if ref missing
@@ -125,6 +125,13 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
     x <- sp_average_profile(x, code = "test",
                             name = paste("test>", x$PROFILE_NAME[1], sep=""))
   }
+
+  #note
+  #    dropped the force option
+  #    to override min.n if < min.n species in x
+  #if(length(unique(x$SPECIES_ID)) < min.n & force){
+  #  min.n <- length(unique(x$SPECIES_ID))
+  #}
 
   ###############
   #do test anyway
@@ -169,6 +176,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   ###################
   .tmp.pr.nm <- as.character(.tmp$PROFILE_NAME)
   .tmp.pr.cd <- as.character(.tmp$PROFILE_CODE)
+
 
   ##################
   #dcast to reshape for search

@@ -212,18 +212,20 @@ sp_rescale_species <- function(x, method = 2, by ="species"){
 }
 
 
+
+
+###################
+#unexported
+##################
+
+
 ######################
-#rescale data by species
+#old.rescale data by species
 ######################
 
 ##########################
 #issues
 ############################
-
-#' @rdname sp.rescale
-#' @export
-## #' @import data.table
-#    importing in xxx.r
 
 # may need to set data.table specifically??
 #      data.table::as.data.table, etc??
@@ -231,7 +233,7 @@ sp_rescale_species <- function(x, method = 2, by ="species"){
 # may need to think about additional local scaling
 #      e.g. within in profile [species conc]/[sum of all species concs]
 
-sp_rescale_species <- function(x, method = 2){
+rsp_rescale_species <- function(x, method = 2){
 
   #################################
   #check x is a respeciate object??
