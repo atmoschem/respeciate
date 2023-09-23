@@ -15,7 +15,7 @@
 
 
 utils::globalVariables(c("sysdata",
-                         "PROFILE_CODE", "PROFILE_NAME",
+                         "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
 
@@ -36,13 +36,15 @@ utils::globalVariables(c("sysdata",
 #         and others???
 #               need to identify them
 
-#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap
-#' @importFrom utils modifyList
+#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
+#' as.formula coefficients formula lm nls nls.control predict
+#' @importFrom utils modifyList head
 #' @importFrom graphics axis barplot par legend lines rect text
 #' @importFrom grDevices cm.colors colorRampPalette
 
 #might be able to drop legend?
 #   check plot.respeciate
+
 
 ##############################
 #common unexported
