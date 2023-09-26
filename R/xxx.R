@@ -39,8 +39,12 @@ utils::globalVariables(c("sysdata",
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
 #' as.formula coefficients formula lm nls nls.control predict
 #' @importFrom utils modifyList head
-#' @importFrom graphics axis barplot par legend lines rect text
-#' @importFrom grDevices cm.colors colorRampPalette
+#' @importFrom graphics axis barplot par legend lines rect text abline
+#' grid mtext plot.new plot.window points polygon title
+#' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
+#' dev.flush dev.hold heat.colors
+
+
 
 #might be able to drop legend?
 #   check plot.respeciate

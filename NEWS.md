@@ -1,9 +1,9 @@
 # Version 0.0 - Release Notes
 
 * [0.2.3] 
-    * released 2023-09-23 
+    * released 2023-09-26 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species 
-    sp_pad, sp_pls_profile
+    sp_pad, sp_pls_profile 
     * added draft spq_ quick profile build  functions 
     * added pls_ functions for sp_pls_profile outputs
     * sp_profile update: references not included by default 
