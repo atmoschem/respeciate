@@ -977,7 +977,6 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
     x <- x[x!=0]
   }
   my.tot <- sum(x)
-  print(my.tot)
   if(my.tot < 99){
     x <- c(x, 100-my.tot)
     labels <- c(labels, "[hide]")
