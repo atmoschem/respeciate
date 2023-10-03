@@ -1,57 +1,30 @@
 #' @name respeciate.generics
 #' @title respeciate.generics
-#' @importFrom graphics axis barplot par
+#' @description \code{respeciate} object classes and generic functions.
 
-#' @description respeciate object classes and generic functions
-
-#reversed order of documentation,
-#started with the find function...
-
+########################
+#might move all the text to top
+#    hard to keep style consistent when docs are in between
+#    multiple functions
 
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{print}} manages its appearance.
-#' @param x the \code{respeciate}
-#' object to be printed, plotted, etc.
-#' @param n when plotting or printing a multi-profile, the
-#' number(s) of profile(s) to report.
-#' @param ... any extra arguments, mostly ignored except by
-#' \code{plot} which passes them to \code{\link{barplot}}.
-#' @rdname respeciate.generics
-#' @method print respeciate
-#' @export
-
-print.respeciate <-
-  function(x, n=6, ...){
-    #shifted from REF_Code to PROFILE_Code
-    #   when allowing multipe profiles
-    #   because REF_Code not unique
-    y <- unique(x$PROFILE_CODE)
-    report <- paste("respeciate profile(s): count ",
-                    length(y), "\n", sep="")
-    if(length(y)==0){
-      cat(paste(report,
-                "empty (or bad?) respeciate object\n",
-                sep=""))
-      return(invisible(x))
-    }
-    yy <- if(length(y)>n) {y[1:n]} else {y}
-    for(i in yy){
-      report <- paste(report, "  ", i, " (checksum: ",
-                      sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
-                          na.rm = T), ")\n", sep="")
-    }
-    if(length(y)>n){
-      report <- paste(report, "  ... not showing last ",
-                      length(y)-n, "\n", sep="")
-    }
-    cat(report, sep="")
-    invisible(x)
-  }
-
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{plot}} provides a basic plot
 #' output. This uses base function \code{\link{barplot}};
 #' also see note.
+#' @param x the \code{respeciate}
+#' object to be printed, plotted, etc.
+#' @param n when plotting or printing a multi-profile object, the
+#' maximum number of profiles to report. (When plotting, \code{n}
+#' is ignored if \code{id} is also set.)
+#' @param ... any extra arguments, mostly ignored except by
+#' \code{plot} which passes them to \code{\link{barplot}}.
+#' @param object like \code{x} but for \code{summary}.
+#' @param id numeric, indices of profiles to use when
+#' plotting (\code{id=1:6} is equivalent to \code{n=6}).
+#' @param order logical, order the species in the
+#' profile(s) by relative abundance before plotting.
 #' @note \code{respeciate} objects revert to
 #' \code{data.frame}s when not doing anything
 #' package-specific, so you can still
@@ -59,17 +32,102 @@ print.respeciate <-
 #' \code{ggplot2}, useful if you are pulling multiple
 #' profiles and you exceed the base \code{\link{barplot}}
 #' capacity...
-#' @param id numeric, indices of profiles to use when
-#' plotting (nb: \code{n=6} is equivalent to code{id=1:6}).
-#' @param order logical, order the species in the
-#' profile(s) by relative abundance before plotting.
+
+
+#notes
+##################################
+
+#loosing the respeciate.ref and respeciate.spcs classes
+#    testing merge them into respeciate
+
+#         with different print outputs?
+#         only plot for class plot, etc???
+
+#' @rdname respeciate.generics
+#' @method print respeciate
+#' @export
+
+print.respeciate <- function(x, n = NULL, ...){
+  test <- rsp_test_respeciate(x, level = 2, silent = TRUE)
+  if(test == "respeciate.profile.ref"){
+    if(is.null(n)){
+      n <- 100
+    }
+    return(rsp_print_respeciate_profile(x=x, n=n, ...))
+  }
+  if(test == "respeciate.species.ref"){
+    if(is.null(n)){
+      n <- 10
+    }
+    return(rsp_print_respeciate_species(x=x, n=n, ...))
+  }
+  if(is.null(n)){
+    n <- 10
+  }
+  rsp_print_respeciate(x=x, n=n, ...)
+}
+
+## rsp_print functions unexported
+##    further down
+##    VVVVVVVVVVVV
+##    VVVVVVVVVVVV
+
+
+
 #' @rdname respeciate.generics
 #' @method plot respeciate
 #' @export
 
+##########################
+#notes
+##########################
+#like....
+#better handling of factor axis labels
+#better handling of axes and legend font sizes
+#    (I think previous code may have handled this a little better)
+#    (but not perfectly...)
+#like horiz=total scales to be other way around?
+#    could also mean rethinking the legend position for this?
+
+############################
+#added warning/handling for
+#  duplicate species in profiles (handling merge/mean)
+#  duplicated profile names (handling make unique)
+
+#test is now set up to use data.table
+
+
+
 plot.respeciate <-
   function(x, n=NULL, id=NULL, order=TRUE, ...){
 
+    #add .value if not there
+    ## don't think .value works
+    x <- rsp_tidy_profile(x)
+
+    ##test object type
+    test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+    if(test != "respeciate"){
+      if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
+        stop("No plot method for respeciate.reference files.")
+      } else {
+        stop("suspect respeciate object!")
+      }
+      #don't stop - respeciate profile
+    }
+
+    ##test something to plot
+    if(nrow(x)==0){
+      ######################
+      #think about this
+      ######################
+      #maybe stop() instead???
+      #stop("empty respeciate object?")
+      return(invisible(NULL))
+    }
+
+    #hold extra args
+    #  passing to plot
     .xargs <- list(...)
 
     #test number of profiles
@@ -91,14 +149,40 @@ plot.respeciate <-
                     "\n", sep=""))
     }
 
-    x <- rsp_test(x)
-    if(any(x$COUNT>1)){
+    x <- rsp_test_profile(x)
+
+
+    if(any(x$.n>1)){
       warning(paste("\n\t",
-                    " found duplicate profiles (merged and averaged...)",
+                    " found duplicate species in profiles (merged and averaged...)",
                     "\n", sep=""))
     }
-
     x$SPECIES_NAME <- rsp_tidy_species_name(x$SPECIES_NAME)
+
+    ####################################
+    #issue profile names are not always unique
+    ####################################
+    test <- x
+    test$SPECIES_ID <- ".default"
+    test <- rsp_test_profile(test)
+    ###################
+    #rep_test
+    #can now replace this with data.table version
+    #BUT check naming conventions for .n
+    ###################
+
+    #does this need a warning?
+    if(length(unique(test$PROFILE_NAME))<nrow(test)){
+      warning(paste("\n\t",
+                    " found profiles with common names (making unique...)",
+                    "\n", sep=""))
+      test$PROFILE_NAME <- make.unique(test$PROFILE_NAME)
+      x <- x[names(x) != "PROFILE_NAME"]
+      x <- merge(x, test[c("PROFILE_NAME", "PROFILE_CODE")], by="PROFILE_CODE")
+    }
+
+
+    #x$PROFILE_NAME <- make.unique(x$PROFILE_NAME)
 
     #order largest to smallest
     #############################
@@ -110,12 +194,12 @@ plot.respeciate <-
       ################################
       test <- x
       test$PROFILE_CODE <- ".default"
-      test <- rsp_test(test)
+      test <- rsp_test_profile(test)
       if("beside" %in% names(.xargs) && .xargs$beside){
         test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
         xx <- unique(test$SPECIES_NAME)
       } else {
-        test <- test[order(test$TOTAL, decreasing = TRUE),]
+        test <- test[order(test$.total, decreasing = TRUE),]
         xx <- unique(test$SPECIES_NAME)
       }
     } else {
@@ -163,28 +247,383 @@ plot.respeciate <-
   }
 
 
+##################################
+#summary
+##################################
 
+#like something to get us to...
+#database.summary
+#summary.respeciate(sysdata$PROFILES)
 
-
-
-#' @description When supplied a \code{respeciate.ref}
-#' object, \code{\link{print}} manages its appearance.
-#' @param x the \code{respeciate} or \code{respeciate.ref}
-#' object to be printed, plotted, etc.
 #' @rdname respeciate.generics
-#' @method print respeciate.ref
+#' @method summary respeciate
 #' @export
-print.respeciate.ref <-
+
+
+# see below about alternative summary output
+#   including check sum?
+
+#   maybe table
+#   profile (code); (name); type; n.species (count); checksum; comments
+#   just show some but send all
+
+# replacing previous
+
+summary.respeciate <-
+  function(object, ...){
+    #v0.1 summary
+    #n <- object$PROFILE_TYPE
+    #n <- n[!duplicated(object$PROFILE_CODE)]
+    #summary(factor(n))
+
+    #v0.3 summary
+
+    xx <- as.data.table(object)
+
+    .xargs <- list(...)
+    .max.n <- if("max.n" %in% names(.xargs)){
+      .xargs$max.n
+    } else {
+      10
+    }
+    .silent <- if("silent" %in% names(.xargs)){
+      .xargs$silent
+    } else {
+      FALSE
+    }
+
+    #check what we have
+    test <- c("WEIGHT_PERCENT","PROFILE_NAME","PROFILE_TYPE",
+              "SPECIES_ID")
+    test <- test[ test %in% colnames(xx)]
+    if(!"PROFILE_CODE" %in% colnames(xx)){
+      xx$PROFILE_CODE <- "{{ICK}}"
+    }
+
+    out <- xx[,
+              .(#SPECIES_NAME = SPECIES_NAME[1],
+                #SPEC_MW = SPEC_MW[1],
+                .checksum = if("WEIGHT_PERCENT" %in% names(xx)){
+                  sum(WEIGHT_PERCENT, na.rm = TRUE)
+                } else {
+                  NA
+                },
+                .checkname = if("PROFILE_NAME" %in% names(xx)){
+                  length(unique(PROFILE_NAME))}
+                else {
+                  NA
+                },
+                .name = if("PROFILE_NAME" %in% names(xx)){
+                  PROFILE_NAME[1]
+                } else {
+                  NA
+                },
+                .type = if("PROFILE_TYPE" %in% names(xx)){
+                  PROFILE_TYPE[1]
+                } else {
+                  NA
+                },
+                .nspecies = if("SPECIES_ID" %in% names(xx)){
+                  length(unique(SPECIES_ID))
+                } else {
+                  NA
+                }
+              ),
+              by=.(PROFILE_CODE)]
+
+    #out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+    #             allow.cartesian=TRUE)
+
+    out$PROFILE_CODE[out$PROFILE_CODE=="{{ICK}}"] <- NA
+    out <- as.data.frame(out)
+    if(!.silent){
+      if(nrow(out) > .max.n){
+        print(head(out[c(1,2,5,6)], n = .max.n))
+        cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]",
+            sep="")
+      } else {
+        print(out[c(1,2,5,6)])
+      }
+    }
+    invisible(out)
+
+
+
+
+  }
+
+
+
+
+
+
+#################################
+#unexported code
+#################################
+
+
+# like to do something like this for summary
+#     but code very messy
+#     AND run time for 100+ profiles is too slow...
+
+#     try with data.table...
+
+
+#rsp_summary_v3 <- function(object, ...){
+
+#  xx <- as.data.table(object)
+
+#  .xargs <- list(...)
+#  .max.n <- if("max.n" %in% names(.xargs)){
+#    .xargs$max.n
+#  } else {
+#    10
+#  }
+#  .silent <- if("silent" %in% names(.xargs)){
+#    .xargs$silent
+#  } else {
+#    FALSE
+#  }
+
+
+  #check what we have
+#  test <- c("WEIGHT_PERCENT","PROFILE_NAME","PROFILE_TYPE",
+#            "SPECIES_ID")
+#  test <- test[ test %in% colnames(xx)]
+#  if(!"PROFILE_CODE" %in% colnames(xx)){
+#    xx$PROFILE_CODE <- "{{ICK}}"
+#  }
+
+#  out <- xx[,
+#            .(#SPECIES_NAME = SPECIES_NAME[1],
+#              #SPEC_MW = SPEC_MW[1],
+#              .checksum = if("WEIGHT_PERCENT" %in% names(xx)){
+#                sum(WEIGHT_PERCENT, na.rm = TRUE)
+#              } else {
+#                NA
+#              },
+#              .checkname = if("PROFILE_NAME" %in% names(xx)){
+#                length(unique(PROFILE_NAME))}
+#              else {
+#                NA
+#              },
+#              .name = if("PROFILE_NAME" %in% names(xx)){
+#                PROFILE_NAME[1]
+#              } else {
+#                NA
+#              },
+#              .type = if("PROFILE_TYPE" %in% names(xx)){
+#                PROFILE_TYPE[1]
+#              } else {
+#                NA
+#              },
+#              .nspecies = if("SPECIES_ID" %in% names(xx)){
+#                length(unique(SPECIES_ID))
+#              } else {
+#                NA
+#              }
+#            ),
+#            by=.(PROFILE_CODE)]
+
+  #out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+  #             allow.cartesian=TRUE)
+
+#  out$PROFILE_CODE[out$PROFILE_CODE=="{{ICK}}"] <- NA
+#  out <- as.data.frame(out)
+#  if(!.silent){
+#    if(nrow(out) > .max.n){
+#      print(head(out[c(1,2,5,6)], n = .max.n))
+#      cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]",
+#          sep="")
+#    } else {
+#      print(out[c(1,2,5,6)])
+#    }
+#  }
+#  invisible(out)
+
+#}
+
+#rsp_summary_v2 <-
+#  function(object, ...){
+#    #v0.2 summary
+#    if(!"PROFILE_CODE" %in% names(object)){
+#      object$PROFILE_CODE <- "{{NA}}"
+#    }
+#    ref <- unique(object$PROFILE_CODE)
+#    if(length(ref)>10){
+#      ref <- ref[1:100]
+#    }
+#    .out <- lapply(ref, function(x){
+#      .tmp <- subset(object, PROFILE_CODE==x)
+#      .x <- if(x=="{{NA}}") {NA} else {x}
+#      .pt <- if("PROFILE_TYPE" %in% names(.tmp)){
+#        .tmp$PROFILE_TYPE[1]
+#      } else {
+#        NA
+#      }
+#      .pn <- if("PROFILE_NAME" %in% names(.tmp)){
+#        .tmp$PROFILE_NAME[1]
+#      } else {
+#        NA
+#      }
+#      .ns <- if("SPECIES_ID" %in% names(.tmp)){
+#        length(unique(.tmp$SPECIES_ID))
+#      } else {
+#        NA
+#      }
+#      .cs <- if("WEIGHT_PERCENT" %in% names(.tmp)){
+#        sum(.tmp$WEIGHT_PERCENT, na.rm=TRUE)
+#      } else {
+#        NA
+#      }
+#      data.frame(profile=.x,
+#                 type=.pt,
+#                 name=.pn,
+#                 n.species=.ns,
+#                 checksum=.cs)
+#    })
+#    .out <- do.call(rbind, .out)
+#    print(.out[c("profile", "type", "n.species", "checksum")], max=40)
+#    return(invisible(.out))
+#  }
+
+
+
+
+###################################
+#class builds
+###################################
+
+#rsp_build_respeciate.spcs <-
+#  function(x, ...){
+    #build
+    #add .value
+#    x <- rsp_tidy_profile(x)
+#    class(x) <- c("respeciate.spcs", "data.frame")
+#    x
+#  }
+
+#rsp_build_respeciate.ref <-
+#  function(x, ...){
+    #build
+#    class(x) <- c("respeciate.ref", "data.frame")
+#    x
+#  }
+
+rsp_build_respeciate <-
   function(x, ...){
+    #build
+    class(x) <- c("respeciate", "data.frame")
+    x
+  }
+
+
+###########################
+#split respeciate by profile
+###########################
+
+#currently not exported
+#quick code assumed CODE is unique to profile
+
+#need to test this
+
+#not sure we are using this any more
+#    i think rsp_test, then rsp_test.2 replaced
+#    and code in plot.respeciate.old ???
+
+rsp_split_profile <- function(x){
+  ref <- unique(x$PROFILE_CODE)
+  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
+}
+
+
+########################
+#unexported rsp_print
+########################
+
+## like to tidy this/these
+
+# respeciate profile(s)
+#    [profile_code] [check sum] [profile_name] < width limited
+#    ... showing n
+
+# added profile_name to output
+
+# could move check sum to summary and
+#      replace with species count???
+
+# doing this... previous
+###.msg <- paste("  ", i, " (checksum: ",
+##round(sum(as.numeric(as.character(x[x$PROFILE_CODE==i,]$WEIGHT_PERCENT)),
+##          na.rm = T), digits=2),
+##") ", i2, "\n", sep="")
+
+# could make other respeciate print outputs
+#      look like this?
+
+rsp_print_respeciate <-
+  function(x, n=6, ...){
+    #profile_code is (I think) only term unique to a profile
+    y <- unique(x$PROFILE_CODE)
+    report <- paste("respeciate profile(s): count ",
+                    length(y), "\n", sep="")
+    if(length(y)==0){
+      cat(paste(report,
+                "empty (or bad?) respeciate object\n",
+                sep=""))
+      return(invisible(x))
+    }
+    .tmp <- getOption("width")
+    yy <- if(length(y)>n) {y[1:n]} else {y}
+    for(i in yy){
+      if("PROFILE_NAME" %in% names(x)){
+        i2 <- x$PROFILE_NAME[x$PROFILE_CODE==i][1]
+      } else {
+        i2 <- "[unknown]"
+      }
+      if("SPECIES_ID" %in% names(x)){
+        .spe <- length(unique(x$SPECIES_ID[x$PROFILE_CODE==i]))
+      } else {
+        .spe <- "0!"
+      }
+      .msg <- paste("  ", i, " (", .spe, " species) ",
+                    i2, "\n", sep="")
+      if(nchar(.msg)>.tmp){
+        .msg <- paste(substring(.msg, 1, .tmp-3), "...\n")
+      }
+      report <- paste(report, .msg, sep="")
+    }
+    if(length(y)>n){
+      report <- paste(report, "  ... not showing last ",
+                      length(y)-n, "\n", sep="")
+    }
+    cat(report, sep="")
+    invisible(x)
+  }
+
+
+## #' @description When supplied a \code{respeciate.ref}
+# #' object, \code{\link{print}} manages its appearance.
+# #' @param x the \code{respeciate} or \code{respeciate.ref}
+# #' object to be printed, plotted, etc.
+# #' @rdname respeciate.generics
+# #' @method print respeciate.ref
+# #' @export
+rsp_print_respeciate_profile <-
+  function(x, n = 100, ...){
     xx <- nrow(x)
     wi <- getOption("width")
     ####################################
     #use of cat might need rethinking?
     ####################################
     cat("respeciate profile reference\n")
-    if(xx>100){
-      report <- c(x$PROFILE_CODE[1:100], "...")
-      comment <- " profiles [showing first 100]\n"
+    if(n>xx){
+      n <- xx
+    }
+    if(xx>n){
+      report <- c(x$PROFILE_CODE[1:n], "...")
+      comment <- paste(" profiles [showing first ", n,
+                       "]\n", sep = "")
     } else {
       report <- x$PROFILE_CODE
       comment <- " profiles\n"
@@ -195,20 +634,24 @@ print.respeciate.ref <-
   }
 
 
-#' @rdname respeciate.generics
-#' @method print respeciate.spcs
-#' @export
-print.respeciate.spcs <-
-  function(x, ...){
+# #' @rdname respeciate.generics
+# #' @method print respeciate.spcs
+# #' @export
+rsp_print_respeciate_species <-
+  function(x, n = 10, ...){
     xx <- nrow(x)
     wi <- getOption("width")
     ####################################
     #use of cat might need rethinking?
     ####################################
-    cat("respeciate species\n")
-    if(xx>10){
-      report <- c(x$SPECIES_NAME[1:10], "...")
-      comment <- " species [showing first 10]\n"
+    cat("respeciate species reference\n")
+    if(n>xx){
+      n <- xx
+    }
+    if(xx>n){
+      report <- c(x$SPECIES_NAME[1:n], "...")
+      comment <- paste(" species [showing first ", n,
+                       "]\n", sep="")
     } else {
       report <- x$SPECIES_NAME
       comment <- " species\n"
@@ -221,79 +664,7 @@ print.respeciate.spcs <-
 
 
 
-#################################
-#unexported code
-#################################
 
-###################################
-#class builds
-###################################
-
-rsp_build_respeciate.spcs <-
-  function(x, ...){
-    #build
-    class(x) <- c("respeciate.spcs", "data.frame")
-    x
-  }
-
-rsp_build_respeciate.ref <-
-  function(x, ...){
-    #build
-    class(x) <- c("respeciate.ref", "data.frame")
-    x
-  }
-
-rsp_build_respeciate <-
-  function(x, ...){
-    #build
-    class(x) <- c("respeciate", "data.frame")
-    x
-  }
-
-###########################
-#tidy names
-###########################
-
-#currently not exported
-#quick code to tidy species names
-
-#note: not fully tested
-
-rsp_tidy_species_name <- function(x){
-
-  #attempts shorten names by remove other versions
-  #names seem to be in format a (or b || c)
-  #where (guessing) a is main name and
-  #         b and c are alternatives.
-
-  #not fully tested,
-  #   might still be more cases this dies on
-
-  #gsub("[(].*","", x) failed if name a includes brackets
-  #example:#"(2-methylpropyl)benzene (or isobutylbenzene)"
-
-  #sub("[(][^(]or+$", "", x) failed if b or c includes brackets
-  #also left space at end so needed sub("^\\s+|\\s+$", "", x)
-
-  #sometimes it is "( or "
-  x <- gsub(" [(] or ", " (or ", x)
-  #next removes from last "(or" onwards
-  x <- gsub("[(]or .*","", x)
-  sub("^\\s+|\\s+$", "", x)
-}
-
-
-###########################
-#split respeciate by profile
-###########################
-
-#currently not exported
-#quick code assumed CODE is unique to profile
-
-rsp_split_profile <- function(x){
-  ref <- unique(x$PROFILE_CODE)
-  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
-}
 
 
 
@@ -427,26 +798,6 @@ plot.respeciate.old <-
     }
   }
 
-rsp_test <- function(x){
-  .prf <- unique(x$PROFILE_CODE)
-  ans <- lapply(.prf, function(y){
-    temp <- subset(x, PROFILE_CODE==y)
-    .spc <- unique(temp$SPECIES_ID)
-    ans <- lapply(.spc, function(z){
-      temp2 <- subset(temp, SPECIES_ID==z)
-      data.frame(PROFILE_CODE = y,
-                 PROFILE_NAME = temp2$PROFILE_NAME[1],
-                 SPECIES_ID = z,
-                 SPECIES_NAME = temp2$SPECIES_NAME[1],
-                 COUNT = length(temp2$WEIGHT_PERCENT[!is.na(temp2$WEIGHT_PERCENT)]),
-                 TOTAL = sum(temp2$WEIGHT_PERCENT[!is.na(temp2$WEIGHT_PERCENT)]),
-                 SPEC_MW = temp2$SPEC_MW[1],
-                 WEIGHT_PERCENT=mean(temp2$WEIGHT_PERCENT, na.rm=TRUE))
-    })
-    do.call(rbind, ans)
-  })
-  do.call(rbind, ans)
-}
 
 
 

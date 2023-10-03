@@ -1,14 +1,14 @@
 Package: respeciate
 Title: Speciation profiles for gases and aerosols
-Version: 0.2.1
-Date: 2023-06-21
-Description: Acess to the US.EPA Speciate (v5.2) tool, to generate speciation for gases and particles.
-           More details in Simon et al (2010) <doi:10.5094/APR.2010.026>.
+Version: 0.2.3
+Date: 2023-09-23
+Description: Acess to the US.EPA Speciate (v5.2) tool, to generate speciation profiles for
+          gases and particles. More details in Simon et al (2010) <doi:10.5094/APR.2010.026>.
 Type: Package
-Authors@R: c( person(given = "Sergio", family = "Ibarra-Espinosa", role = c("aut", "cre"), email =
-           "sergio.ibarra@usp.br", comment = c(ORCID = "0000-0002-3162-1905")), person(given = "Karl",
-           family = "Ropkins", role = c("aut"), email = "k.ropkins@its.leeds.ac.uk", comment = c(ORCID
-           = "0000-0002-0294-6997")) )
+Authors@R: c( person(given = "Sergio", family = "Ibarra-Espinosa", role = c("aut", "cre"),
+          email = "sergio.ibarra@usp.br", comment = c(ORCID = "0000-0002-3162-1905")),
+          person(given = "Karl", family = "Ropkins", role = c("aut"), email =
+          "k.ropkins@its.leeds.ac.uk", comment = c(ORCID = "0000-0002-0294-6997")) )
 License: MIT + file LICENSE
 URL: https://github.com/atmoschem/respeciate
 BugReports: https://github.com/atmoschem/respeciate/issues
@@ -16,3 +16,4 @@ LazyData: yes
 Depends: R (>= 3.5.0)
 RoxygenNote: 7.2.3
 Encoding: UTF-8
+Imports: data.table

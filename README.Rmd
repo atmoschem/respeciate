@@ -51,7 +51,7 @@ Plotting a profile
 plot(p)
 ```
 
-... or multiple profiles using barplot syntax
+... using barplot syntax
 
 ```{r fig.width=12, fig.height=5, fig.align="center", dpi=400}
 #using base barplot 
