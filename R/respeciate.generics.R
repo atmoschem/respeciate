@@ -8,7 +8,7 @@
 #    multiple functions
 
 #' @description When supplied a \code{respeciate}
-#' object, \code{\link{print}} manages its appearance.
+#' object or similar, \code{\link{print}} manages its appearance.
 #' @description When supplied a \code{respeciate}
 #' object, \code{\link{plot}} provides a basic plot
 #' output. This uses base function \code{\link{barplot}};
@@ -71,6 +71,43 @@ print.respeciate <- function(x, n = NULL, ...){
 ##    further down
 ##    VVVVVVVVVVVV
 ##    VVVVVVVVVVVV
+
+
+
+#############################################
+#############################################
+## print.rsp_pls
+#############################################
+#############################################
+
+#' @rdname respeciate.generics
+#' @method print rsp_pls
+#' @export
+
+# notes
+############################
+
+#currently just a print tidier
+#    so user not catching this does not get a
+#        screen dump of model lists
+
+#needs work if we want it to actually be useful...
+
+print.rsp_pls <- function(x, n = NULL, ...){
+  #expecting list of nls models
+  report <- "respeciate pls model:"
+  if(!is.list(x)){
+    report <- paste(report, "\n   Suspect!", sep="")
+  } else{
+    temp <- unlist(lapply(x, function(x) !is.null(x)))
+    temp <- length(temp[temp])
+    report <- paste(report, "\n   list of ", length(x), " profile models",
+                    "\n   (", temp, " good)", sep="")
+  }
+  cat(report)
+}
+
+
 
 
 

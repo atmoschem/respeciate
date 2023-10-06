@@ -1,5 +1,10 @@
 # Version 0.0 - Release Notes
 
+* [0.2.4] 
+    * released 2023-10-06 
+    * added functions: pls_fit_species 
+    * added draft rsp_pls object class 
+
 * [0.2.3] 
     * released 2023-09-26 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species 

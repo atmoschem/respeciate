@@ -3,11 +3,14 @@
 \name{respeciate.generics}
 \alias{respeciate.generics}
 \alias{print.respeciate}
+\alias{print.rsp_pls}
 \alias{plot.respeciate}
 \alias{summary.respeciate}
 \title{respeciate.generics}
 \usage{
 \method{print}{respeciate}(x, n = NULL, ...)
+
+\method{print}{rsp_pls}(x, n = NULL, ...)
 
 \method{plot}{respeciate}(x, n = NULL, id = NULL, order = TRUE, ...)
 
@@ -36,7 +39,7 @@ profile(s) by relative abundance before plotting.}
 \code{respeciate} object classes and generic functions.
 
 When supplied a \code{respeciate}
-object, \code{\link{print}} manages its appearance.
+object or similar, \code{\link{print}} manages its appearance.
 
 When supplied a \code{respeciate}
 object, \code{\link{plot}} provides a basic plot

@@ -4,6 +4,7 @@
 \alias{sp.pls}
 \alias{sp_pls_profile}
 \alias{pls_report}
+\alias{pls_fit_species}
 \alias{pls_refit_species}
 \alias{pls_fit_parent}
 \alias{pls_plot}
@@ -14,6 +15,8 @@
 sp_pls_profile(x, ref, power = 1, ...)
 
 pls_report(pls)
+
+pls_fit_species(pls, species, power = 1, ...)
 
 pls_refit_species(pls, name, power = 1, ...)
 
@@ -47,10 +50,19 @@ weightings when fitting the PLS model. This is applied in the form
 weighting of the more heavily weighted measurements. Values in the
 range \code{1 - 2.5} are sometimes helpful.}
 
-\item{...}{additional arguments, currently ignored.}
+\item{...}{additional arguments, typically passed on to
+\code{\link{nls}}.}
 
 \item{pls}{A \code{sp_pls_profile} output, only used by \code{pls_}
 functions.}
+
+\item{species, profile}{(for \code{pls_plot}s only) numeric or character
+identifying the species or profile to plot. If numeric, these are treated
+as indices of the species or profile, respectively, in the PLS model; if
+character, species is treated as the name of species and profile is treated
+as the profile code. Both can be concatenation to product multiple plots and
+the special case \code{-1} is a short cut to all species or profiles,
+respectively.}
 
 \item{name}{Character class, for \code{pls_refit_species} only, the
 name of the species to refit. All other species in the reference
@@ -68,14 +80,6 @@ to \code{ref} with a start value of 100 (percent), and the model is refitted.}
 \item{start, lower, upper}{all numeric, the start value and lower and upper
 boundaries when fitting a parameter.}
 
-\item{species, profile}{(for \code{pls_plot}s only) numeric or character
-identifying the species or profile to plot. If numeric, these are treated
-as indices of the species or profile, respectively, in the PLS model; if
-character, species is treated as the name of species and profile is treated
-as the profile code. Both can be concatenation to product multiple plots and
-the special case \code{-1} is a short cut to all species or profiles,
-respectively.}
-
 \item{type}{(for \code{pls_plot}s only) numeric, the plot type if
 multiple options are available.}
 
@@ -87,10 +91,11 @@ applies 'log' scaling to the primary Y axes of the plot.}
 profile/measurement set in \code{x}. The \code{pls_} functions work with
 these outputs. \code{pls_report} generates a \code{data.frame} of
 model outputs, and is used of several of the other \code{pls_}
-functions. \code{pls_refit_species} and \code{pls_fit_parent}
-return the supplied \code{sp_pls_profile} output, updated on the
-basis of the \code{pls_} function action. \code{pls_plot}s produce
-various plots commonly used in source apportionment studies.
+functions. \code{pls_fit_species}, \code{pls_refit_species} and
+\code{pls_fit_parent} return the supplied \code{sp_pls_profile} output,
+updated on the basis of the \code{pls_} function action.
+\code{pls_plot}s produce various plots commonly used in source
+apportionment studies.
 }
 \description{
 Functions for Positive Least Squares (PSL) fitting of
@@ -106,17 +111,17 @@ source apportionment based on the assumption that the profiles in the
 reference set are representative of the mix that make up the modeled
 sample. The \code{pls_} functions work with \code{sp_pls_profile}
 outputs, and are intended to be used when refining and analyzing
-these PLS models. See
+these PLS models.
 }
 \note{
 This implementation of PLS applies the following modeling constraints:
 
-1. The generate a model of \code{x} that is positively constained linear
+1. It generates a model of \code{x} that is positively constrained linear
 product of the profiles in \code{ref}, so outputs can only be
 zero or more.  Although the model is generated using \code{\link{nls}},
 which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 in this case is linear.
 
 2. The number of species in \code{x} must be more that the number of
-profiles in \code{ref}, to reduce the likelihood of over-fitting.
+profiles in \code{ref} to reduce the likelihood of over-fitting.
 }

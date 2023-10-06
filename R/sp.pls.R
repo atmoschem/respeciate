@@ -1,7 +1,7 @@
 #' @name sp.pls
 #' @title (re)SPECIATE profile Positive Least Squares
-#' @aliases sp_pls_profile pls_report pls_refit_species pls_fit_parent
-#' pls_plot pls_plot_species pls_plot_profile
+#' @aliases sp_pls_profile pls_report pls_fit_species pls_refit_species
+#' pls_fit_parent pls_plot pls_plot_species pls_plot_profile
 
 #' @description Functions for Positive Least Squares (PSL) fitting of
 #' (re)SPECIATE profiles
@@ -17,7 +17,7 @@
 #' reference set are representative of the mix that make up the modeled
 #' sample. The \code{pls_} functions work with \code{sp_pls_profile}
 #' outputs, and are intended to be used when refining and analyzing
-#' these PLS models. See
+#' these PLS models.
 
 #' @param x A \code{respeciate} object, a \code{data.frame} of
 #' profiles in standard long form, intended for PLS modelling.
@@ -29,7 +29,8 @@
 #' \code{weight^power}, and increasing this, increases the relative
 #' weighting of the more heavily weighted measurements. Values in the
 #' range \code{1 - 2.5} are sometimes helpful.
-#' @param ... additional arguments, currently ignored.
+#' @param ... additional arguments, typically passed on to
+#' \code{\link{nls}}.
 #' @param pls A \code{sp_pls_profile} output, only used by \code{pls_}
 #' functions.
 #' @param name Character class, for \code{pls_refit_species} only, the
@@ -66,21 +67,22 @@
 #' profile/measurement set in \code{x}. The \code{pls_} functions work with
 #' these outputs. \code{pls_report} generates a \code{data.frame} of
 #' model outputs, and is used of several of the other \code{pls_}
-#' functions. \code{pls_refit_species} and \code{pls_fit_parent}
-#' return the supplied \code{sp_pls_profile} output, updated on the
-#' basis of the \code{pls_} function action. \code{pls_plot}s produce
-#' various plots commonly used in source apportionment studies.
+#' functions. \code{pls_fit_species}, \code{pls_refit_species} and
+#' \code{pls_fit_parent} return the supplied \code{sp_pls_profile} output,
+#' updated on the basis of the \code{pls_} function action.
+#' \code{pls_plot}s produce various plots commonly used in source
+#' apportionment studies.
 
 #' @note This implementation of PLS applies the following modeling constraints:
 #'
-#' 1. The generate a model of \code{x} that is positively constained linear
+#' 1. It generates a model of \code{x} that is positively constrained linear
 #' product of the profiles in \code{ref}, so outputs can only be
 #' zero or more.  Although the model is generated using \code{\link{nls}},
 #' which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 #' in this case is linear.
 #'
 #' 2. The number of species in \code{x} must be more that the number of
-#' profiles in \code{ref}, to reduce the likelihood of over-fitting.
+#' profiles in \code{ref} to reduce the likelihood of over-fitting.
 #'
 #'
 
@@ -128,7 +130,7 @@ sp_pls_profile <- function(x, ref,
   ########################
   #only allowing profiles < species
   if(length(unique(ref$PROFILE_CODE)) >= length(unique(x$SPECIES_ID))){
-    stop("sp_pls: need #.species > #.profiles, more species or less profiles??",
+    stop("sp_pls: need #.species > #.profiles, more species or less profiles?",
          call. = FALSE)
   }
 
@@ -146,6 +148,12 @@ sp_pls_profile <- function(x, ref,
     .x
   })
   .xx <- data.table::rbindlist(.xx)
+#############################
+#currently just dropping them
+#can't fit negatives
+  .xx <- .xx[.xx$.value >= 0, ]
+  .xx <- .xx[!is.na(.xx$.value),]
+#############################
   #should be same! redundant
   .pr.cd <- unique(.xx$PROFILE_CODE)
 
@@ -213,6 +221,9 @@ sp_pls_profile <- function(x, ref,
       #   should check how this is done?
       #   might not translate sesnibly...
       #   pass upper, default INF???
+
+      .out[is.na(.out)] <- 0  #testing
+
       args <- list(formula = .for,
                    data=.out,
                    start=.ls2,
@@ -273,7 +284,8 @@ sp_pls_profile <- function(x, ref,
   #returns the list of nls models
   #(assuming all viable, one per profile_code in x)
 
-  #to think about object type???
+  #testing class options
+  class(ans) <- unique(c("rsp_pls", class(ans)))
   return(ans)
 
 }
@@ -299,25 +311,33 @@ pls_report <- function(pls){
 
   ans <- lapply(names(pls), function(x){
     .xx <- pls[[x]]
-    .out <- .xx$args$data
-    .tmp <- summary(.xx$mod)$coefficients
-    .p.mod <- .tmp[,4]
-    names(.p.mod) <- gsub("m_", "p_", names(.p.mod))
-    .out <- data.frame(PROFILE_CODE = x,
-                       .out,
-                       t(.tmp[,1]),
-                       t(.p.mod),
-                       pred = predict(.xx$mod, newdata=.xx$args$data),
-                       check.names=FALSE)
-    .out
+    if(!is.null(.xx)){
+      .out <- .xx$args$data
+      .tmp <- summary(.xx$mod)$coefficients
+      .p.mod <- .tmp[,4]
+      names(.p.mod) <- gsub("m_", "p_", names(.p.mod))
+      .out <- data.frame(PROFILE_CODE = x,
+                         .out,
+                         t(.tmp[,1]),
+                         t(.p.mod),
+                         pred = predict(.xx$mod, newdata=.xx$args$data),
+                         check.names=FALSE)
+      .out
+    } else {
+      NULL
+    }
   })
   ans <- data.table::rbindlist(ans, use.names=TRUE, fill=TRUE)
+  if(nrow(ans)==0){
+    return(as.data.frame(ans))
+  }
   #####################
   #think about
   #####################
   #    adding x_[profile] (m_[profile] * profile) calculations here
   #    currently done on fly in some plots...
   ans$.value <- ans$test
+  #ans$pred[is.na(ans$pred)] <- 0   #this about this...
   mod2 <- lm(pred~.value, data=ans)
   ans$adj.r.sq <- summary(mod2)$adj.r.squared
   ans$slope <- summary(mod2)$coefficients[2,1]
@@ -334,6 +354,200 @@ pls_report <- function(pls){
 
   as.data.frame(ans)
 }
+
+
+
+
+
+
+####################################
+####################################
+## pls_fit_species
+####################################
+####################################
+
+
+#' @rdname sp.pls
+#' @export
+
+##   now imports from xxx.r
+##   #' @import data.table
+
+#############################
+#this needs a lot of work
+#############################
+
+# thinking about dropping the pls_refit_species and pls_fit_parent
+#      (or making them wrappers of this)
+
+# (like pls_(re)fit_'s)
+# like to drop power from formals
+#   maybe ignore or pass from previous, but have option to overwrite via ...?
+
+# need to update the model handling so it is like sp_pls_profile
+#     this would sort power issue above
+#          also means the user can change setting themselves
+#          THINK ABOUT THIS
+#               they could make a pls that was not positively constrained
+#      this would also remove the start, lower and upper options
+#           from the formals...
+
+# parent could already be in x
+#    then parent could just be the name of parent???
+
+# also a case for using this to add a non-parent to x
+#    e.g. pls_fit_unknown_species...
+#    to fit a species to the existing model as a source apportion of
+#        that unknown...
+#    in which case maybe this should just be a wrapper for that
+#        with the start, lower and upper like below
+
+# if we are setting start and lower
+#     start = lower if start is missing might be safer...
+
+
+pls_fit_species <- function(pls, species, power=1, ...){
+
+  x.args <- list(...)
+  #hiding model args
+
+  .out <- pls_report(pls)
+  #species/ parent should only have one species
+  #and have same profiles as pls model data
+  #and its contribution to all sources is set by .value
+
+  #note
+  ################################
+  #following just done quickly to replace
+  #    two previous functions pls_fit_parent and pls_refit_species
+
+  if(is.character(species)){
+    #assuming this is SPECIES_NAME of the species to be fit
+    #and species was in modelled data when pls was built...
+    parent <- subset(.out, SPECIES_NAME == species[1])
+
+  } else {
+    #assuming this is respeciate object data.frame of right structure
+    parent <- species
+  }
+  .out <- subset(.out, SPECIES_ID == unique(.out$SPECIES_ID)[1])
+  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+  .test <- names(parent)[names(parent) %in% .test]
+  .data <- parent[.test]
+  names(.data)[2] <- "parent"
+  .data <- merge(.out, .data[c(1:2)])
+
+  #formula
+  .ms <- names(.data)[grepl("^m_", names(.out))]
+  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                sep="", collapse = "+")
+  .for <- as.formula(paste("parent~", .for))
+
+  .ns <- .ms
+  names(.ns) <- gsub("^m_", "n_", .ms)
+
+  #note
+  ##################
+  #model handling temp update
+  #lower, start and upper
+  lower <- if("lower" %in% names(x.args)){
+    x.args$lower
+  } else {
+    0
+  }
+  start <- if("start" %in% names(x.args)){
+    x.args$start
+  } else {
+    lower
+  }
+  upper <- if("upper" %in% names(x.args)){
+    x.args$upper
+  } else {
+    Inf
+  }
+
+  .ls <- lapply(.ns, function(x){start})
+  .ls2 <- lapply(.ns, function(x){lower})
+  .ls3 <- lapply(.ns, function(x){upper})
+
+  mod <- nls(.for, data=.data,
+             #weights = (1/.out$test)^power,
+             #no weighting currently because species are all the same here!
+             start=.ls,
+             lower=.ls2,
+             upper=.ls3,
+             algorithm="port",
+             control=nls.control(tol=1e-5) #think about tolerance
+  )
+  .ans <- data.frame(
+    PROFILE_CODE = .data$PROFILE_CODE,
+    SPECIES_ID = parent$SPECIES_ID[1],
+    SPECIES_NAME = parent$SPECIES_NAME[1],
+    t(coefficients(mod)),
+    test = .data$parent
+  )
+  names(.ans) <- gsub("^n_", "", names(.ans))
+
+  for(i in .ans$PROFILE_CODE){
+    .ii <- subset(.ans, PROFILE_CODE==i)
+    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+    pls[[i]]$args$data <-
+      rbind(pls[[i]]$args$data, .ii)
+    #rebuild model
+    .for <- as.character(formula(pls[[i]]$mod))
+    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+    .ms <- names(pls[[i]]$args$data)
+    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ls <- lapply(.ms, function(x){0})
+    names(.ls) <- paste("m_", .ms, sep="")
+    .da <- pls[[i]]$args$data
+
+    #note
+    #############################
+    # option to not do this refit?
+    pls[[i]]$mod <- nls(.for, data=.da,
+                        weights = (1/.da$test)^power, # think about weighting
+                        start=.ls, lower=.ls,
+                        algorithm="port",
+                        control=nls.control(tol=1e-5) #think about tolerance
+    )
+  }
+
+  pls
+
+}
+
+
+#fix if nulls are an issue
+############################
+
+#mod3 <- mod3[unlist(lapply(mod3, function(x) !is.null(x)))]
+
+#test code
+####################
+
+#inc <- readRDS("C:\\Users\\trakradmin\\OneDrive - University of Leeds\\Documents\\pkg\\respeciate\\_projects\\marylebone03\\.tmp.increment.rds")
+#inc$.value <- inc$.value.inc
+#inc$WEIGHT_PERCENT <- inc$.value.inc
+#inc$PROFILE_CODE <- as.character(inc$`Start Date`)
+#inc$PROFILE_NAME <- as.character(inc$`Start Date`)
+
+#inc <- sp_pad(inc, "species")
+#inc <- subset(inc, `Start Date` > "2021-01-01")
+
+#sp_match_profile(inc, spq_pm(), matches=20)
+
+#aa <- sp_profile(c("3157", "4330310", "3941", "4027", "3961"))
+
+#inc.metals <- subset(inc, !grepl("[[]avg.AURN[]]", SPECIES_NAME))
+
+#moda <- sp_pls_profile(inc.metals, aa)
+#modb <- sp_pls_profile(inc, aa)
+
+#moda2 <- pls_fit_parent(moda, subset(inc, SPECIES_NAME=="[avg.AURN] PM2.5"))
+
+#moda2i <- pls_fit_species(moda, subset(inc, SPECIES_NAME=="[avg.AURN] PM2.5"))
+
 
 
 
@@ -425,9 +639,14 @@ pls_refit_species <- function(pls, name, power=1,
     )
   }
 
-  pls
+  invisible(pls)
 
 }
+
+
+
+
+
 
 
 
@@ -546,6 +765,9 @@ pls_fit_parent <- function(pls, parent, power=1,
 }
 
 
+
+
+
 ####################################
 ###################################
 ## pls_plots
@@ -649,32 +871,46 @@ pls_plot <- function(pls, species=1, type=1,...){
     .rep2 <- as.data.frame(subset(.rep, SPECIES_NAME==i))
     .rep2$.index <- as.character(.rep2$PROFILE_CODE)
     .tot2 <- as.data.frame(subset(.tot, SPECIES_NAME==i))
+    .dat <- subset(dat, SPECIES_NAME==i)
 
     if(1 %in% type){
-      .rep2$.index <- as.numeric(ordered(.rep2$.index, levels=unique(.rep2$.index)))
-      .rep2$.index <- ordered(.rep2$.index, levels=unique(.rep2$.index))
-      #.cols <- palette.colors(n = length(.sp.x.pro), palette = "Okabe-Ito",
-      #                        recycle = FALSE)
-      .cols <- heat.colors(n=length(.sp.x.pro))
-      .ncol <- ceiling(length(.sp.x.pro)/3)
-      .leg.text <- gsub("^x_", "", .sp.x.pro)
-      .bar <- barplot(value~variable + .index,  .rep2, col=.cols,
-                      main = i, ylab="Measurement",
-                      xlab="Sample [index]",
-                      legend.text=.leg.text,
-                      args.legend=list(cex=0.8,
-                                       ncol=.ncol))
-      .dat <- subset(dat, SPECIES_NAME==i)
-      lines(.bar, .dat$.value)
+      if(all(is.na(.dat$pred)) | all(.dat$pred==0)){
+        warning(paste("pls_plot: no type 1 ", i, " model", sep=""),
+                call. = FALSE)
+      } else {
+        .scale <- c(.dat$.value, .dat$pred)
+        .scale <- .scale[is.finite((.scale))]
+        .scale <- max(pretty(.scale))
+        .rep2$.index <- as.numeric(ordered(.rep2$.index, levels=unique(.rep2$.index)))
+        .rep2$.index <- ordered(.rep2$.index, levels=unique(.rep2$.index))
+        #.cols <- palette.colors(n = length(.sp.x.pro), palette = "Okabe-Ito",
+        #                        recycle = FALSE)
+        .cols <- heat.colors(n=length(.sp.x.pro))
+        .ncol <- ceiling(length(.sp.x.pro)/3)
+        .leg.text <- gsub("^x_", "", .sp.x.pro)
+        .bar <- barplot(value~variable + .index,  .rep2, col=.cols,
+                        main = i, ylab="Measurement",
+                        xlab="Sample [index]",
+                        ylim=c(0, .scale),   #testing
+                        legend.text=.leg.text,
+                        args.legend=list(cex=0.8,
+                                         ncol=.ncol))
+        .dat <- subset(dat, SPECIES_NAME==i)
+
+        lines(.bar, .dat$.value)
+      }
     }
     if(2 %in% type){
       .cols <- heat.colors(n=length(.sp.x.pro))
       .vals <- unlist((.tot2[,.sp.x.pro]/.tot2$.value) * 100)
-
-      .labs=paste(gsub("x_", "", .sp.x.pro), "\n", signif(.vals, 3) , "%", sep="")
-      print(sum(.vals))
-      rsp_profile_pie(.vals, col=.cols, edges=1000,
-                      labels=.labs, main=i)
+      if(all(.vals==0)){
+        warning(paste("pls_plot: no type 2 ", i, " model", sep=""),
+                call. = FALSE)
+      } else {
+        .labs=paste(gsub("x_", "", .sp.x.pro), "\n", signif(.vals, 3) , "%", sep="")
+        rsp_profile_pie(.vals, col=.cols, edges=1000,
+                        labels=.labs, main=i)
+      }
     }
 
   }
@@ -965,6 +1201,9 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
   #R Core Team (2023). _R: A Language and Environment for Statistical Computing_. R Foundation
   #for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
 
+  #print(labels)
+  #print(col)
+
   if (!is.numeric(x) || any(is.na(x) | x < 0))
     stop("'x' values must be positive.")
   if (is.null(labels))
@@ -972,8 +1211,10 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
   else labels <- as.graphicsAnnot(labels)
 
   #added to remove any source with a zero contribution
+  #but hold labels and col alignment
   if(any(x==0)){
     labels <- labels[x!=0]
+    col <- col[x!=0]
     x <- x[x!=0]
   }
   my.tot <- sum(x)
@@ -1001,8 +1242,8 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
       c("white", "lightblue", "mistyrose", "lightcyan",
         "lavender", "cornsilk")
   else par("fg")
-  if (!is.null(col))
-    col <- rep_len(col, nx)
+#  if (!is.null(col))
+#    col <- rep_len(col, nx)
   if (!is.null(border))
     border <- rep_len(border, nx)
   if (!is.null(lty))
@@ -1017,6 +1258,7 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
     t2p <- twopi * t + init.angle * pi/180
     list(x = radius * cos(t2p), y = radius * sin(t2p))
   }
+
   for (i in 1L:nx) {
 
     if(!as.character(labels[i]) == "[hide]"){
