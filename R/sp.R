@@ -94,11 +94,11 @@ sp_profile <- function(code, include.refs=FALSE) {
          call.=FALSE)
   }
 
-  PROFILES <- as.data.table(sysdata$PROFILES)
-  SPECIES <- as.data.table(sysdata$SPECIES)
-  SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
-  PROFILE_REFERENCE <- as.data.table(sysdata$PROFILE_REFERENCE)
-  REFERENCES <- as.data.table(sysdata$REFERENCES)
+  PROFILES <- data.table::as.data.table(sysdata$PROFILES)
+  SPECIES <- data.table::as.data.table(sysdata$SPECIES)
+  SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
+  PROFILE_REFERENCE <- data.table::as.data.table(sysdata$PROFILE_REFERENCE)
+  REFERENCES <- data.table::as.data.table(sysdata$REFERENCES)
 
   ##########################
   #testing tolower below

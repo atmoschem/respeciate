@@ -25,8 +25,8 @@ utils::globalVariables(c("sysdata",
 
 # all @import here
 #    in case we have to move to data.table::as.data.table, etc...
-
-#' @import data.table
+#    moving to data.table::as.data.table...
+# #' @import data.table
 
 #   data.table used by:
 #         rsp_test_profile,
@@ -36,6 +36,7 @@ utils::globalVariables(c("sysdata",
 #         and others???
 #               need to identify them
 
+#' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
 #' as.formula coefficients formula lm nls nls.control predict
 #' @importFrom utils modifyList head
@@ -175,7 +176,7 @@ rsp_test_profile <- function(x){
   #      testing
   #######################################
   tmp <- class(x)
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
   out <- xx[,
             .(PROFILE_NAME = PROFILE_NAME[1],
               SPECIES_NAME = SPECIES_NAME[1],

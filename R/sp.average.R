@@ -82,7 +82,7 @@ sp_average_profile <- function(x, code = NULL, name = NULL, method = 1,
   #save class to return as is..
   #    thinking about this
   tmp <- class(x)
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
 
   #save profiles
   test <- unique(x$PROFILE_CODE)

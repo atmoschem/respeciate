@@ -315,7 +315,7 @@ summary.respeciate <-
 
     #v0.3 summary
 
-    xx <- as.data.table(object)
+    xx <- data.table::as.data.table(object)
 
     .xargs <- list(...)
     .max.n <- if("max.n" %in% names(.xargs)){

@@ -305,7 +305,21 @@ sp_pls_profile <- function(x, ref,
 
 # this is the model report table
 # other pls_ functions use output
-#    so take care if changes
+#    so take care when changing anything...
+
+# to think about
+###############################
+
+# drop intercept from diagnostics model..?
+#    can't decide if it should be there
+#    not in the pls_plot which are based on conventional SA plots...
+
+# calculate the x_[profile] (contributions) in pls_report
+#    currently doing this in several of the pls_plot's
+
+# should the diagnostics be calculated per-species???
+#    if some species very large and some very small
+#        doing them on an all results basis will be overly positive
 
 pls_report <- function(pls){
 
@@ -332,12 +346,16 @@ pls_report <- function(pls){
     return(as.data.frame(ans))
   }
   #####################
-  #think about
+  #thinking about
   #####################
   #    adding x_[profile] (m_[profile] * profile) calculations here
   #    currently done on fly in some plots...
   ans$.value <- ans$test
-  #ans$pred[is.na(ans$pred)] <- 0   #this about this...
+  #ans$pred[is.na(ans$pred)] <- 0   #this about this..
+  ######################
+  #thinking about
+  ######################
+  #    forcing this to y=x
   mod2 <- lm(pred~.value, data=ans)
   ans$adj.r.sq <- summary(mod2)$adj.r.squared
   ans$slope <- summary(mod2)$coefficients[2,1]
@@ -787,8 +805,10 @@ pls_fit_parent <- function(pls, parent, power=1,
 #' @rdname sp.pls
 #' @export
 
-##   now imports from xxx.r
+##   now imports via data.table::
+##        need this to kill the as.data.table load message
 ##   #' @import data.table
+##
 
 #############################
 #this needs a lot of work
@@ -858,13 +878,15 @@ pls_plot <- function(pls, species=1, type=1,...){
   .sp.x.pro <- names(dat)[grep("^x_", names(dat))]
 
   .rep <- dat[c("SPECIES_NAME", "SPECIES_ID", "PROFILE_CODE", .sp.x.pro)]
-  .rep <- melt(as.data.table(.rep),
+  .rep <- data.table::melt(data.table::as.data.table(.rep),
                id=c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE"))
 
-  .tot <- as.data.table(dat)
+  .tot <- data.table::as.data.table(dat)
   .cs <- c(".value", "pred", .sp.x.pro)
-  .tot <- .tot[, lapply(.SD, function(x) sum(x, na.rm=TRUE)),
-               .SDcols= .cs, by=c("SPECIES_ID", "SPECIES_NAME")]
+  .tot <- .tot[, lapply(data.table::.SD,
+                        function(x) sum(x, na.rm=TRUE)),
+               .SDcols= .cs,
+               by=c("SPECIES_ID", "SPECIES_NAME")]
 
   for(i in species){
 
@@ -1075,7 +1097,7 @@ pls_plot_profile <- function(pls, profile, log=FALSE, ...){
   }
   .rep <- data.table::as.data.table(dat)
   .cols <- c(".value", "pred", paste("x_", profile, sep=""))
-  .rep <- .rep[, lapply(.SD, function(x) sum(x, na.rm=TRUE)),
+  .rep <- .rep[, lapply(data.table::.SD, function(x) sum(x, na.rm=TRUE)),
                .SDcols= .cols, by=c("SPECIES_ID", "SPECIES_NAME")]
   .rep <- as.data.frame(.rep)
   for(i in profile){
