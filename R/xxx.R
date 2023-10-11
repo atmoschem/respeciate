@@ -14,7 +14,7 @@
 #        (not keeping unless we can get it to work better)
 
 
-utils::globalVariables(c("sysdata",
+utils::globalVariables(c("sysdata", ".SD",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
