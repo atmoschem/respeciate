@@ -5,6 +5,8 @@
 \alias{sp_pls_profile}
 \alias{pls_report}
 \alias{pls_fit_species}
+\alias{pls_refit_species}
+\alias{pls_rebuild}
 \alias{pls_plot}
 \alias{pls_plot_species}
 \alias{pls_plot_profile}
@@ -15,6 +17,10 @@ sp_pls_profile(x, ref, power = 1, ...)
 pls_report(pls)
 
 pls_fit_species(pls, species, power = 1, refit.profile = TRUE, ...)
+
+pls_refit_species(pls, species, power = 1, refit.profile = TRUE, ...)
+
+pls_rebuild(pls, species, power = 1, refit.profile = TRUE, ...)
 
 pls_plot(pls, n = 1, type = 1, ...)
 
@@ -42,19 +48,21 @@ range \code{1 - 2.5} are sometimes helpful.}
 \item{pls}{A \code{sp_pls_profile} output, only used by \code{pls_}
 functions.}
 
-\item{species}{(for \code{pls_fit_species} only) a data.frame of
-measurements of an additional species to be fitted to the existing
-PLS model, or the (character class) name of a species already included
-in the model to be refit.}
+\item{species}{for \code{pls_fit_species}, a data.frame of
+measurements of an additional species to be fitted to an existing
+PLS model, or for \code{pls_refit_species} a character vector of the
+names of species already included in the model to be refit. Both are
+multiple-\code{species} wrappers for \code{pls_rebuild}, a general-purpose
+PLS fitter than only handles single \code{species}.}
 
-\item{refit.profile}{(for \code{pls_fit_species} only) logical.
-When fitting a new \code{species} (or refitted an existing \code{species}),
-all other species in the reference profiles are held 'as is' and
-\code{species} is fit to the source contribution time-series of the
-previous PLS model. By default, the full PLS model is then refit
-using the revised \code{ref} source profile to generate a PLS model
-based on the revised source profiles (i.e., ref + new species or ref +
-refit species). However, this second step can be omitted using
+\item{refit.profile}{(for \code{pls_fit_species}, \code{pls_refit_species}
+and \code{pls_rebuild}) logical. When fitting a new \code{species} (or
+refitted an existing \code{species}), all other species in the reference
+profiles are held 'as is' and added \code{species} is fit to the source
+contribution time-series of the previous PLS model. By default, the full PLS
+model is then refit using the revised \code{ref} source profile to generate
+a PLS model based on the revised source profiles (i.e., ref + new species
+or ref + refit species). However, this second step can be omitted using
 \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 as an indicator rather than a standard member of the apportionment model.}
 

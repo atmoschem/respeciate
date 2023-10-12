@@ -1,7 +1,7 @@
 # Version 0.0 - Release Notes
 
 * [0.2.4] 
-    * released 2023-10-09 
+    * released 2023-10-12 
     * added functions: pls_fit_species 
     * added draft rsp_pls object class 
     * moved from importing data.table to data.table::as.data.table, etc... 

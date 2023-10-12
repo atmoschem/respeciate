@@ -1,7 +1,8 @@
 #' @name sp.pls
 #' @title (re)SPECIATE profile Positive Least Squares
 #' @aliases sp_pls_profile pls_report pls_fit_species
-#' pls_plot pls_plot_species pls_plot_profile
+#' pls_refit_species pls_rebuild pls_plot
+#' pls_plot_species pls_plot_profile
 
 #' @description Functions for Positive Least Squares (PSL) fitting of
 #' (re)SPECIATE profiles
@@ -33,18 +34,20 @@
 #' \code{\link{nls}}.
 #' @param pls A \code{sp_pls_profile} output, only used by \code{pls_}
 #' functions.
-#' @param species (for \code{pls_fit_species} only) a data.frame of
-#' measurements of an additional species to be fitted to the existing
-#' PLS model, or the (character class) name of a species already included
-#' in the model to be refit.
-#' @param refit.profile (for \code{pls_fit_species} only) logical.
-#' When fitting a new \code{species} (or refitted an existing \code{species}),
-#' all other species in the reference profiles are held 'as is' and
-#' \code{species} is fit to the source contribution time-series of the
-#' previous PLS model. By default, the full PLS model is then refit
-#' using the revised \code{ref} source profile to generate a PLS model
-#' based on the revised source profiles (i.e., ref + new species or ref +
-#' refit species). However, this second step can be omitted using
+#' @param species for \code{pls_fit_species}, a data.frame of
+#' measurements of an additional species to be fitted to an existing
+#' PLS model, or for \code{pls_refit_species} a character vector of the
+#' names of species already included in the model to be refit. Both are
+#' multiple-\code{species} wrappers for \code{pls_rebuild}, a general-purpose
+#' PLS fitter than only handles single \code{species}.
+#' @param refit.profile (for \code{pls_fit_species}, \code{pls_refit_species}
+#' and \code{pls_rebuild}) logical. When fitting a new \code{species} (or
+#' refitted an existing \code{species}), all other species in the reference
+#' profiles are held 'as is' and added \code{species} is fit to the source
+#' contribution time-series of the previous PLS model. By default, the full PLS
+#' model is then refit using the revised \code{ref} source profile to generate
+#' a PLS model based on the revised source profiles (i.e., ref + new species
+#' or ref + refit species). However, this second step can be omitted using
 #' \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 #' as an indicator rather than a standard member of the apportionment model.
 #' @param n (for \code{pls_plot}s only) numeric or character
@@ -386,16 +389,66 @@ pls_report <- function(pls){
 
 ####################################
 ####################################
-## pls_fit_species
+## pls fitting
 ####################################
 ####################################
+
+#includes
+#   pls_fit_species and
+#   pls_refit_species
+#   pls_rebuild
 
 
 #' @rdname sp.pls
 #' @export
 
-##   now imports from xxx.r
-##   #' @import data.table
+pls_fit_species <- function(pls, species, power=1,
+                            refit.profile=TRUE, ...){
+  #wrapper for multiple fits of new data to a pls model
+  .id <- unique(species$SPECIES_NAME)
+  for(i in .id){
+    .sub.sp <- subset(species, SPECIES_NAME==i)
+    .test <- try(pls_rebuild(pls, species=.sub.sp, power=power,
+                             refit.profile=refit.profile, ...),
+        silent=TRUE)
+    if(class(.test)[1]=="try-error"){
+      warning("RSP_PLS> failed to fit: ", i, sep="")
+    } else {
+      pls <- .test
+    }
+  }
+  pls
+}
+
+
+
+#' @rdname sp.pls
+#' @export
+
+pls_refit_species <- function(pls, species, power=1,
+                              refit.profile=TRUE, ...){
+  #wrapper for multiple fits of new data to a pls model
+  .id <- species
+  for(i in .id){
+    .test <- try(pls_rebuild(pls, species=i, power=power,
+                             refit.profile=refit.profile, ...),
+                 silent=TRUE)
+    #pass back the error???
+    if(class(.test)[1]=="try-error"){
+      warning("RSP_PLS> failed to fit: ", i, sep="",
+              call.=FALSE)
+    } else {
+      pls <- .test
+    }
+  }
+  pls
+}
+
+
+
+#' @rdname sp.pls
+#' @export
+
 
 #############################
 #this needs a lot of work
@@ -430,7 +483,7 @@ pls_report <- function(pls){
 #     start = lower if start is missing might be safer...
 
 
-pls_fit_species <- function(pls, species, power=1,
+pls_rebuild <- function(pls, species, power=1,
                             refit.profile=TRUE, ...){
 
   x.args <- list(...)
@@ -632,7 +685,8 @@ pls_fit_species <- function(pls, species, power=1,
 #     both pls_plot and rsp_profile_pie need work...
 
 
-pls_plot <- function(pls, n=1, type=1,...){
+pls_plot <- function(pls, n=1, type=1,
+                     ...){
 
   #main summary plot
   #require(data.table)
@@ -650,6 +704,9 @@ pls_plot <- function(pls, n=1, type=1,...){
   #    arg passing to barplot in ...???
   #    at least col control???
 
+  #    temp
+  #    tracking col, xlab, ylab in ...
+
   #type 1
   ############################
   #like x axes to look like a conventionally numeric
@@ -665,7 +722,7 @@ pls_plot <- function(pls, n=1, type=1,...){
   #      unexported/below
   #      see notes there...
 
-
+  .x.args <- list(...)
   species <- n
 
   dat <- pls_report(pls)
@@ -687,6 +744,17 @@ pls_plot <- function(pls, n=1, type=1,...){
   .sp.ord <- unique(dat$SPECIES_ID) #only need this if I
   .sp.m.pro <- names(dat)[grep("^m_", names(dat))]
   .sp.pro <- gsub("^m_", "", .sp.m.pro)
+
+  .cols <- if("col" %in% names(.x.args)){
+    .cols <- .x.args$col
+  } else {
+    .cols <- heat.colors(n=length(.sp.m.pro))
+  }
+  if(length(.cols)!=length(.sp.m.pro)){
+    stop("pls_plot> halted; expecting ", length(.sp.m.pro), "colours; given ",
+         length(.cols), sep="", call. = FALSE)
+  }
+
 
   #could put this is pls_report???
   for(i in .sp.pro){
@@ -723,12 +791,22 @@ pls_plot <- function(pls, n=1, type=1,...){
         .rep2$.index <- ordered(.rep2$.index, levels=unique(.rep2$.index))
         #.cols <- palette.colors(n = length(.sp.x.pro), palette = "Okabe-Ito",
         #                        recycle = FALSE)
-        .cols <- heat.colors(n=length(.sp.x.pro))
+        #.cols <- heat.colors(n=length(.sp.x.pro))
         .ncol <- ceiling(length(.sp.x.pro)/3)
         .leg.text <- gsub("^x_", "", .sp.x.pro)
+        .ylb <- if("ylab" %in% names(.x.args)){
+          .x.args$ylab
+        } else {
+          "Measurement"
+        }
+        .xlb <- if("xlab" %in% names(.x.args)){
+          .x.args$xlab
+        } else {
+          "Sample [index]"
+        }
         .bar <- barplot(value~variable + .index,  .rep2, col=.cols,
-                        main = i, ylab="Measurement",
-                        xlab="Sample [index]",
+                        main = i, ylab=.ylb,
+                        xlab=.xlb,
                         ylim=c(0, .scale),   #testing
                         legend.text=.leg.text,
                         args.legend=list(cex=0.8,
@@ -739,7 +817,7 @@ pls_plot <- function(pls, n=1, type=1,...){
       }
     }
     if(2 %in% type){
-        .cols <- heat.colors(n=length(.sp.x.pro))
+        #.cols <- heat.colors(n=length(.sp.x.pro))
         if(nrow(.tot2)==0){
           warning(paste("pls_plot: no type 2 ", i, " model", sep=""),
                   call. = FALSE)
@@ -795,7 +873,13 @@ pls_plot_species <- function(pls, n, type=1, ...){
   #needs external plot control...
   #    arg passing to barplot in ...???
   #    at least col control???
+  #    type 2 plot should have a legend
 
+  #temp update
+  #    tracking col (and mod.col), xlab, ylab via ...
+
+
+  .x.args <- list(...)
   species <- n
 
   #get (and work from) report
@@ -818,6 +902,26 @@ pls_plot_species <- function(pls, n, type=1, ...){
          call.=FALSE)
   }
   for(i in species){
+    .xlb <- if("xlab" %in% names(.x.args)){
+      .x.args$xlab
+    } else {
+      "Measurement"
+    }
+    .ylb <- if("ylab" %in% names(.x.args)){
+      .x.args$ylab
+    } else {
+      "Model"
+    }
+    .bc <- if("col" %in% names(.x.args)){
+      .x.args$col
+    } else {
+      par("col")
+    }
+    .mc <- if("mod.col" %in% names(.x.args)){
+      .x.args$mod.col
+    } else {
+      "red"
+    }
     d2 <- subset(dat, SPECIES_NAME==i)
     lims <- range(c(d2$.value, d2$pred))
     mod <- lm(pred~0+.value, d2)
@@ -827,23 +931,35 @@ pls_plot_species <- function(pls, n, type=1, ...){
     if(1 %in% type){
       plot(d2$.value, d2$pred, type="n",
            main=i,
-           xlab="Measurement",
-           ylab="Model",
+           col=.bc,
+           xlab=.xlb,
+           ylab=.ylb,
            xlim=lims, ylim=lims)
       grid()
       abline(a=0, b=1, col="grey")
       points(d2$.value, d2$pred)
-      abline(mod, col="red", lty=2)
+      abline(mod, col=.mc, lty=2)
       text(lims[1], lims[2], .sum, adj=c(0,1), cex=0.75)
     }
     if(2 %in% type){
+      .xlb <- if("xlab" %in% names(.x.args)){
+        .x.args$xlab
+      } else {
+        "Sample [index]"
+      }
+      .ylb <- if("ylab" %in% names(.x.args)){
+        .x.args$ylab
+      } else {
+        "Measurement"
+      }
       plot(d2$.value, type="n",
            main=i,
-           ylab="Measurement",
-           xlab="Sample [index]",
+           col=.bc,
+           ylab=.ylb,
+           xlab=.xlb,
            ylim=lims)
       lines(d2$.value)
-      lines(d2$pred, col="red")
+      lines(d2$pred, col=.mc)
     }
   }
   invisible(NULL)
@@ -881,6 +997,9 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
   #    arg passing to barplot in ...???
   #    at least col control???
 
+  #temp updates
+  #   tracking col (and y2col), ylab (and y2.lab) via ...
+
   #type
   ############################
   #(currently only one so not needed...)
@@ -893,6 +1012,7 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
 
   #require(data.table)
 
+  .x.args <- list(...)
   profile <- n
 
   dat <- pls_report(pls)
@@ -994,12 +1114,23 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
       .y <- d2[,i]
       .y1.at <- pretty(.y)
       .y1.lb <- .y1.at
-      .yl <- "Source Loading"
       .y2 <- d2[, paste("pc_", i, sep="")]
       .y2 <- ((.y2/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
       .y2.lb <- seq(0, 100, by=20)
       .y2.at <- ((.y2.lb/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
 
+    }
+
+    .bc <- if("col" %in% names(.x.args)){
+      .x.args$col
+    } else {
+      NULL
+    }
+    .yl <- if("ylab" %in% names(.x.args)){
+      .x.args$ylab
+    }
+    else {
+      "Source Loading"
     }
 
     #lims <- range(d2[,4], na.rm=TRUE)
@@ -1015,15 +1146,26 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
                     cex.names=.f.cex,
                     axes=FALSE,
                     ylab=.yl,
+                    col=.bc,
                     las=2
     )
-    points(.bar, .y2, col="red", pch=19)
+    .y2c <- if("y2.col" %in% names(.x.args)){
+      .x.args$y2.col
+    } else {
+      "Red"
+    }
+    points(.bar, .y2, col=.y2c, pch=19)
     axis(2, ylim=range(.y1.at), at=.y1.at, labels=.y1.lb, cex=.f.cex,
          cex.axis=.f.cex, las=2)
     axis(4, ylim=range(0, max(.y2.at)), at=.y2.at, labels=.y2.lb,
-         col="red", col.axis="red", cex=.f.cex,
+         col=.y2c, col.axis=.y2c, cex=.f.cex,
          cex.axis=.f.cex, las=2)
-    mtext("Percent of Total Contribution (%)", side=4, line=3, col ="red",
+    .y2l <- if("y2.lab" %in% names(.x.args)){
+      .x.args$y2.lab
+    } else {
+      "Percent of Total Contribution (%)"
+    }
+    mtext(.y2l, side=4, line=3, col =.y2c,
           cex=.f.cex)
 
   }
@@ -1172,7 +1314,7 @@ rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
 #               they could make a pls that was not positively constrained
 
 
-pls_refit_species <- function(pls, name, power=1,
+rsp_pls_refit_species <- function(pls, name, power=1,
                               ...){
   .xx <- pls_report(pls)
   #name might want to be case-non-sensitive at some point
@@ -1278,7 +1420,7 @@ pls_refit_species <- function(pls, name, power=1,
 #     start = lower if start is missing might be safer...
 
 
-pls_fit_parent <- function(pls, parent, power=1,
+rsp_pls_fit_parent <- function(pls, parent, power=1,
                            start=100,
                            lower=50, upper=200, ...){
 

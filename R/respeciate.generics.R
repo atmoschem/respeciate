@@ -97,12 +97,12 @@ print.rsp_pls <- function(x, n = NULL, ...){
   #expecting list of nls models
   report <- "respeciate pls model:"
   if(!is.list(x)){
-    report <- paste(report, "\n   Suspect!", sep="")
+    report <- paste(report, "\n   Suspect!\n", sep="")
   } else{
     temp <- unlist(lapply(x, function(x) !is.null(x)))
     temp <- length(temp[temp])
     report <- paste(report, "\n   list of ", length(x), " profile models",
-                    "\n   (", temp, " good)", sep="")
+                    "\n   (", temp, " good)\n", sep="")
   }
   cat(report)
 }
