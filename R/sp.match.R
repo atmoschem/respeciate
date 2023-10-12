@@ -235,7 +235,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
       NA
     }
   }
-  .out <- .tmp[, (.cols) := lapply(data.table::.SD, f), .SDcols = .cols]
+  .out <- .tmp[, (.cols) := lapply(.SD, f), .SDcols = .cols]
 
   ##########################
   #chop down to build report
