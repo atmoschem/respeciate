@@ -109,7 +109,10 @@ sp_average_profile <- function(x, code = NULL, name = NULL, method = 1,
   out <- xx[,
             .(PROFILE_NAME = PROFILE_NAME[1],
               SPECIES_NAME = SPECIES_NAME[1],
-              SPEC_MW = SPEC_MW[1],
+  ##########################
+  # testing
+              #SPEC_MW = SPEC_MW[1],
+  ##########################
               .total = sum(.value, na.rm = TRUE),
               .value = mean(.value, na.rm = TRUE),
               .n = length(.value[!is.na(.value)]),

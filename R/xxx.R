@@ -107,7 +107,7 @@ rsp_test_respeciate <- function(x, level = 1,
 #######################
 #tidy profile
 
-#I am thinking of using a .value column as my value column
+#now using a .value column as a local version of WEIGHT_PERCENT...
 #then WEIGHT_PERCENT remains as EPA made it even if we rescale...
 
 ## testing this idea at the moment
@@ -122,6 +122,11 @@ rsp_tidy_profile <- function(x){
   }
   x
 }
+
+
+
+
+
 
 ###########################
 #tidy names
@@ -180,7 +185,11 @@ rsp_test_profile <- function(x){
   out <- xx[,
             .(PROFILE_NAME = PROFILE_NAME[1],
               SPECIES_NAME = SPECIES_NAME[1],
-              SPEC_MW = SPEC_MW[1],
+  #######################
+  #test
+  ########################
+              #SPEC_MW = SPEC_MW[1],
+  ########################
               .total = sum(.value, na.rm = TRUE),
               .value = mean(.value, na.rm = TRUE),
               .n = length(.value[!is.na(.value)]),

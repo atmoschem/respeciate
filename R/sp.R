@@ -1,6 +1,6 @@
 #' @name sp
 #' @title sp_ functions
-#' @aliases sp_profile
+#' @aliases sp_profile sp_build_rsp_x
 
 
 #' @description sp function to get profiles from the R (re)SPECIATE archive
@@ -14,10 +14,30 @@
 #' the \code{code}s as a named \code{PROFILE_NAME} column.
 #' @param include.refs logical, include profile reference information when
 #' getting the requested profile(s) from the archive, default \code{FALSE}.
+#' @param x (for \code{sp_build}s only) A \code{data.frame} or similar to
+#' be converted into a \code{respeciate} object for comparison with
+#' SPECIATE profiles.
+#' @param profile_name,profile_code (for \code{sp_build}s only;
+#' \code{character})  The name of the column in \code{x} containing
+#' profile name and code, respectively. If not already named according
+#' to SPECIATE conventions, at least one of these will need to be assigned.
+#' @param species_name,species_id (for \code{sp_build}s only;
+#' \code{character})  The name of the column in \code{x} containing
+#' species name and id, respectively. If not already named according
+#' to SPECIATE conventions, at least one of these will need to be assigned.
+#' @param value (for \code{sp_build}s only; \code{character})  The name
+#' of the column in \code{x} containing measurement values. If not already
+#' named according to SPECIATE conventions, this will need to be assigned.
+#' @param ... additional arguments, currently ignored.
 #' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
 #' (re)SPECIATE profile.
-#' @note The option \code{include.refs} adds profile source reference
+#'
+#' \code{sp_build}s attempt to build and return a (re)SPECIATE-like profile
+#' that can be compared with with data in re(SPECIATE).
+#' @note With \code{sp_profile}:
+#'
+#' The option \code{include.refs} adds profile source reference
 #' information to the returned \code{respeciate} data set. The default option
 #' is to not include these because some profiles have several associated
 #' references and including these replicates records, once per reference.
@@ -25,6 +45,17 @@
 #' own methods or code and include references in any profile build you may be
 #' biasing some analyses in favor of those multiple-reference profile unless
 #' you check and account such cases.
+#'
+#' With \code{sp_build}s:
+#'
+#' It is particularly IMPORTANT that you use EPA SPECIATE conventions when
+#' assign species information if you want to compare your data with SPECIATE
+#' profiles. Currently, working on option to improve on this (and very happy
+#' to discuss if anyone has ideas), but current best suggestion is: (1)
+#' identify the SPECIATE species code for all the species in your data set,
+#' and (2) assign these as \code{species_id} when \code{sp_build}ing. The
+#' function will associate the \code{species_name}.
+#'
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
@@ -128,6 +159,131 @@ sp_profile <- function(code, include.refs=FALSE) {
   df <- rsp_build_respeciate(as.data.frame(df))
   return(df)
 }
+
+
+
+##############################
+# sp_build_rsp_x
+##############################
+
+#' @rdname sp
+#' @export
+
+sp_build_rsp_x <-
+  function(x, profile_code, profile_name,
+           species_name, species_id,
+           value, ...){
+
+    # light build for a rsp_x data object
+    # might need spec_mwt
+
+    # current build rules
+    # profile_name:  if not there, if sent in call use,
+    #                              else if there use profile_code
+    # profile_code:  if not there, if sent in call use,
+    #                              else if there use profile_name
+    # species_name:  if not there, if sent in call use,
+    #                              else if there use use species_id to look-up
+    #                              if any missing, warn
+    # species_id:    if not there, if sent in call use,
+    #                              else if there use species_name to look-up
+    #                              if any missing, warn
+    # .value:        if not there, if sent in call use.
+    # WEIGHT_PERCENT:if not there, if sent in call use.
+    #                              else if there use .value to look-up
+
+    # don't build/error if any of these missing and end of build
+
+    # redundant?
+    # currently not using ...
+    .x.args <- list(...)
+
+    #if not there and sent in call
+
+    #note:
+    #current making all BUT values, character class
+    if(!"PROFILE_NAME" %in% names(x) & (!missing(profile_name))){
+      if(!profile_name %in% names(x)){
+        stop("sp_build> '", as.character(profile_name)[1],
+             "' not in 'x'...", sep="", call. = FALSE)
+      }
+      x$PROFILE_NAME <- as.character(x[, profile_name])
+    }
+    if(!"PROFILE_CODE" %in% names(x) & (!missing(profile_code))){
+      if(!profile_code %in% names(x)){
+        stop("sp_build> '", as.character(profile_code)[1],
+             "' not in 'x'...", sep="", call. = FALSE)
+      }
+      x$PROFILE_CODE <- as.character(x[, profile_code])
+    }
+    if(!"SPECIES_NAME" %in% names(x) & (!missing(species_name))){
+      if(!species_name %in% names(x)){
+        stop("sp_build> '", as.character(species_name)[1],
+             "' not in 'x'...", sep="", call. = FALSE)
+      }
+      x$SPECIES_NAME <- as.character(x[, species_name])
+    }
+    if(!"SPECIES_ID" %in% names(x) & (!missing(species_id))){
+      if(!species_id %in% names(x)){
+        stop("sp_build> '", as.character(species_id)[1],
+             "' not in 'x'...", sep="", call. = FALSE)
+      }
+      x$SPECIES_ID <- as.character(x[, species_id])
+    }
+    if(!".value" %in% names(x) & (!missing(value))){
+      if(!value %in% names(x)){
+        stop("sp_build> '", as.character(value)[1],
+             "' not in 'x'...", sep="", call. = FALSE)
+      }
+      x$.value <- x[, value]
+    }
+
+    #if still not there try to assign using what is there
+
+    if("PROFILE_NAME" %in% names(x) & !"PROFILE_CODE" %in% names(x)){
+      x$PROFILE_CODE <- x$PROFILE_NAME
+    }
+    if("PROFILE_CODE" %in% names(x) & !"PROFILE_NAME" %in% names(x)){
+      x$PROFILE_NAME <- x$PROFILE_CODE
+    }
+    test <- c("SPECIES_NAME", "SPECIES_ID")[c("SPECIES_NAME", "SPECIES_ID")
+                                            %in% names(x)]
+    if(length(test)==1){
+      #one there, other as look-up
+      .tmp <- data.table::as.data.table(
+        sysdata$SPECIES_PROPERTIES[c("SPECIES_NAME", "SPECIES_ID")]
+      )
+      .tmp$SPECIES_NAME <- as.character(.tmp$SPECIES_NAME)
+      .tmp$SPECIES_ID <- as.character(.tmp$SPECIES_ID)
+      x <- merge(data.table::as.data.table(x),
+                 data.table::as.data.table(.tmp),
+                 all.x=TRUE, all.y=FALSE, allow.cartesian=TRUE)
+      x <- as.data.frame(x)
+    }
+    if(".value" %in% names(x) & !"WEIGHT_PERCENT" %in% names(x)){
+      x$WEIGHT_PERCENT <- x$.value
+    }
+
+    #test what we have
+
+    .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_NAME", "SPECIES_ID",
+               ".value", "WEIGHT_PERCENT")
+    .test <- .test[!.test %in% names(x)]
+    if(length(.test)>0){
+      stop("sp_build> bad data structure, expected column(s) missing/unassigned:\n",
+           paste(.test, sep="", collapse = ", "), "\n", sep="", call.=FALSE)
+    }
+    if(any(is.na(x$SPECIES_ID)) | any(is.na(x$SPECIES_NAMES))){
+      warning("sp_build> suspect species data, values missing:\n",
+              "(respeciate needs valid species entries)\n",
+              sep="", call.=FALSE)
+    }
+
+    x <- as.data.frame(x)
+    class(x) <- c("rsp_x", "respeciate", "data.frame")
+    x
+  }
+
 
 
 

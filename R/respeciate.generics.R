@@ -376,7 +376,7 @@ summary.respeciate <-
     if(!.silent){
       if(nrow(out) > .max.n){
         print(head(out[c(1,2,5,6)], n = .max.n))
-        cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]",
+        cat("  [forestortened - showing ", .max.n, " of ", nrow(out), "]\n",
             sep="")
       } else {
         print(out[c(1,2,5,6)])
@@ -553,6 +553,9 @@ rsp_build_respeciate <-
     class(x) <- c("respeciate", "data.frame")
     x
   }
+
+
+
 
 
 ###########################
