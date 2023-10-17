@@ -350,34 +350,56 @@ pls_report <- function(pls){
   if(nrow(ans)==0){
     return(as.data.frame(ans))
   }
+
   #####################
   #thinking about
   #####################
   #    adding x_[profile] (m_[profile] * profile) calculations here
   #    currently done on fly in some plots...
+
   ans$.value <- ans$test
-  #ans$pred[is.na(ans$pred)] <- 0   #this about this..
-  ######################
-  #thinking about
-  ######################
-  #    forcing this to y=x??
-  #       if so, use code in pls_plot_species
-  #            so consistent....
-  #    also, moving the lm to the lapply
-  #       so lm stats are calculated by-species??
-  mod2 <- lm(pred~.value, data=ans)
-  ans$adj.r.sq <- summary(mod2)$adj.r.squared
-  ans$slope <- summary(mod2)$coefficients[2,1]
-  ans$p.slope <- summary(mod2)$coefficients[2,4]
-  ans$intercept <- summary(mod2)$coefficients[1,1]
-  ans$p.intercept <- summary(mod2)$coefficients[1,4]
-  ###########
-  #(also noted in sp_pls_profile)
-  #if we need to calculate it on a case-by-case basis...
-  #need to read this:
-  #https://stackoverflow.com/questions/39999456/aic-on-nls-on-r
-  #see stats:::logLik.nls for AIC calc...
-  ans$AIC <- AIC(mod2)
+
+  #######################################
+  # previous
+  #     as all-species step
+  #######################################
+  ##    .mod <- lm(pred ~ 0 + .value, data = .out)
+  ##    .out$adj.r.sq <- summary(.mod)$adj.r.squared
+  ##    .out$slope <- summary(.mod)$coefficients[1, 1]
+  ##    .out$p.slope <- summary(.mod)$coefficients[1, 4]
+  ##    .out$AIC <- AIC(.mod)
+  ##    .out
+
+  #################################
+  # replacing with...
+  #################################
+  #by species calculate stats
+  #    guessing this could be done in data.table???
+  .sp.ref <- unique(ans$SPECIES_NAME)
+  .tmp <- lapply(.sp.ref, function(x){
+    .tmp <- subset(ans, SPECIES_NAME==x)
+    #################
+    # note
+    #################
+    #    was previouslys pred ~ .value
+    #         and reported intercept and intercept p
+    #
+    .mod <- lm(pred ~ 0 + .value, data = .tmp)
+    ###########
+    #(also noted in sp_pls_profile)
+    #if we need to calculate aic based on the method parameters...
+    #need to read this:
+    #https://stackoverflow.com/questions/39999456/aic-on-nls-on-r
+    #see stats:::logLik.nls for AIC calc...
+    data.frame(SPECIES_NAME = x,
+               adj.r.sq = summary(.mod)$adj.r.squared,
+               slope = summary(.mod)$coefficients[1, 1],
+               p.slope = summary(.mod)$coefficients[1, 4],
+               AIC = AIC(.mod)
+    )
+  })
+  .tmp <- data.table::rbindlist(.tmp)
+  ans <- merge(ans, .tmp, by="SPECIES_NAME")
 
   as.data.frame(ans)
 }
@@ -923,7 +945,12 @@ pls_plot_species <- function(pls, n, type=1, ...){
       "red"
     }
     d2 <- subset(dat, SPECIES_NAME==i)
-    lims <- range(c(d2$.value, d2$pred))
+    #lims <- range(c(d2$.value, d2$pred))
+    #######################################
+    # update - were seeing NAs in the pls models
+    #          BUT should not be happening
+    lims <- range(c(d2$.value, d2$pred), na.rm = TRUE, finite = TRUE)
+    #############################
     mod <- lm(pred~0+.value, d2)
     .sum <- paste("y = ", signif(summary(mod)$coefficients[1,1], 3),
                   "x (adj.R2 = ", signif(summary(mod)$adj.r.squared, 3),
