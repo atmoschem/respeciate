@@ -97,21 +97,21 @@ sp_dcast <- function(x, widen = "species"){
   #save class
   cls <- class(x)
 
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
 
   #stop if widen option not known.
   if(!widen %in% c("species", "profile")){
     stop("unknown widen option")
   }
   if(widen=="species"){
-    out <- dcast(xx,
+    out <- data.table::dcast(xx,
                  PROFILE_CODE + PROFILE_NAME ~ SPECIES_NAME,
                  mean,
                  na.rm=TRUE,
                  value.var = ".value")
   }
   if(widen=="profile"){
-    out <- dcast(xx,
+    out <- data.table::dcast(xx,
                  SPECIES_ID + SPECIES_NAME ~PROFILE_CODE,
                  mean,
                  na.rm=TRUE,
@@ -192,7 +192,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
   #save class
   cls <- class(x)
 
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
 
   #################
   #test log/wide
@@ -225,7 +225,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
   #should only be species.wide or profile.wide
   #   if we get to here
 
-  out <- melt(xx, id.vars = .id.vars)
+  out <- data.table::melt(xx, id.vars = .id.vars)
   names(out)[names(out)=="variable"] <- .long
   names(out)[names(out)=="value"] <- ".value"
 

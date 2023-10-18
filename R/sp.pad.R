@@ -90,11 +90,11 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
   x <- rsp_tidy_profile(x)
   #save class
   .cls <- class(x)
-  out <- as.data.table(x)
+  out <- data.table::as.data.table(x)
 
   #profile
   if(any(c("profile", "profiles", "standard", "all") %in% tolower(pad))){
-    PROFILES <- as.data.table(sysdata$PROFILES)
+    PROFILES <- data.table::as.data.table(sysdata$PROFILES)
     .tmp <- intersect(names(out), names(PROFILES))
     if(length(.tmp)>0){
       out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
@@ -104,7 +104,7 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
 
   #species
   if(any(c("species", "standard", "all") %in% tolower(pad))){
-    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
+    SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
     .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
     if(length(.tmp) >0){
       out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
@@ -114,7 +114,7 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
 
   #species weights
   if(any(c("weight", "weights", "standard", "all") %in% tolower(pad))){
-    SPECIES <- as.data.table(sysdata$SPECIES)
+    SPECIES <- data.table::as.data.table(sysdata$SPECIES)
     .tmp <- intersect(names(out), names(SPECIES))
     if(length(.tmp) >0){
       out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
@@ -124,8 +124,8 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
 
   #references
   if(any(c("reference", "references", "all") %in% tolower(pad))){
-    PROFILE_REFERENCE <- as.data.table(sysdata$PROFILE_REFERENCE)
-    REFERENCES <- as.data.table(sysdata$REFERENCES)
+    PROFILE_REFERENCE <- data.table::as.data.table(sysdata$PROFILE_REFERENCE)
+    REFERENCES <- data.table::as.data.table(sysdata$REFERENCES)
     .tmp <- intersect(names(out), names(PROFILE_REFERENCE))
     if(length(.tmp) >0){
       out <- merge(out, PROFILE_REFERENCE, by = .tmp, all.y=FALSE,
@@ -172,7 +172,7 @@ sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
   x <- rsp_tidy_profile(x)
   #save class
   .cls <- class(x)
-  out <- as.data.table(x)
+  out <- data.table::as.data.table(x)
 
   #set up padding for melts...
   .long <- "nothing"
@@ -183,8 +183,8 @@ sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
     .long <- "PROFILE_CODE"
   }
 
-  PROFILES <- as.data.table(sysdata$PROFILES)
-  SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
+  PROFILES <- data.table::as.data.table(sysdata$PROFILES)
+  SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
   if(.long=="PROFILE_CODE"){
     #add in profile then species info
     out <- merge(out, PROFILES, by = .long, all.y=FALSE,
@@ -203,7 +203,7 @@ sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
   }
   #to get weight_percentage etc
   if(pad %in% c("species", "profile", "weight")){
-    SPECIES <- as.data.table(sysdata$SPECIES)
+    SPECIES <- data.table::as.data.table(sysdata$SPECIES)
     .tmp <- intersect(names(out), names(SPECIES))
     out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
                  all.x=TRUE, allow.cartesian=TRUE)

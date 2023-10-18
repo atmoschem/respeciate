@@ -14,7 +14,7 @@
 #        (not keeping unless we can get it to work better)
 
 
-utils::globalVariables(c("sysdata",
+utils::globalVariables(c("sysdata", ".SD",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
@@ -25,8 +25,8 @@ utils::globalVariables(c("sysdata",
 
 # all @import here
 #    in case we have to move to data.table::as.data.table, etc...
-
-#' @import data.table
+#    moving to data.table::as.data.table...
+# #' @import data.table
 
 #   data.table used by:
 #         rsp_test_profile,
@@ -36,6 +36,7 @@ utils::globalVariables(c("sysdata",
 #         and others???
 #               need to identify them
 
+#' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
 #' as.formula coefficients formula lm nls nls.control predict
 #' @importFrom utils modifyList head
@@ -106,7 +107,7 @@ rsp_test_respeciate <- function(x, level = 1,
 #######################
 #tidy profile
 
-#I am thinking of using a .value column as my value column
+#now using a .value column as a local version of WEIGHT_PERCENT...
 #then WEIGHT_PERCENT remains as EPA made it even if we rescale...
 
 ## testing this idea at the moment
@@ -121,6 +122,11 @@ rsp_tidy_profile <- function(x){
   }
   x
 }
+
+
+
+
+
 
 ###########################
 #tidy names
@@ -175,11 +181,15 @@ rsp_test_profile <- function(x){
   #      testing
   #######################################
   tmp <- class(x)
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
   out <- xx[,
             .(PROFILE_NAME = PROFILE_NAME[1],
               SPECIES_NAME = SPECIES_NAME[1],
-              SPEC_MW = SPEC_MW[1],
+  #######################
+  #test
+  ########################
+              #SPEC_MW = SPEC_MW[1],
+  ########################
               .total = sum(.value, na.rm = TRUE),
               .value = mean(.value, na.rm = TRUE),
               .n = length(.value[!is.na(.value)]),

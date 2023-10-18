@@ -1,5 +1,12 @@
 # Version 0.0 - Release Notes
 
+* [0.2.4] 
+    * released 2023-11-14 
+    * added functions: pls_fit_species 
+    * added draft rsp_pls and rsp_x object classes 
+    * added draft sp_build_rsp_x  
+    * moved from importing data.table to data.table::as.data.table, etc... 
+
 * [0.2.3] 
     * released 2023-09-26 
     * added functions: sp_rescale_species, sp_dcast, sp_dcast_species 

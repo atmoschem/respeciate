@@ -88,7 +88,7 @@ sp_rescale <- function(x, method = 2, by = "species"){
 
   #################################
   #calculate stats
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
   #remove stats if there...
   test <- c(".min",".max",".total", ".mean", ".na", ".n", ".sd")
   test <- test[ test %in% colnames(xx)]
@@ -247,7 +247,7 @@ rsp_rescale_species <- function(x, method = 2){
 
   #################################
   #calculate stats
-  xx <- as.data.table(x)
+  xx <- data.table::as.data.table(x)
   #remove stats if there...
   test <- c(".min",".max",".total", ".mean", ".na", ".n", ".sd")
   test <- test[ test %in% colnames(xx)]

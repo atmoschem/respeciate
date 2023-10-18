@@ -140,9 +140,9 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
     matches <- matches + 1
   #}
 
-  x <- as.data.table(x)
-  ref <- as.data.table(ref)
-  .tmp <- rbindlist(list(x, ref), fill=TRUE)
+  x <- data.table::as.data.table(x)
+  ref <- data.table::as.data.table(ref)
+  .tmp <- data.table::rbindlist(list(x, ref), fill=TRUE)
 
   #################
   #think about this
@@ -167,7 +167,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #          but then maybe need to check requires
   #          cols are there???
 
-  .tmp <- as.data.table(sp_rescale_species(.tmp, method=rescale))
+  .tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -193,7 +193,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #              na.rm=TRUE,
   #              value.var = ".value")
 
-  .tmp <- as.data.table(sp_dcast(.tmp, widen="profile"))
+  .tmp <- data.table::as.data.table(sp_dcast(.tmp, widen="profile"))
 
   #nb: need the as.data.table() because sp_profile_dcast
   #    currently returns data.frame
