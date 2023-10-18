@@ -1116,10 +1116,18 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
       .y[.y<.min] <- .min
       .y[is.na(.y)] <- .min
       .y <- log10(.y)
-      .y1.at <- pretty(.y)
-      .y1.at <- .y1.at[.y1.at == round(.y1.at)]
-      #need to go back in and recalculate min as
-      #bottom of pretty...
+      ##############################
+      #testing
+      #this was dying when only one species in a profile...
+      #little useless for any analysis
+      #     but can happen with SPECIATE sources
+      ###############################
+      ##.y1.at <- pretty(.y)
+      ##.y1.at <- .y1.at[.y1.at == round(.y1.at)]
+      ###need to go back in and recalculate min as
+      ###bottom of pretty...
+      .y1.at <- min(floor(.y), na.rm=TRUE): max(ceiling(.y), na.rm=TRUE)
+
       .y[.y==log10(.min)] <- .y1.at[1]
 
       #.y1.lb <- as.character(10^(.y1.at))
