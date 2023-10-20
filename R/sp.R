@@ -14,9 +14,10 @@
 #' the \code{code}s as a named \code{PROFILE_NAME} column.
 #' @param include.refs logical, include profile reference information when
 #' getting the requested profile(s) from the archive, default \code{FALSE}.
-#' @param x (for \code{sp_build}s only) A \code{data.frame} or similar to
-#' be converted into a \code{respeciate} object for comparison with
-#' SPECIATE profiles.
+#' @param x (for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
+#' something that can be converted to a \code{data.frame} using
+#' \code{as.data.frame}) to be converted into a \code{respeciate} object for
+#' comparison with SPECIATE profiles.
 #' @param profile_name,profile_code (for \code{sp_build}s only;
 #' \code{character})  The name of the column in \code{x} containing
 #' profile name and code, respectively. If not already named according
@@ -174,10 +175,17 @@ sp_build_rsp_x <-
            species_name, species_id,
            value, ...){
 
+
     # light build for a rsp_x data object
     # might need spec_mwt
 
+    ###########################
     # current build rules
+    ###########################
+
+    # must be a data.frame or something that can be converted
+    #        using as.data.frame(x)
+
     # profile_name:  if not there, if sent in call use,
     #                              else if there use profile_code
     # profile_code:  if not there, if sent in call use,
@@ -197,6 +205,11 @@ sp_build_rsp_x <-
     # redundant?
     # currently not using ...
     .x.args <- list(...)
+
+    #adding the as.data.frame because
+    #    code is not planning nicely with Dennis' tibbles
+    #        if tibble is loaded before respeciate...
+    x <- as.data.frame(x)
 
     #if not there and sent in call
 

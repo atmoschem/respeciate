@@ -28,9 +28,10 @@ the \code{code}s as a named \code{PROFILE_NAME} column.}
 \item{include.refs}{logical, include profile reference information when
 getting the requested profile(s) from the archive, default \code{FALSE}.}
 
-\item{x}{(for \code{sp_build}s only) A \code{data.frame} or similar to
-be converted into a \code{respeciate} object for comparison with
-SPECIATE profiles.}
+\item{x}{(for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
+something that can be converted to a \code{data.frame} using
+\code{as.data.frame}) to be converted into a \code{respeciate} object for
+comparison with SPECIATE profiles.}
 
 \item{profile_name, profile_code}{(for \code{sp_build}s only;
 \code{character})  The name of the column in \code{x} containing
