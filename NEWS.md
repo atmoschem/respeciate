@@ -1,8 +1,8 @@
 # Version 0.0 - Release Notes
 
 * [0.2.5] 
-    * released 2023-11-20
-    * sp_build_rsp_x update; x converted to data.frame (I blame the tibbles!)  
+    * released 2023-11-21
+    * sp_build_rsp_x update; x converted to data.frame (trouble with tibbles!)  
 
 * [0.2.4] 
     * released 2023-11-14 

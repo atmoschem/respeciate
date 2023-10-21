@@ -167,6 +167,23 @@ sp_profile <- function(code, include.refs=FALSE) {
 # sp_build_rsp_x
 ##############################
 
+# notes
+##############################
+
+# sp_build_rsp_x currently converts x as.data.frame(x)
+#     if tibble is loaded, any tibbles complicate things
+
+#     BUT might want to revisit this because it looked like:
+#           the data structure was fine but
+#           print.respeciate was having problems...
+
+#           BUT might be other problems I did not spot
+
+#           BUT be nice if c("respeciate", class("tibble")) could be use...
+#               to retain the data type history
+#               and drop back to tibble rather than data.frame....
+
+
 #' @rdname sp
 #' @export
 
@@ -290,6 +307,30 @@ sp_build_rsp_x <-
       warning("sp_build> suspect species data, values missing:\n",
               "(respeciate needs valid species entries)\n",
               sep="", call.=FALSE)
+    }
+
+
+    #rationalise this and above...
+    ################################
+    # below might be best place as catch-all ?
+    #    because...
+    #    user could supply and above is currently
+    #        only applying as.character when making something new...
+    #    else may at start then when making something new...
+    # also
+    #    do values need to be as.numeric???
+
+    if("PROFILE_NAME" %in% names(x)){
+      x$PROFILE_NAME <- as.character(x$PROFILE_NAME)
+    }
+    if("PROFILE_CODE" %in% names(x)){
+      x$PROFILE_CODE <- as.character(x$PROFILE_CODE)
+    }
+    if("SPECIES_NAME" %in% names(x)){
+      x$SPECIES_NAME <- as.character(x$SPECIES_NAME)
+    }
+    if("SPECIES_ID" %in% names(x)){
+      x$SPECIES_ID <- as.character(x$SPECIES_ID)
     }
 
     x <- as.data.frame(x)
