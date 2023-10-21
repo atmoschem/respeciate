@@ -203,6 +203,8 @@ sp_build_rsp_x <-
     # must be a data.frame or something that can be converted
     #        using as.data.frame(x)
 
+    # profile and species columns must be character...
+
     # profile_name:  if not there, if sent in call use,
     #                              else if there use profile_code
     # profile_code:  if not there, if sent in call use,
@@ -227,6 +229,32 @@ sp_build_rsp_x <-
     #    code is not planning nicely with Dennis' tibbles
     #        if tibble is loaded before respeciate...
     x <- as.data.frame(x)
+
+    #rationalise this?...
+    #    could they be else options when
+    #        check for species and profile columns?
+    ################################
+    # notes
+    # profile and species columns all need to character
+    #    user could supply any thing  and previously
+    #        only applying as.character when making something new...
+    #    else may at start then when making something new...
+    #    (at end did not work for species if building one of species_name
+    #         and species_id from other...)
+    # also
+    #    do values need to be as.numeric???
+    if("PROFILE_NAME" %in% names(x)){
+      x$PROFILE_NAME <- as.character(x$PROFILE_NAME)
+    }
+    if("PROFILE_CODE" %in% names(x)){
+      x$PROFILE_CODE <- as.character(x$PROFILE_CODE)
+    }
+    if("SPECIES_NAME" %in% names(x)){
+      x$SPECIES_NAME <- as.character(x$SPECIES_NAME)
+    }
+    if("SPECIES_ID" %in% names(x)){
+      x$SPECIES_ID <- as.character(x$SPECIES_ID)
+    }
 
     #if not there and sent in call
 
@@ -295,6 +323,7 @@ sp_build_rsp_x <-
     }
 
     #test what we have
+    ########################
 
     .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_NAME", "SPECIES_ID",
                ".value", "WEIGHT_PERCENT")
@@ -309,29 +338,8 @@ sp_build_rsp_x <-
               sep="", call.=FALSE)
     }
 
-
-    #rationalise this and above...
-    ################################
-    # below might be best place as catch-all ?
-    #    because...
-    #    user could supply and above is currently
-    #        only applying as.character when making something new...
-    #    else may at start then when making something new...
-    # also
-    #    do values need to be as.numeric???
-
-    if("PROFILE_NAME" %in% names(x)){
-      x$PROFILE_NAME <- as.character(x$PROFILE_NAME)
-    }
-    if("PROFILE_CODE" %in% names(x)){
-      x$PROFILE_CODE <- as.character(x$PROFILE_CODE)
-    }
-    if("SPECIES_NAME" %in% names(x)){
-      x$SPECIES_NAME <- as.character(x$SPECIES_NAME)
-    }
-    if("SPECIES_ID" %in% names(x)){
-      x$SPECIES_ID <- as.character(x$SPECIES_ID)
-    }
+    #output
+    ######################
 
     x <- as.data.frame(x)
     class(x) <- c("rsp_x", "respeciate", "data.frame")
