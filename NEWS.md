@@ -1,11 +1,12 @@
 # Version 0.0 - Release Notes
 
 * [0.2.5] 
-    * released 2023-11-21
-    * sp_build_rsp_x update; x converted to data.frame (trouble with tibbles!)  
+    * released 2023-10-25
+    * sp_build_rsp_x update; x converted to data.frame (trouble with tibbles!)
+    * pls_plot update; changed mar settings 
 
 * [0.2.4] 
-    * released 2023-11-14 
+    * released 2023-10-14 
     * added functions: pls_fit_species 
     * added draft rsp_pls and rsp_x object classes 
     * added draft sp_build_rsp_x  

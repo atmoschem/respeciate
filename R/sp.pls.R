@@ -641,10 +641,13 @@ pls_rebuild <- function(pls, species, power=1,
 ####################
 
 #inc <- readRDS("C:\\Users\\trakradmin\\OneDrive - University of Leeds\\Documents\\pkg\\respeciate\\_projects\\marylebone03\\.tmp.increment.rds")
+
 #inc$.value <- inc$.value.inc
 #inc$WEIGHT_PERCENT <- inc$.value.inc
 #inc$PROFILE_CODE <- as.character(inc$`Start Date`)
 #inc$PROFILE_NAME <- as.character(inc$`Start Date`)
+
+#inc <- sp_build_rsp_x(inc, value=".value.inc")
 
 #inc <- sp_pad(inc, "species")
 #inc <- subset(inc, `Start Date` > "2021-01-01")
@@ -826,12 +829,19 @@ pls_plot <- function(pls, n=1, type=1,
         } else {
           "Sample [index]"
         }
+        .brd <- if("border" %in% names(.x.args)){
+          .x.args$border
+        } else {
+          NA
+        }
         .bar <- barplot(value~variable + .index,  .rep2, col=.cols,
+                        border=.brd,
                         main = i, ylab=.ylb,
                         xlab=.xlb,
                         ylim=c(0, .scale),   #testing
                         legend.text=.leg.text,
                         args.legend=list(cex=0.8,
+                                         border=.brd,
                                          ncol=.ncol))
         .dat <- subset(dat, SPECIES_NAME==i)
 
@@ -1012,7 +1022,8 @@ pls_plot_species <- function(pls, n, type=1, ...){
 #############################
 
 
-pls_plot_profile <- function(pls, n, log=FALSE, ...){
+pls_plot_profile <- function(pls, n, log=FALSE,
+                             ...){
 
   #general
 
@@ -1084,9 +1095,21 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
                .SDcols= .cols, by=c("SPECIES_ID", "SPECIES_NAME")]
   .rep <- as.data.frame(.rep)
 
-  for(i in profile){
-    .rep[, paste("pc_", i, sep="")] <- (.rep[, paste("x_", i, sep="")] / .rep$pred) * 100
+
+  #this is a bit messy unless y2 is set to pred in call
+  #  this should always be relative to .value
+  if("y2" %in% names(.x.args) && .x.args$y2=="pred"){
+    for(i in profile){
+      .rep[, paste("pc_", i, sep="")] <-
+        (.rep[, paste("x_", i, sep="")] / .rep$pred) * 100
+    }
+  } else {
+    for(i in profile){
+      .rep[, paste("pc_", i, sep="")] <-
+        (.rep[, paste("x_", i, sep="")] / .rep$.value) * 100
+    }
   }
+
 
   #dat <- dat[dat$PROFILE_CODE==unique(dat$PROFILE_CODE)[1],]
   #   replace above because first profile does not contain all species
@@ -1110,7 +1133,6 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
       #plotting first axis as logs
       .f.cex = 0.8
       .x <- d2$SPECIES_NAME
-      .m.x <- max(nchar(.x), na.rm=T)/1.3*.f.cex
       .y <- d2[,i]
       .min <- min(.y[.y>0], na.rm=TRUE)/2
       .y[.y<.min] <- .min
@@ -1140,12 +1162,12 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
       .y2 <- ((.y2/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
       .y2.lb <- seq(0, 100, by=20)
       .y2.at <- ((.y2.lb/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
+      .m.y <- (max(nchar(.y1.lb), na.rm=T) * (0.05*.f.cex))+4
 
     } else {
       #plotting first axis as is
       .f.cex = 0.8
       .x <- d2$SPECIES_NAME
-      .m.x <- max(nchar(.x), na.rm=T)/1.3*.f.cex
       .y <- d2[,i]
       .y1.at <- pretty(.y)
       .y1.lb <- .y1.at
@@ -1153,6 +1175,7 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
       .y2 <- ((.y2/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
       .y2.lb <- seq(0, 100, by=20)
       .y2.at <- ((.y2.lb/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
+      .m.y <- (max(nchar(.y1.lb), na.rm=T) * (0.05*.f.cex))+4
 
     }
 
@@ -1163,16 +1186,15 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
     }
     .yl <- if("ylab" %in% names(.x.args)){
       .x.args$ylab
-    }
-    else {
+    } else {
       "Source Loading"
     }
 
     #lims <- range(d2[,4], na.rm=TRUE)
     #.min <- min(d2[,4][d2[,4]>0], na.rm=TRUE)
 
-
-    par(mar = c(.m.x, 4, 4, 4) + 0.3)
+    .m.x <- max(nchar(.x), na.rm=T)/1.3*.f.cex
+    par(mar = c(.m.x, .m.y, 4, 4) + 0.3)
     .bar <- barplot(.y,
                     names.arg=.x,
                     ylim = range(.y1.at),
@@ -1180,28 +1202,37 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
                     cex.lab=.f.cex,
                     cex.names=.f.cex,
                     axes=FALSE,
-                    ylab=.yl,
+                    ylab=" ",
                     col=.bc,
                     las=2
     )
-    .y2c <- if("y2.col" %in% names(.x.args)){
-      .x.args$y2.col
-    } else {
-      "Red"
-    }
-    points(.bar, .y2, col=.y2c, pch=19)
+    #y axis
+    #####################
+    #these seems very messy
     axis(2, ylim=range(.y1.at), at=.y1.at, labels=.y1.lb, cex=.f.cex,
          cex.axis=.f.cex, las=2)
-    axis(4, ylim=range(0, max(.y2.at)), at=.y2.at, labels=.y2.lb,
-         col=.y2c, col.axis=.y2c, cex=.f.cex,
-         cex.axis=.f.cex, las=2)
-    .y2l <- if("y2.lab" %in% names(.x.args)){
-      .x.args$y2.lab
-    } else {
-      "Percent of Total Contribution (%)"
-    }
-    mtext(.y2l, side=4, line=3, col =.y2c,
+    mtext(.yl, side=2, line=3.5,
           cex=.f.cex)
+    #y2 axis
+    ###########################
+    if(!"y2" %in% names(.x.args) || .x.args$y2){
+      .y2c <- if("y2.col" %in% names(.x.args)){
+        .x.args$y2.col
+      } else {
+        "Red"
+      }
+      points(.bar, .y2, col=.y2c, pch=19)
+      axis(4, ylim=range(0, max(.y2.at)), at=.y2.at, labels=.y2.lb,
+           col=.y2c, col.axis=.y2c, cex=.f.cex,
+           cex.axis=.f.cex, las=2)
+      .y2l <- if("y2.lab" %in% names(.x.args)){
+        .x.args$y2.lab
+      } else {
+        "Percent of Total Contribution (%)"
+      }
+      mtext(.y2l, side=4, line=3, col =.y2c,
+            cex=.f.cex)
+    }
 
   }
 
