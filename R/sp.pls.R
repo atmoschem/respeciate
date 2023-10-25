@@ -1,6 +1,6 @@
 #' @name sp.pls
 #' @title (re)SPECIATE profile Positive Least Squares
-#' @aliases sp_pls_profile pls_report pls_fit_species
+#' @aliases sp_pls_profile pls_report pls_test pls_fit_species
 #' pls_refit_species pls_rebuild pls_plot
 #' pls_plot_species pls_plot_profile
 
@@ -403,6 +403,51 @@ pls_report <- function(pls){
 
   as.data.frame(ans)
 }
+
+
+
+
+#############################
+#############################
+## pls_test
+#############################
+#############################
+
+#' @rdname sp.pls
+#' @export
+
+##   now imports from xxx.r
+##   #' @import data.table
+
+# this is the model tests
+# this builds from pls_report
+
+pls_test <- function(pls){
+  .rp <- pls_report(pls)
+  #species
+  .tmp<- lapply(unique(.rp$SPECIES_NAME), function(i){
+    .ans <- subset(.rp, SPECIES_NAME==i)
+    data.frame(SPECIES_NAME = i,
+               adj.r.sq = .ans$adj.r.sq[1],
+               slope=.ans$slope[1],
+               p.slope=.ans$p.slope[1],
+               AIC = .ans$AIC[1])
+  })
+  .sp <- data.table::rbindlist(.tmp)
+
+  #ref profiles
+  .pn <- names(.rp)[grepl("^p_", names(.rp))]
+  .ans <- data.table::as.data.table(.rp)[, lapply(.SD,
+                                                  function(x){length(x[x>0.05])/length(x)}),
+                                         .SDcols = .pn]
+  .ans <- as.data.frame(.ans)
+  .ans <- (1 - .ans)*100
+  names(.ans) <- gsub("^p_", "gp_", names(.ans))
+
+  list(.species=.sp,
+       .pls = .ans)
+}
+
 
 
 

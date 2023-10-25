@@ -4,6 +4,7 @@
 \alias{sp.pls}
 \alias{sp_pls_profile}
 \alias{pls_report}
+\alias{pls_test}
 \alias{pls_fit_species}
 \alias{pls_refit_species}
 \alias{pls_rebuild}
@@ -15,6 +16,8 @@
 sp_pls_profile(x, ref, power = 1, ...)
 
 pls_report(pls)
+
+pls_test(pls)
 
 pls_fit_species(pls, species, power = 1, refit.profile = TRUE, ...)
 
