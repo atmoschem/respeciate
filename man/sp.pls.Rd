@@ -19,11 +19,35 @@ pls_report(pls)
 
 pls_test(pls)
 
-pls_fit_species(pls, species, power = 1, refit.profile = TRUE, ...)
+pls_fit_species(
+  pls,
+  species,
+  power = 1,
+  refit.profile = TRUE,
+  as.marker = FALSE,
+  drop.missing = FALSE,
+  ...
+)
 
-pls_refit_species(pls, species, power = 1, refit.profile = TRUE, ...)
+pls_refit_species(
+  pls,
+  species,
+  power = 1,
+  refit.profile = TRUE,
+  as.marker = FALSE,
+  drop.missing = FALSE,
+  ...
+)
 
-pls_rebuild(pls, species, power = 1, refit.profile = TRUE, ...)
+pls_rebuild(
+  pls,
+  species,
+  power = 1,
+  refit.profile = TRUE,
+  as.marker = FALSE,
+  drop.missing = FALSE,
+  ...
+)
 
 pls_plot(pls, n = 1, type = 1, ...)
 
@@ -68,6 +92,15 @@ a PLS model based on the revised source profiles (i.e., ref + new species
 or ref + refit species). However, this second step can be omitted using
 \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 as an indicator rather than a standard member of the apportionment model.}
+
+\item{as.marker}{for \code{pls_rebuild}, \code{pls_fit_species} and
+\code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+fitting (or refitting) a species, treat it as source marker.}
+
+\item{drop.missing}{for \code{pls_rebuild}, \code{pls_fit_species} and
+\code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+building or rebuilding a PLS model, discard cases where \code{species}
+is missing.}
 
 \item{n}{(for \code{pls_plot}s only) numeric or character
 identifying the species or profile to plot. If numeric, these are treated

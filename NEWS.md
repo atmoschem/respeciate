@@ -1,5 +1,9 @@
 # Version 0.0 - Release Notes
 
+* [0.2.6] 
+    * released 2023-11-03
+    * pls_rebuild update; option to add species as marker  
+
 * [0.2.5] 
     * released 2023-10-25
     * sp_build_rsp_x update; x converted to data.frame (trouble with tibbles!)

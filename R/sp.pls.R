@@ -50,6 +50,13 @@
 #' or ref + refit species). However, this second step can be omitted using
 #' \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 #' as an indicator rather than a standard member of the apportionment model.
+#' @param as.marker for \code{pls_rebuild}, \code{pls_fit_species} and
+#' \code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+#' fitting (or refitting) a species, treat it as source marker.
+#' @param drop.missing for \code{pls_rebuild}, \code{pls_fit_species} and
+#' \code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+#' building or rebuilding a PLS model, discard cases where \code{species}
+#' is missing.
 #' @param n (for \code{pls_plot}s only) numeric or character
 #' identifying the species or profile to plot. If numeric, these are treated
 #' as indices of the species or profile, respectively, in the PLS model; if
@@ -391,10 +398,17 @@ pls_report <- function(pls){
     #need to read this:
     #https://stackoverflow.com/questions/39999456/aic-on-nls-on-r
     #see stats:::logLik.nls for AIC calc...
+    .s.mod <- suppressWarnings(summary(.mod))
+    ####################
+    #above suppress warnings
+    #    is to hide the perfect fit warning
+    #        you get if you fit a marker...
+    #            option to jitters still there
+    #############
     data.frame(SPECIES_NAME = x,
-               adj.r.sq = summary(.mod)$adj.r.squared,
-               slope = summary(.mod)$coefficients[1, 1],
-               p.slope = summary(.mod)$coefficients[1, 4],
+               adj.r.sq = .s.mod$adj.r.squared,
+               slope = .s.mod$coefficients[1, 1],
+               p.slope = .s.mod$coefficients[1, 4],
                AIC = AIC(.mod)
     )
   })
@@ -470,13 +484,19 @@ pls_test <- function(pls){
 #' @export
 
 pls_fit_species <- function(pls, species, power=1,
-                            refit.profile=TRUE, ...){
+                            refit.profile=TRUE,
+                            as.marker=FALSE,
+                            drop.missing=FALSE,
+                            ...){
   #wrapper for multiple fits of new data to a pls model
   .id <- unique(species$SPECIES_NAME)
   for(i in .id){
     .sub.sp <- subset(species, SPECIES_NAME==i)
     .test <- try(pls_rebuild(pls, species=.sub.sp, power=power,
-                             refit.profile=refit.profile, ...),
+                             refit.profile=refit.profile,
+                             as.marker=as.marker,
+                             drop.missing=drop.missing,
+                             ...),
         silent=TRUE)
     if(class(.test)[1]=="try-error"){
       warning("RSP_PLS> failed to fit: ", i, sep="")
@@ -493,12 +513,18 @@ pls_fit_species <- function(pls, species, power=1,
 #' @export
 
 pls_refit_species <- function(pls, species, power=1,
-                              refit.profile=TRUE, ...){
+                              refit.profile=TRUE,
+                              as.marker=FALSE,
+                              drop.missing=FALSE,
+                              ...){
   #wrapper for multiple fits of new data to a pls model
   .id <- species
   for(i in .id){
     .test <- try(pls_rebuild(pls, species=i, power=power,
-                             refit.profile=refit.profile, ...),
+                             refit.profile=refit.profile,
+                             as.marker=as.marker,
+                             drop.missing=drop.missing,
+                             ...),
                  silent=TRUE)
     #pass back the error???
     if(class(.test)[1]=="try-error"){
@@ -521,8 +547,9 @@ pls_refit_species <- function(pls, species, power=1,
 #this needs a lot of work
 #############################
 
-# thinking about dropping the pls_refit_species and pls_fit_parent
-#      (or making them wrappers of this)
+# pls_fit_species and pls_refit_species
+#      are now multiple use wrappers for this...
+#         they for loop try(pls_rebuild(...))
 
 # (like pls_(re)fit_'s)
 # like to drop power from formals
@@ -536,38 +563,33 @@ pls_refit_species <- function(pls, species, power=1,
 #      this would also remove the start, lower and upper options
 #           from the formals...
 
-# parent could already be in x
-#    then parent could just be the name of parent???
-
-# also a case for using this to add a non-parent to x
-#    e.g. pls_fit_unknown_species...
-#    to fit a species to the existing model as a source apportion of
-#        that unknown...
-#    in which case maybe this should just be a wrapper for that
-#        with the start, lower and upper like below
-
 # if we are setting start and lower
 #     start = lower if start is missing might be safer...
+#        (see code in sp_pls_profile)
 
+#needs to allow more constraint
+#     currently not passing forward the args...
 
 pls_rebuild <- function(pls, species, power=1,
-                            refit.profile=TRUE, ...){
+                         refit.profile=TRUE,
+                         as.marker=FALSE,
+                         drop.missing=FALSE,
+                         ...){
 
   x.args <- list(...)
   #hiding model args
+  #also like to hide power
 
   .out <- pls_report(pls)
-  #species / parent should only have one species
-  #   note: parent is name from previous function
-  #         maybe change now???
-  #and have same profiles as pls model data
-  #and its contribution to all sources is set by .value
 
-  #note
-  ################################
-  #following just done quickly to replace
-  #    two previous functions pls_fit_parent and pls_refit_species
+  #cheat
+  #########################
+  .cheat <- character()
+  .cheat2 <- character()
 
+  #########################
+  #standardise inputs
+  #########################
   if(is.character(species)){
     #assuming this is SPECIES_NAME of the species to be fit
     #and species was in modelled data when pls was built...
@@ -575,106 +597,352 @@ pls_rebuild <- function(pls, species, power=1,
       stop("RSP_PLS> 'species' not in PLS, please check",
            call. = FALSE)
     }
-    parent <- subset(.out, SPECIES_NAME == species[1])
+    .add <- subset(.out, SPECIES_NAME == species[1])
     .out <- subset(.out, SPECIES_NAME != species[1])
 
   } else {
-    #assuming this is respeciate object data.frame of right structure
-    parent <- species
+    #assuming this is respeciate object/data.frame of right structure
+    .add <- species
   }
-  #get a 'safe' profile
-  .test <- .out[.out$pred>0,]
-  .out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
-  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
-  .test <- names(parent)[names(parent) %in% .test]
-  .data <- parent[.test]
-  names(.data)[2] <- "parent"
-  .data <- merge(.out, .data[c(1:2)])
 
-  #formula
-  .ms <- names(.data)[grepl("^m_", names(.out))]
-  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
-                sep="", collapse = "+")
-  .for <- as.formula(paste("parent~", .for))
+  ###################################
+  #get and check species name and id
+  ###################################
+  sp.nm <- unique(.add$SPECIES_NAME)
+  sp.id <- unique(.add$SPECIES_ID)
+  #both need to be 1 element
+  if(length(sp.nm) !=1 || length (sp.id) != 1){
+    stop("RSP_PLS> 'species' not unique, either missing or multiple",
+         call. = FALSE)
+  }
 
-  .ns <- .ms
-  names(.ns) <- gsub("^m_", "n_", .ms)
-
-  #note
-  ##################
-  #model handling temp update
-  #lower, start and upper
-  lower <- if("lower" %in% names(x.args)){
-    x.args$lower
+  #if as.marker is character
+  #   use it as marker profile name and reset as.marker to TRUE
+  #   else use species_name as profile name
+  #        wondering if this should be more unique
+  if(is.character(as.marker)){
+    .mrk.nm <- as.marker
+    as.marker <- TRUE
   } else {
-    0
+    .mrk.nm <- sp.nm
   }
-  start <- if("start" %in% names(x.args)){
-    x.args$start
+
+  #####################
+  #as.marker T/F handling
+  #####################
+  if(as.marker){
+    #treat species as marker
+    for(i in names(pls)){
+      if(i %in% unique(.add$PROFILE_CODE) & !is.null(pls[[i]])){
+        #remark off all print when happy with method
+        #print(i)
+        #########################
+        #can simplify a lot below
+        #########################
+        x <- pls[[i]]
+        .da <- subset(x$args$data, SPECIES_NAME != sp.nm)
+        .da[.mrk.nm] <- 0
+        #.cht <- rev(unique(c("test", rev(names(.da)))))
+        #.da <- .da[.cht]
+        .da <- .da[rev(unique(c("test", rev(names(.da)))))]
+        .mn.df <- .da[1,]
+        #.mn.df[,1] <- sp.id
+        #.mn.df[,2] <- sp.nm
+        .mn.df[,c(1,2)] <- c(sp.id, sp.nm)
+        .mn.df[,3:(ncol(.da)-2)] <- 0
+        ##############################
+        #below might want to be something other than 1
+        #    e.g. median other others excluding zero's???
+        .mn.df[,ncol(.da)-1] <- 1
+        #######################################
+        #might need to add a jitter to next???
+        #######################################
+        #print("hi")
+        #print(.add)
+        #print(i)
+        #print(.add[.add$PROFILE_CODE==i,])
+        .mn.df[,ncol(.da)] <- .add[.add$PROFILE_CODE==i, ".value"]
+
+        ##################################
+        #a lot below needs more generalising
+        ###################################
+        pls[[i]]$args$data <- rbind(.da, .mn.df)
+        pls[[i]]$args$weights <- (1/pls[[i]]$args$data$test)^power
+        if(any(!grepl(.mrk.nm, pls[[i]]$args$formula))){
+          #update formula
+          .for <- as.character(pls[[i]]$args$formula)
+          .for[3] <- paste(.for[3], "+ (`m_", .mrk.nm,
+                           "` * `", .mrk.nm, "`)",
+                           sep="")
+          pls[[i]]$args$formula <- as.formula(paste(.for[2], .for[1],
+                                                    .for[3], sep=""))
+        }
+        if("start" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$start)){
+            #print("adding m_ start")
+            .arg <- pls[[i]]$args$start
+            .arg[[paste("m_", .mrk.nm, sep="")]] <-0
+            pls[[i]]$args$start <- .arg
+          }
+        }
+        if("lower" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$lower)){
+            #print("adding m_ lower")
+            .arg <- pls[[i]]$args$lower
+            .arg[[paste("m_", .mrk.nm, sep="")]] <-0
+            pls[[i]]$args$lower <- .arg
+          }
+        }
+        if("upper" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$upper)){
+            #print("adding m_ upper")
+            .arg <- pls[[i]]$args$upper
+            .arg[[paste("m_", .mrk.nm, sep="")]] <- Inf
+            pls[[i]]$args$upper <- .arg
+          }
+        }
+
+        #print(pls[[i]]$args$data)
+        #print(pls[[i]]$args$formula)
+        #print(pls[[i]]$args$weights)
+        ######################
+        #nls model do.call might need a try wrapper
+        ########################
+        .cheat2 <- c(.cheat2, i)
+        pls[[i]]$mod <- do.call(nls, pls[[i]]$args)
+      } else {
+        #can't build this model update, so drop it!
+        #either no marker or no previous model
+        #############################
+        #might want to change this to
+        #leave them alone???
+        #   just might never get the o3 profile included
+        #   or make the as.marker = FALSE drop the case it
+        #       can't model...?
+        if(drop.missing){
+          .cheat <- c(.cheat, i)
+          pls[i] <- list(NULL)
+        }
+      }
+    }
+    #print("doing these [mrk]")
+    #print(.cheat2)
+    #print("dropping these [mrk]")
+    #print(.cheat)
   } else {
-    lower
-  }
-  upper <- if("upper" %in% names(x.args)){
-    x.args$upper
-  } else {
-    Inf
-  }
+    ######################################
+    #species not a marker
+    ######################################
+    #distribute across existing sources
+    ######################################
 
-  .ls <- lapply(.ns, function(x){start})
-  .ls2 <- lapply(.ns, function(x){lower})
-  .ls3 <- lapply(.ns, function(x){upper})
+    ###############################
+    #remark prints when happy with method
+    ###############################
 
-#print(.data)
+    #########################
+    #like to first better way of doing following
+    #########################
 
-  mod <- nls(.for, data=.data,
-             #weights = (1/.out$test)^power,
-             #no weighting currently because species are all the same here!
-             start=.ls,
-             lower=.ls2,
-             upper=.ls3,
-             algorithm="port",
-             control=nls.control(tol=1e-5) #think about tolerance
-  )
-  .ans <- data.frame(
-    PROFILE_CODE = .data$PROFILE_CODE,
-    SPECIES_ID = parent$SPECIES_ID[1],
-    SPECIES_NAME = parent$SPECIES_NAME[1],
-    t(coefficients(mod)),
-    test = .data$parent
-  )
-  names(.ans) <- gsub("^n_", "", names(.ans))
+    #need to build a unique data set of previous m matrix predictions
+    ##################
+    #.test <- .out[.out$pred>0,]
+    # (had to exclude pred = 0 because these were not yet modelled)
+    #.out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
+    # (replacing with following because above dropped models if first species
+    #  was missing from those profile_code)
+    #
+    .test <- .out[.out$pred>0,]
+    .out <- .test[!duplicated(.test$PROFILE_CODE),]
 
-  for(i in .ans$PROFILE_CODE){
-    .ii <- subset(.ans, PROFILE_CODE==i)
-    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
-    .nn <- pls[[i]]$args$data
-    .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
-    pls[[i]]$args$data <- rbind(.nn, .ii)
-    #rebuild model
-    .for <- as.character(formula(pls[[i]]$mod))
-    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
-    .ms <- names(pls[[i]]$args$data)
-    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
-    .ls <- lapply(.ms, function(x){0})
-    names(.ls) <- paste("m_", .ms, sep="")
-    .da <- pls[[i]]$args$data
+    .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+    .test <- names(.add)[names(.add) %in% .test]
+    .data <- .add[.test]
+
+    names(.data)[2] <- "refit"
+    .data <- merge(.out, .data[c(1:2)])
+
+    #########################
+    #note
+    #if checking .data species may not be unique
+    # just after a unique (all profile_code) m matrix
+    # for the added
+    #print(.data)
+
+    .ms <- names(.data)[grepl("^m_", names(.data))]
+    .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                  sep="", collapse = "+")
+    .for <- as.formula(paste("refit~", .for))
+
+    .ns <- .ms
+    names(.ns) <- gsub("^m_", "n_", .ms)
 
     #note
-    #############################
-    # option to not do this refit?
-    if(refit.profile){
-      pls[[i]]$mod <- nls(.for, data=.da,
-                          weights = (1/.da$test)^power, # think about weighting
-                          start=.ls, lower=.ls,
-                          algorithm="port",
-                          control=nls.control(tol=1e-5) #think about tolerance
-      )
+    ##################
+    #model handling temp update
+    #lower, start and upper
+    lower <- if("lower" %in% names(x.args)){
+      x.args$lower
+    } else {
+      0
+    }
+    start <- if("start" %in% names(x.args)){
+      x.args$start
+    } else {
+      lower
+    }
+    upper <- if("upper" %in% names(x.args)){
+      x.args$upper
+    } else {
+      Inf
+    }
+
+    .ls <- lapply(.ns, function(x){start})
+    .ls2 <- lapply(.ns, function(x){lower})
+    .ls3 <- lapply(.ns, function(x){upper})
+
+    #print(.data)
+    #print(.for)
+
+    mod <- nls(.for, data=.data,
+               #weights = (1/.out$test)^power,
+               #no weighting currently because species are all the same here!
+               start=.ls,
+               lower=.ls2,
+               upper=.ls3,
+               algorithm="port",
+               control=nls.control(tol=1e-5) #think about tolerance
+    )
+    #check.names TRUE was applying make.names
+    #     so turned off when building data.frames for pls model outputs
+    .ans <- data.frame(
+      PROFILE_CODE = .data$PROFILE_CODE,
+      SPECIES_ID = .add$SPECIES_ID[1],
+      SPECIES_NAME = .add$SPECIES_NAME[1],
+      t(coefficients(mod)),
+      test = .data$refit,
+      check.names=FALSE
+    )
+    names(.ans) <- gsub("^n_", "", names(.ans))
+
+    #print("doing these")
+    #print(.ans$PROFILE_CODE)
+
+    #for each build model, put new models in pls
+    ###################################
+    #need to move this to working directly from models
+    for(i in unique(.ans$PROFILE_CODE)){
+      .ii <- subset(.ans, PROFILE_CODE==i)
+      .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+      .nn <- pls[[i]]$args$data
+      .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
+      ###########
+      #cheat
+      #############
+      #print(names(.nn))
+      #print(names(.ii))
+      ########################
+
+      pls[[i]]$args$data <- rbind(.nn, .ii)
+      #rebuild model
+      .for <- as.character(formula(pls[[i]]$mod))
+      .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+      .ms <- names(pls[[i]]$args$data)
+      .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+      .ls <- lapply(.ms, function(x){0})
+      names(.ls) <- paste("m_", .ms, sep="")
+      .da <- pls[[i]]$args$data
+      pls[[i]]$args$weights <- (1/pls[[i]]$args$data$test)^power
+      #################
+      #can these go now..?
+      #################
+      if("start" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$start)){
+          #print("adding m_ start")
+          .arg <- pls[[i]]$args$start
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <-0
+          pls[[i]]$args$start <- .arg
+        }
+      }
+      if("lower" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$lower)){
+          #print("adding m_ lower")
+          .arg <- pls[[i]]$args$lower
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <-0
+          pls[[i]]$args$lower <- .arg
+        }
+      }
+      if("upper" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$upper)){
+          #print("adding m_ upper")
+          .arg <- pls[[i]]$args$upper
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <- Inf
+          pls[[i]]$args$upper <- .arg
+        }
+      }
+
+    }
+    if(drop.missing){
+      ##########################################
+      #if we are dropping cases were species was
+      #     not available, we need to drop the
+      #         models that were not (re)fit...
+      #print("dropping these!")
+      .test <- names(pls)[!names(pls) %in% unique(.ans$PROFILE_CODE)]
+      #print(.test)
+      if(length(.test)>0){
+        for(i in .test){
+          pls[i] <- list(NULL)
+        }
+      }
     }
   }
 
-  pls
+  ################
+  #refit.profiles
+  ################
+  #this might be a little redundant now
 
+  if(refit.profile){
+    for(i in names(pls)){
+      if(!is.null(pls[[i]])){
+        #print(i)
+        #print(pls[[i]]$args$data)
+        #print(pls[[i]]$args$formula)
+
+        pls[[i]]$mod <- do.call(nls, pls[[i]]$args)
+        #pls[[i]]$mod <- nls(.for, data=.da,
+        #                    weights = (1/.da$test)^power, # think about weighting
+        #                    start=.ls, lower=.ls,
+        #                    algorithm="port",
+        #                    control=nls.control(tol=1e-5) #think about tolerance
+        #)
+        #.for <- as.character(formula(pls[[i]]$mod))
+        #.for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+        #.da <- pls[[i]]$args$data
+        #.ls <- pls[[i]]$args$lower
+        #print(.da)
+        #print(.ls)
+        #print((1/.da$test)^power)
+        #pls[[i]]$mod <- nls(.for, data=.da,
+        #                    weights = (1/.da$test)^power, # think about weighting
+        #                    start=.ls, lower=.ls,
+        #                    algorithm="port",
+        #                    control=nls.control(tol=1e-5) #think about tolerance
+        #)
+        #print("refit.profile")
+      }
+    }
+  }
+  ################
+  #output
+  ################
+  pls
 }
+
+#################
+
+
 
 
 #fix if nulls are an issue
@@ -686,21 +954,13 @@ pls_rebuild <- function(pls, species, power=1,
 ####################
 
 #inc <- readRDS("C:\\Users\\trakradmin\\OneDrive - University of Leeds\\Documents\\pkg\\respeciate\\_projects\\marylebone03\\.tmp.increment.rds")
-
-#inc$.value <- inc$.value.inc
-#inc$WEIGHT_PERCENT <- inc$.value.inc
 #inc$PROFILE_CODE <- as.character(inc$`Start Date`)
 #inc$PROFILE_NAME <- as.character(inc$`Start Date`)
-
 #inc <- sp_build_rsp_x(inc, value=".value.inc")
-
-#inc <- sp_pad(inc, "species")
-#inc <- subset(inc, `Start Date` > "2021-01-01")
 
 #sp_match_profile(inc, spq_pm(), matches=20)
 
 #aa <- sp_profile(c("3157", "4330310", "3941", "4027", "3961"))
-
 #inc.metals <- subset(inc, !grepl("[[]avg.AURN[]]", SPECIES_NAME))
 
 #moda <- sp_pls_profile(inc.metals, aa)
@@ -709,6 +969,41 @@ pls_rebuild <- function(pls, species, power=1,
 #moda2 <- pls_fit_parent(moda, subset(inc, SPECIES_NAME=="[avg.AURN] PM2.5"))
 
 #moda2i <- pls_fit_species(moda, subset(inc, SPECIES_NAME=="[avg.AURN] PM2.5"))
+
+
+
+############################
+#next steps
+############################
+
+#note
+
+#tidy rebuild2 code
+#    go through and tidy messy code
+#    NB: data.frame names might be getting changed in some functions
+#        seemed to be happening in multiple refits....
+#            looked like make.name(BAD-NAME)
+#    think about models with missing input
+#        leave in or drop??
+#           or option to do both... ???
+#    think about power and other nls arguments
+#        need to be handling these better...
+#        currently re-calaculating on rebuild
+#             BUT might need to be able to work with user input???
+#    update the documents
+
+#    move rebuild2 to rebuild
+#       move rebuild.old to unexported code for now ...
+#          but can go if newer version works fine
+
+#    have hidden perfect fit error in pls_report
+#       think that kills it anywhere
+#           but should check pls_plot...
+#       also could add a add jigger when fitting marker in rebuild?
+
+
+
+
 
 
 
@@ -1595,6 +1890,163 @@ rsp_pls_fit_parent <- function(pls, parent, power=1,
                         algorithm="port",
                         control=nls.control(tol=1e-5) #think about tolerance
     )
+  }
+
+  pls
+
+}
+
+
+
+#previous version of rebuild...
+
+
+rsp_pls_rebuild.old <- function(pls, species, power=1,
+                        refit.profile=TRUE, ...){
+
+  x.args <- list(...)
+  #hiding model args
+
+  .out <- pls_report(pls)
+  #species / parent should only have one species
+  #   note: parent is name from previous function
+  #         maybe change now???
+  #and have same profiles as pls model data
+  #and its contribution to all sources is set by .value
+
+  #note
+  ################################
+  #following just done quickly to replace
+  #    two previous functions pls_fit_parent and pls_refit_species
+
+  if(is.character(species)){
+    #assuming this is SPECIES_NAME of the species to be fit
+    #and species was in modelled data when pls was built...
+    if(!species[1] %in% .out$SPECIES_NAME){
+      stop("RSP_PLS> 'species' not in PLS, please check",
+           call. = FALSE)
+    }
+    parent <- subset(.out, SPECIES_NAME == species[1])
+    .out <- subset(.out, SPECIES_NAME != species[1])
+
+  } else {
+    #assuming this is respeciate object data.frame of right structure
+    parent <- species
+  }
+  #get a 'safe' profile
+  #not sure this will work if any sources are not fit to first species
+  .test <- .out[.out$pred>0,]
+  .out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
+  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+  .test <- names(parent)[names(parent) %in% .test]
+  .data <- parent[.test]
+  names(.data)[2] <- "parent"
+  .data <- merge(.out, .data[c(1:2)])
+
+  ######################
+  #for trace
+  #add parent to this as m_dummy?
+  #that should fit as n_dummy = 1...
+
+  ###########
+  #cheat
+  #############
+
+  #print(.data)
+
+  #formula
+  #changed .out to .data in next line
+  .ms <- names(.data)[grepl("^m_", names(.data))]
+  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                sep="", collapse = "+")
+  .for <- as.formula(paste("parent~", .for))
+
+  .ns <- .ms
+  names(.ns) <- gsub("^m_", "n_", .ms)
+
+  #note
+  ##################
+  #model handling temp update
+  #lower, start and upper
+  lower <- if("lower" %in% names(x.args)){
+    x.args$lower
+  } else {
+    0
+  }
+  start <- if("start" %in% names(x.args)){
+    x.args$start
+  } else {
+    lower
+  }
+  upper <- if("upper" %in% names(x.args)){
+    x.args$upper
+  } else {
+    Inf
+  }
+
+  .ls <- lapply(.ns, function(x){start})
+  .ls2 <- lapply(.ns, function(x){lower})
+  .ls3 <- lapply(.ns, function(x){upper})
+
+  #print(.data)
+  #print(.for)
+
+  mod <- nls(.for, data=.data,
+             #weights = (1/.out$test)^power,
+             #no weighting currently because species are all the same here!
+             start=.ls,
+             lower=.ls2,
+             upper=.ls3,
+             algorithm="port",
+             control=nls.control(tol=1e-5) #think about tolerance
+  )
+  .ans <- data.frame(
+    PROFILE_CODE = .data$PROFILE_CODE,
+    SPECIES_ID = parent$SPECIES_ID[1],
+    SPECIES_NAME = parent$SPECIES_NAME[1],
+    t(coefficients(mod)),
+    test = .data$parent
+  )
+  names(.ans) <- gsub("^n_", "", names(.ans))
+
+  #print(.ans)
+
+  for(i in .ans$PROFILE_CODE){
+    .ii <- subset(.ans, PROFILE_CODE==i)
+    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+    .nn <- pls[[i]]$args$data
+    .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
+    ###########
+    #cheat
+    #############
+    #print(i)
+    #print(names(.nn))
+    #print(names(.ii))
+    ########################
+
+    pls[[i]]$args$data <- rbind(.nn, .ii)
+    #rebuild model
+    .for <- as.character(formula(pls[[i]]$mod))
+    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+    .ms <- names(pls[[i]]$args$data)
+    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ls <- lapply(.ms, function(x){0})
+    names(.ls) <- paste("m_", .ms, sep="")
+    .da <- pls[[i]]$args$data
+
+
+    #print(.for)
+    #note
+    #############################
+    # option to not do this refit?
+    if(refit.profile){
+      pls[[i]]$mod <- nls(.for, data=.da,
+                          weights = (1/.da$test)^power, # think about weighting
+                          start=.ls, lower=.ls,
+                          algorithm="port",
+                          control=nls.control(tol=1e-5) #think about tolerance
+      )
+    }
   }
 
   pls

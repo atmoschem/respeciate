@@ -39,7 +39,7 @@ utils::globalVariables(c("sysdata", ".SD",
 #' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
 #' as.formula coefficients formula lm nls nls.control predict
-#' @importFrom utils modifyList head
+#' @importFrom utils modifyList head packageVersion
 #' @importFrom graphics axis barplot par legend lines rect text abline
 #' grid mtext plot.new plot.window points polygon title
 #' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
