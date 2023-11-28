@@ -6,7 +6,7 @@
 \alias{sp_build_rsp_x}
 \title{sp_ functions}
 \usage{
-sp_profile(code, include.refs = FALSE)
+sp_profile(code, ..., include.refs = FALSE)
 
 sp_build_rsp_x(
   x,
@@ -25,8 +25,12 @@ typically one or concatenated character or numeric entries, but can also
 be a \code{respeciate} object or similar \code{data.frame} containing
 the \code{code}s as a named \code{PROFILE_NAME} column.}
 
-\item{include.refs}{logical, include profile reference information when
-getting the requested profile(s) from the archive, default \code{FALSE}.}
+\item{...}{additional arguments, ignored except by \code{sp_profile} which
+treats these as additional sources for \code{code}.}
+
+\item{include.refs}{logical, (for \code{sp_profile} only) include profile
+reference information when getting the requested profile(s) from the
+archive, default \code{FALSE}.}
 
 \item{x}{(for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
 something that can be converted to a \code{data.frame} using
@@ -46,8 +50,6 @@ to SPECIATE conventions, at least one of these will need to be assigned.}
 \item{value}{(for \code{sp_build}s only; \code{character})  The name
 of the column in \code{x} containing measurement values. If not already
 named according to SPECIATE conventions, this will need to be assigned.}
-
-\item{...}{additional arguments, currently ignored.}
 }
 \value{
 \code{sp_profile} returns a object of
@@ -83,7 +85,7 @@ profiles. Currently, working on option to improve on this (and very happy
 to discuss if anyone has ideas), but current best suggestion is: (1)
 identify the SPECIATE species code for all the species in your data set,
 and (2) assign these as \code{species_id} when \code{sp_build}ing. The
-function will associate the \code{species_name}.
+function will then associate the \code{species_name}.
 }
 \examples{
 \dontrun{

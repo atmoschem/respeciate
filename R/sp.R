@@ -12,8 +12,11 @@
 #' typically one or concatenated character or numeric entries, but can also
 #' be a \code{respeciate} object or similar \code{data.frame} containing
 #' the \code{code}s as a named \code{PROFILE_NAME} column.
-#' @param include.refs logical, include profile reference information when
-#' getting the requested profile(s) from the archive, default \code{FALSE}.
+#' @param ... additional arguments, ignored except by \code{sp_profile} which
+#' treats these as additional sources for \code{code}.
+#' @param include.refs logical, (for \code{sp_profile} only) include profile
+#' reference information when getting the requested profile(s) from the
+#' archive, default \code{FALSE}.
 #' @param x (for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
 #' something that can be converted to a \code{data.frame} using
 #' \code{as.data.frame}) to be converted into a \code{respeciate} object for
@@ -29,7 +32,6 @@
 #' @param value (for \code{sp_build}s only; \code{character})  The name
 #' of the column in \code{x} containing measurement values. If not already
 #' named according to SPECIATE conventions, this will need to be assigned.
-#' @param ... additional arguments, currently ignored.
 #' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
 #' (re)SPECIATE profile.
@@ -55,7 +57,7 @@
 #' to discuss if anyone has ideas), but current best suggestion is: (1)
 #' identify the SPECIATE species code for all the species in your data set,
 #' and (2) assign these as \code{species_id} when \code{sp_build}ing. The
-#' function will associate the \code{species_name}.
+#' function will then associate the \code{species_name}.
 #'
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
@@ -108,23 +110,44 @@
 #   based on previous sp_profile but using data.table
 #   (0.1 version currently unexported sp_profile.old)
 
-sp_profile <- function(code, include.refs=FALSE) {
+sp_profile <- function(code, ..., include.refs=FALSE) {
 
   # code currently handles:
-  # respeciate.ref, numerics and characters characters
+  # respeciate.ref, data.frames containing profile_code,
+  # numerics and characters
 
   #######################
-  #could replace code with ...???
+  #could replace code AND ... with just ...???
+  #   but would need to think about options
+  #   if any in ... were data.frames
   ######################
+  .try <- lapply(list(code, ...), function(.code){
+    if(is.data.frame(.code) && "PROFILE_CODE" %in% names(.code)){
+      .code <- unique(.code$PROFILE_CODE)
+    }
+    if(is.numeric(.code)) {
+      .code <- as.character(.code)
+    }
+    if(!is.character(.code)) {
+      warning("unexpected 'code' object found and ignored",
+           call.=FALSE)
+      .code <- NULL
+    }
+    .code
+  })
+  code <- do.call(c, .try)
 
-  if(is.data.frame(code) && "PROFILE_CODE" %in% names(code)){
-    code <- unique(code$PROFILE_CODE)
-  }
-  if(is.numeric(code)) code <- as.character(code)
-  if(!is.character(code)) {
-    stop("unexpected 'code' class",
-         call.=FALSE)
-  }
+  ################
+  #previous....
+  ################
+  #if(is.data.frame(code) && "PROFILE_CODE" %in% names(code)){
+  #  code <- unique(code$PROFILE_CODE)
+  #}
+  #if(is.numeric(code)) code <- as.character(code)
+  #if(!is.character(code)) {
+  #  stop("unexpected 'code' class",
+  #       call.=FALSE)
+  #}
 
   PROFILES <- data.table::as.data.table(sysdata$PROFILES)
   SPECIES <- data.table::as.data.table(sysdata$SPECIES)
@@ -216,7 +239,8 @@ sp_build_rsp_x <-
     #                              else if there use species_name to look-up
     #                              if any missing, warn
     # .value:        if not there, if sent in call use.
-    # WEIGHT_PERCENT:if not there, if sent in call use.
+    #                              (NEW/TESTING) else if there use WEIGHT_PERCENT
+    # WEIGHT_PERCENT:if not there, if sent in call use
     #                              else if there use .value to look-up
 
     # don't build/error if any of these missing and end of build
@@ -288,13 +312,32 @@ sp_build_rsp_x <-
       }
       x$SPECIES_ID <- as.character(x[, species_id])
     }
-    if(!".value" %in% names(x) & (!missing(value))){
-      if(!value %in% names(x)){
-        stop("sp_build> '", as.character(value)[1],
-             "' not in 'x'...", sep="", call. = FALSE)
+    if(!".value" %in% names(x)){
+      if(missing(value)){
+        if("WEIGHT_PERCENT" %in% names(x)){
+          x$.value <- x[, "WEIGHT_PERCENT"]
+        } else {
+          stop("sp_build> 'value' not found for 'x'...",
+               sep="", call. = FALSE)
+        }
+      } else {
+        if(!value %in% names(x)){
+           stop("sp_build> '", as.character(value)[1],
+                "' not in 'x'...", sep="", call. = FALSE)
+        }
       }
       x$.value <- x[, value]
     }
+    #################
+    #old
+    #################
+    #if(!".value" %in% names(x) & (!missing(value))){
+    #  if(!value %in% names(x)){
+    #    stop("sp_build> '", as.character(value)[1],
+    #         "' not in 'x'...", sep="", call. = FALSE)
+    #  }
+    #  x$.value <- x[, value]
+    #}
 
     #if still not there try to assign using what is there
 

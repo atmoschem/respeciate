@@ -14,7 +14,7 @@
 #        (not keeping unless we can get it to work better)
 
 
-utils::globalVariables(c("sysdata", ".SD",
+utils::globalVariables(c("sysdata", ".SD", "ans",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
@@ -36,9 +36,12 @@ utils::globalVariables(c("sysdata", ".SD",
 #         and others???
 #               need to identify them
 
+#' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
+#' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
+#' @importFrom latticeExtra doubleYScale panel.ablineq
 #' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
-#' as.formula coefficients formula lm nls nls.control predict
+#' as.formula coefficients formula lm nls nls.control predict update
 #' @importFrom utils modifyList head packageVersion
 #' @importFrom graphics axis barplot par legend lines rect text abline
 #' grid mtext plot.new plot.window points polygon title
@@ -56,6 +59,85 @@ utils::globalVariables(c("sysdata", ".SD",
 ##############################
 
 
+#rsp_plot_fix
+#########################
+# general tidy function for data before plotting
+#    merges duplicate species in profiles
+#    makes profile names unique if duplicated
+#    tidies species names for use in labelling
+
+#used by
+###################
+#plot.respeciate
+#sp_plot_profile
+
+#uses
+####################
+#rsp_tidy_profile
+#rsp_test_respeciate
+#rsp_test_profile
+
+
+
+rsp_plot_fix <- function(x, silent = FALSE, ...){
+
+  .x.args <- list(...)
+  x <- rsp_tidy_profile(x)
+  ##test object type
+  test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+  if(test != "respeciate"){
+    if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
+      stop("RSP> No plot method for respeciate.reference files.",
+           call. = FALSE)
+    } else {
+      stop("RSP> suspect respeciate object!",
+           call. = FALSE)
+    }
+    #don't stop - respeciate profile
+  }
+  #check for duplicates
+  x <- rsp_test_profile(x)
+  if(any(x$.n>1) & !silent){
+    warning(paste("RSP> found duplicate species in profiles (merged and averaged...)",
+                  sep=""), call.=FALSE)
+  }
+  #shorten names for plotting
+  x$SPECIES_NAME <- rsp_tidy_species_name(x$SPECIES_NAME)
+
+  ####################################
+  #issue profile names are not always unique
+  ####################################
+  test <- x
+  test$SPECIES_ID <- ".default"
+  test <- rsp_test_profile(test)
+  ###################
+  #rep_test
+  #can now replace this with data.table version
+  #BUT check naming conventions for .n
+  ###################
+
+  #does this need a warning?
+  if(length(unique(test$PROFILE_NAME))<nrow(test)){
+    if(!silent){
+      warning(paste("RSP> found profiles with common names (making unique...)",
+                    sep=""), call. = FALSE)
+    }
+    test$PROFILE_NAME <- make.unique(test$PROFILE_NAME)
+    x <- x[names(x) != "PROFILE_NAME"]
+    x <- merge(x, test[c("PROFILE_NAME", "PROFILE_CODE")], by="PROFILE_CODE")
+    ############################
+    #why not just
+    #x$PROFILE_NAME <- make.unique(x$PROFILE_NAME)
+    ############################
+  }
+
+  #out
+  x
+}
+
+
+
+
 ############################
 #unexported function to
 #test is x respeciate
@@ -69,7 +151,7 @@ utils::globalVariables(c("sysdata", ".SD",
 ## level likewise but TRUE for respeciate, respeciate.ref and respeciate.spcs
 
 ##might need to rethink this if I want to use it as is.respeciate method
-##  is only allows 1 argument.
+##  it only allows 1 argument.
 
 ## could also test for .value
 
@@ -129,7 +211,7 @@ rsp_tidy_profile <- function(x){
 
 
 ###########################
-#tidy names
+#tidy species names
 
 #currently not exported
 #quick code to tidy species names
@@ -138,13 +220,17 @@ rsp_tidy_profile <- function(x){
 
 #note: not fully tested
 
+#thinking about
+
+#    option foreshorten any names longer than [n] characters???
+#    similar function to tidy profile names
 
 rsp_tidy_species_name <- function(x){
 
   #attempts shorten names by remove other versions
   #names seem to be in format a (or b || c)
   #where (guessing) a is main name and
-  #         b and c are alternatives.
+  #         b and c are alternative terms.
 
   #not fully tested,
   #   might still be more cases this dies on
@@ -167,8 +253,6 @@ rsp_tidy_species_name <- function(x){
 #rsp_test_profile
 
 #file:///C:/Users/trakradmin/Downloads/datatable.pdf
-
-
 ##rsp_test_profile(aa)
 
 rsp_test_profile <- function(x){

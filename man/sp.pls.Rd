@@ -49,7 +49,7 @@ pls_rebuild(
   ...
 )
 
-pls_plot(pls, n = 1, type = 1, ...)
+pls_plot(pls, n, type = 1, ...)
 
 pls_plot_species(pls, n, type = 1, ...)
 
