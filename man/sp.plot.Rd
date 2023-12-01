@@ -54,7 +54,7 @@ plotting functions.}
 \code{sp_plot} graph, plot, etc usually as a trellis object.
 }
 \description{
-Functions for plotting \code{respeciate} objects.
+General plots for \code{respeciate} objects.
 
 \code{sp_plot} functions generate plots for supplied
 (re)SPECIATE profile data sets.

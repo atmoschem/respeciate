@@ -2,7 +2,7 @@
 #' @title plotting (re)SPECIATE profiles
 #' @aliases sp_plot_profile
 
-#' @description Functions for plotting \code{respeciate} objects.
+#' @description General plots for \code{respeciate} objects.
 
 #' @description \code{sp_plot} functions generate plots for supplied
 #' (re)SPECIATE profile data sets.
@@ -24,9 +24,28 @@
 #' @return \code{sp_plot} graph, plot, etc usually as a trellis object.
 #' @note These functions are currently in development, so may change.
 
-#NOTE
+#functions
+# sp_plot_profile
+# sp_plot_species
 
-#reference lattice package...
+# plot.respeciate is wrapper for sp_plot_profile
+
+#use unexported
+# rsp_plot_fix
+
+
+
+#JOBS
+#######################
+
+#reference lattice and latticeEXtra packages in documents...
+
+#all functions need work
+#see function fix, tidy, etc job notes in code
+
+#thinking about an sp_plot_compare(x, y)
+#  to compare profile x and profile(s) y
+#  started project (in own-notes)
 
 ###################################
 #sp_plot_profile
@@ -267,6 +286,8 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 
 #in development
 
+#taken straight from sp_plot_profile
+#so lots of redundancy
 
 sp_plot_species <- function(x, id, multi.species = "group",
                               order=FALSE, log=FALSE, ...,
@@ -370,22 +391,43 @@ sp_plot_species <- function(x, id, multi.species = "group",
   }
   x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
 
-  #dcast and melt to add in any missed entries as NAs
-  #(for the plot trail)
-  #not padding
-  x <- sp_melt_wide(sp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
-
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME,
-                           levels = xx)
 
   ##################
   #profile bar chart
   ##################
 
+  #dcast and melt to add in any missed entries as NAs
+  #(for the plot trail)
+  #not padding
+  x <- sp_melt_wide(sp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
+
+
+  ###############################
+  #species handling
+  ##############################
+
+  #dropped for now...
+  #x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+  #                         levels = xx)
+
+  #############################
+  # x axis handling
+  #############################
+
+  #currently calculating and using sample index
+  #could add alternatives
+  #  use profile_code column as is
+  #     x$x.id <- x$PROFILE_CODE
+  #        would also want an xlab change....
+  #  use a different column?
+  #  convert to factor
+  #       but then by default lattice shows all factors labels...
+  #  format using a supplied function???
   x$x.id <- as.numeric(factor(x$PROFILE_CODE))
 
+
   p1.ls <- list(x= .value~x.id,
-                data=x, ylab="Profile Loading", xlab="",
+                data=x, ylab="Measurement", xlab="Sample [index]",
                 type="l",
                 #NB: prepanel seemed to break ylim when stacking
                 panel = function(x, y, ...){

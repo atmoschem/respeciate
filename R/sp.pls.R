@@ -1644,7 +1644,7 @@ pls_plot_profile <- function (pls, n, log = FALSE, ...)
   ##
   #think there is more here that can be generalized...
   p1.ls <- list(x = loading~SPECIES_NAME | pls_profile,
-                data=dat, ylab="Source Loading\n",
+                data=dat, ylab="Source Loading",
                 panel = function(...){
                   rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
                                panel.grid, ...)
@@ -1736,11 +1736,16 @@ rsp_yscale.component.log10 <- function(lim, ...) {
   ans <- yscale.components.default(lim = lim, ...)
   tick.at <- pretty(lim)
   tick.at <- tick.at[tick.at == floor(tick.at)]
+  tick.at <- tick.at[tick.at < max(lim, na.rm=TRUE) & tick.at > min(lim, na.rm=TRUE)]
   ans$left$ticks$at <- tick.at
   ans$left$labels$at <- tick.at
   ans$left$labels$labels <- c(format(10^(tick.at),
                                      drop0trailing = TRUE,
                                      scientific = FALSE))
+  #print(ans$left$labels$labels)
+  #######################
+  #need to sort of right labeling
+  #   dropped for now...
   #ans$right <- ans$left
   ans
 }
