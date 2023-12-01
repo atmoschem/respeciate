@@ -806,10 +806,15 @@ pls_rebuild <- function(pls, species, power=1,
     } else {
       Inf
     }
-
     .ls <- lapply(.ns, function(x){start})
     .ls2 <- lapply(.ns, function(x){lower})
     .ls3 <- lapply(.ns, function(x){upper})
+
+    control <- if("control" %in% names(x.args)){
+      x.args$control
+    } else {
+      nls.control(tol=1e-5)
+    }
 
     #print(.data)
     #print(.for)
@@ -821,7 +826,7 @@ pls_rebuild <- function(pls, species, power=1,
                lower=.ls2,
                upper=.ls3,
                algorithm="port",
-               control=nls.control(tol=1e-5) #think about tolerance
+               control=control #think about tolerance
     )
     #check.names TRUE was applying make.names
     #     so turned off when building data.frames for pls model outputs
@@ -864,6 +869,7 @@ pls_rebuild <- function(pls, species, power=1,
       names(.ls) <- paste("m_", .ms, sep="")
       .da <- pls[[i]]$args$data
       pls[[i]]$args$weights <- (1/pls[[i]]$args$data$test)^power
+      pls[[i]]$args$control <- control
       #################
       #can these go now..?
       #################
@@ -2357,7 +2363,7 @@ rsp_pls_rebuild.old <- function(pls, species, power=1,
                           weights = (1/.da$test)^power, # think about weighting
                           start=.ls, lower=.ls,
                           algorithm="port",
-                          control=nls.control(tol=1e-5) #think about tolerance
+                          control=control #think about tolerance
       )
     }
   }
