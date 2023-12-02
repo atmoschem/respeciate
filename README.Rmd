@@ -51,12 +51,11 @@ Plotting a profile
 plot(p)
 ```
 
-... using barplot syntax
+... using lattice barchart syntax
 
 ```{r fig.width=12, fig.height=5, fig.align="center", dpi=400}
-#using base barplot 
 p2 <- sp_profile(c(8833, 8850))
-plot(p2, beside=TRUE)
+plot(p2, key=list(space="top"))
 ```
 
 

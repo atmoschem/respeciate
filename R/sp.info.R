@@ -76,10 +76,10 @@
 sp_info <- function() {
   #extract profile info from archive
   .ver <- "source: SPECIATE 5.2\n\t[in (re)SPECIATE since 0.2.0]"
+  .ver <- paste(.ver, "\n\t[now (re)SPECIATE ", packageVersion("respeciate"), "]", sep="")
   .pro <- length(unique(sysdata$PROFILES$PROFILE_CODE))
   .spc <- length(unique(sysdata$SPECIES_PROPERTIES$SPECIES_ID))
-  cat(.ver, "\n\tProfiles: ", .pro, "\n\tSpecies: ", .spc, sep = "")
-
+  cat(.ver, "\n\tProfiles: ", .pro, "\n\tSpecies: ", .spc, "\n", sep = "")
 }
 
 

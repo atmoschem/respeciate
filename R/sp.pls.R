@@ -1,6 +1,6 @@
 #' @name sp.pls
 #' @title (re)SPECIATE profile Positive Least Squares
-#' @aliases sp_pls_profile pls_report pls_fit_species
+#' @aliases sp_pls_profile pls_report pls_test pls_fit_species
 #' pls_refit_species pls_rebuild pls_plot
 #' pls_plot_species pls_plot_profile
 
@@ -50,6 +50,13 @@
 #' or ref + refit species). However, this second step can be omitted using
 #' \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 #' as an indicator rather than a standard member of the apportionment model.
+#' @param as.marker for \code{pls_rebuild}, \code{pls_fit_species} and
+#' \code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+#' fitting (or refitting) a species, treat it as source marker.
+#' @param drop.missing for \code{pls_rebuild}, \code{pls_fit_species} and
+#' \code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
+#' building or rebuilding a PLS model, discard cases where \code{species}
+#' is missing.
 #' @param n (for \code{pls_plot}s only) numeric or character
 #' identifying the species or profile to plot. If numeric, these are treated
 #' as indices of the species or profile, respectively, in the PLS model; if
@@ -391,10 +398,17 @@ pls_report <- function(pls){
     #need to read this:
     #https://stackoverflow.com/questions/39999456/aic-on-nls-on-r
     #see stats:::logLik.nls for AIC calc...
+    .s.mod <- suppressWarnings(summary(.mod))
+    ####################
+    #above suppress warnings
+    #    is to hide the perfect fit warning
+    #        you get if you fit a marker...
+    #            option to jitters still there
+    #############
     data.frame(SPECIES_NAME = x,
-               adj.r.sq = summary(.mod)$adj.r.squared,
-               slope = summary(.mod)$coefficients[1, 1],
-               p.slope = summary(.mod)$coefficients[1, 4],
+               adj.r.sq = .s.mod$adj.r.squared,
+               slope = .s.mod$coefficients[1, 1],
+               p.slope = .s.mod$coefficients[1, 4],
                AIC = AIC(.mod)
     )
   })
@@ -403,6 +417,51 @@ pls_report <- function(pls){
 
   as.data.frame(ans)
 }
+
+
+
+
+#############################
+#############################
+## pls_test
+#############################
+#############################
+
+#' @rdname sp.pls
+#' @export
+
+##   now imports from xxx.r
+##   #' @import data.table
+
+# this is the model tests
+# this builds from pls_report
+
+pls_test <- function(pls){
+  .rp <- pls_report(pls)
+  #species
+  .tmp<- lapply(unique(.rp$SPECIES_NAME), function(i){
+    .ans <- subset(.rp, SPECIES_NAME==i)
+    data.frame(SPECIES_NAME = i,
+               adj.r.sq = .ans$adj.r.sq[1],
+               slope=.ans$slope[1],
+               p.slope=.ans$p.slope[1],
+               AIC = .ans$AIC[1])
+  })
+  .sp <- data.table::rbindlist(.tmp)
+
+  #ref profiles
+  .pn <- names(.rp)[grepl("^p_", names(.rp))]
+  .ans <- data.table::as.data.table(.rp)[, lapply(.SD,
+                                                  function(x){length(x[x>0.05])/length(x)}),
+                                         .SDcols = .pn]
+  .ans <- as.data.frame(.ans)
+  .ans <- (1 - .ans)*100
+  names(.ans) <- gsub("^p_", "gp_", names(.ans))
+
+  list(.species=.sp,
+       .pls = .ans)
+}
+
 
 
 
@@ -425,13 +484,19 @@ pls_report <- function(pls){
 #' @export
 
 pls_fit_species <- function(pls, species, power=1,
-                            refit.profile=TRUE, ...){
+                            refit.profile=TRUE,
+                            as.marker=FALSE,
+                            drop.missing=FALSE,
+                            ...){
   #wrapper for multiple fits of new data to a pls model
   .id <- unique(species$SPECIES_NAME)
   for(i in .id){
     .sub.sp <- subset(species, SPECIES_NAME==i)
     .test <- try(pls_rebuild(pls, species=.sub.sp, power=power,
-                             refit.profile=refit.profile, ...),
+                             refit.profile=refit.profile,
+                             as.marker=as.marker,
+                             drop.missing=drop.missing,
+                             ...),
         silent=TRUE)
     if(class(.test)[1]=="try-error"){
       warning("RSP_PLS> failed to fit: ", i, sep="")
@@ -448,12 +513,18 @@ pls_fit_species <- function(pls, species, power=1,
 #' @export
 
 pls_refit_species <- function(pls, species, power=1,
-                              refit.profile=TRUE, ...){
+                              refit.profile=TRUE,
+                              as.marker=FALSE,
+                              drop.missing=FALSE,
+                              ...){
   #wrapper for multiple fits of new data to a pls model
   .id <- species
   for(i in .id){
     .test <- try(pls_rebuild(pls, species=i, power=power,
-                             refit.profile=refit.profile, ...),
+                             refit.profile=refit.profile,
+                             as.marker=as.marker,
+                             drop.missing=drop.missing,
+                             ...),
                  silent=TRUE)
     #pass back the error???
     if(class(.test)[1]=="try-error"){
@@ -476,8 +547,9 @@ pls_refit_species <- function(pls, species, power=1,
 #this needs a lot of work
 #############################
 
-# thinking about dropping the pls_refit_species and pls_fit_parent
-#      (or making them wrappers of this)
+# pls_fit_species and pls_refit_species
+#      are now multiple use wrappers for this...
+#         they for loop try(pls_rebuild(...))
 
 # (like pls_(re)fit_'s)
 # like to drop power from formals
@@ -491,38 +563,39 @@ pls_refit_species <- function(pls, species, power=1,
 #      this would also remove the start, lower and upper options
 #           from the formals...
 
-# parent could already be in x
-#    then parent could just be the name of parent???
-
-# also a case for using this to add a non-parent to x
-#    e.g. pls_fit_unknown_species...
-#    to fit a species to the existing model as a source apportion of
-#        that unknown...
-#    in which case maybe this should just be a wrapper for that
-#        with the start, lower and upper like below
-
 # if we are setting start and lower
 #     start = lower if start is missing might be safer...
+#        (see code in sp_pls_profile)
+
+#needs to allow more constraint
+#     currently not passing forward the args...
+
+#mod <- readRDS("C:/Users/trakradmin/OneDrive - University of Leeds/Documents/pkg/respeciate/test/mod1.RDS")
+#dat <- readRDS("C:/Users/trakradmin/OneDrive - University of Leeds/Documents/pkg/respeciate/test/uk.metals.aurn.2b.rds")
+
+#pls_rebuild(mod, subset(dat, SPECIES_NAME=="[avg.AURN] O3"), power=2, as.marker=T)
 
 
 pls_rebuild <- function(pls, species, power=1,
-                            refit.profile=TRUE, ...){
+                         refit.profile=TRUE,
+                         as.marker=FALSE,
+                         drop.missing=FALSE,
+                         ...){
 
   x.args <- list(...)
   #hiding model args
+  #also like to hide power
 
   .out <- pls_report(pls)
-  #species / parent should only have one species
-  #   note: parent is name from previous function
-  #         maybe change now???
-  #and have same profiles as pls model data
-  #and its contribution to all sources is set by .value
 
-  #note
-  ################################
-  #following just done quickly to replace
-  #    two previous functions pls_fit_parent and pls_refit_species
+  #cheat
+  #########################
+  .cheat <- character()
+  .cheat2 <- character()
 
+  #########################
+  #standardise inputs
+  #########################
   if(is.character(species)){
     #assuming this is SPECIES_NAME of the species to be fit
     #and species was in modelled data when pls was built...
@@ -530,106 +603,363 @@ pls_rebuild <- function(pls, species, power=1,
       stop("RSP_PLS> 'species' not in PLS, please check",
            call. = FALSE)
     }
-    parent <- subset(.out, SPECIES_NAME == species[1])
+    .add <- subset(.out, SPECIES_NAME == species[1])
     .out <- subset(.out, SPECIES_NAME != species[1])
 
   } else {
-    #assuming this is respeciate object data.frame of right structure
-    parent <- species
+    #assuming this is respeciate object/data.frame of right structure
+    .add <- species
   }
-  #get a 'safe' profile
-  .test <- .out[.out$pred>0,]
-  .out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
-  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
-  .test <- names(parent)[names(parent) %in% .test]
-  .data <- parent[.test]
-  names(.data)[2] <- "parent"
-  .data <- merge(.out, .data[c(1:2)])
 
-  #formula
-  .ms <- names(.data)[grepl("^m_", names(.out))]
-  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
-                sep="", collapse = "+")
-  .for <- as.formula(paste("parent~", .for))
+  ###################################
+  #get and check species name and id
+  ###################################
+  sp.nm <- unique(.add$SPECIES_NAME)
+  sp.id <- unique(.add$SPECIES_ID)
+  #both need to be 1 element
+  if(length(sp.nm) !=1 || length (sp.id) != 1){
+    stop("RSP_PLS> 'species' not unique, either missing or multiple",
+         call. = FALSE)
+  }
 
-  .ns <- .ms
-  names(.ns) <- gsub("^m_", "n_", .ms)
-
-  #note
-  ##################
-  #model handling temp update
-  #lower, start and upper
-  lower <- if("lower" %in% names(x.args)){
-    x.args$lower
+  #if as.marker is character
+  #   use it as marker profile name and reset as.marker to TRUE
+  #   else use species_name as profile name
+  #        wondering if this should be more unique
+  if(is.character(as.marker)){
+    .mrk.nm <- as.marker
+    as.marker <- TRUE
   } else {
-    0
+    .mrk.nm <- sp.nm
   }
-  start <- if("start" %in% names(x.args)){
-    x.args$start
+
+  #####################
+  #as.marker T/F handling
+  #####################
+  if(as.marker){
+    #treat species as marker
+    for(i in names(pls)){
+      if(i %in% unique(.add$PROFILE_CODE) & !is.null(pls[[i]])){
+        #remark off all print when happy with method
+        #print(i)
+        #########################
+        #can simplify a lot below
+        #########################
+        x <- pls[[i]]
+        .da <- subset(x$args$data, SPECIES_NAME != sp.nm)
+        .da[.mrk.nm] <- 0
+        #.cht <- rev(unique(c("test", rev(names(.da)))))
+        #.da <- .da[.cht]
+        .da <- .da[rev(unique(c("test", rev(names(.da)))))]
+        .mn.df <- .da[1,]
+        #.mn.df[,1] <- sp.id
+        #.mn.df[,2] <- sp.nm
+        .mn.df[,c(1,2)] <- c(sp.id, sp.nm)
+        .mn.df[,3:(ncol(.da)-2)] <- 0
+        ##############################
+        #below might want to be something other than 1
+        #    e.g. median other others excluding zero's???
+        .mn.df[,ncol(.da)-1] <- 1
+        #######################################
+        #might need to add a jitter to next???
+        #######################################
+        #print("hi")
+        #print(.add)
+        #print(i)
+        #print(.add[.add$PROFILE_CODE==i,])
+        .mn.df[,ncol(.da)] <- .add[.add$PROFILE_CODE==i, ".value"]
+        if(!is.na(.mn.df[,ncol(.da)])){
+
+
+        ##################################
+        #a lot below needs more generalising
+        ###################################
+        pls[[i]]$args$data <- rbind(.da, .mn.df)
+        pls[[i]]$args$weights <- (1/pls[[i]]$args$data$test)^power
+        if(any(!grepl(.mrk.nm, pls[[i]]$args$formula))){
+          #update formula
+          .for <- as.character(pls[[i]]$args$formula)
+          .for[3] <- paste(.for[3], "+ (`m_", .mrk.nm,
+                           "` * `", .mrk.nm, "`)",
+                           sep="")
+          pls[[i]]$args$formula <- as.formula(paste(.for[2], .for[1],
+                                                    .for[3], sep=""))
+        }
+        if("start" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$start)){
+            #print("adding m_ start")
+            .arg <- pls[[i]]$args$start
+            .arg[[paste("m_", .mrk.nm, sep="")]] <-0
+            pls[[i]]$args$start <- .arg
+          }
+        }
+        if("lower" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$lower)){
+            #print("adding m_ lower")
+            .arg <- pls[[i]]$args$lower
+            .arg[[paste("m_", .mrk.nm, sep="")]] <-0
+            pls[[i]]$args$lower <- .arg
+          }
+        }
+        if("upper" %in% names(pls[[i]]$args)){
+          if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$upper)){
+            #print("adding m_ upper")
+            .arg <- pls[[i]]$args$upper
+            .arg[[paste("m_", .mrk.nm, sep="")]] <- Inf
+            pls[[i]]$args$upper <- .arg
+          }
+        }
+
+        #print(pls[[i]]$args$data)
+        #print(pls[[i]]$args$formula)
+        #print(pls[[i]]$args$weights)
+        ######################
+        #nls model do.call might need a try wrapper
+        ########################
+        .cheat2 <- c(.cheat2, i)
+
+        pls[[i]]$mod <- do.call(nls, pls[[i]]$args)
+      } #stop it trying entry is NA
+      } else {
+        #can't build this model update, so drop it!
+        #either no marker or no previous model
+        #############################
+        #might want to change this to
+        #leave them alone???
+        #   just might never get the o3 profile included
+        #   or make the as.marker = FALSE drop the case it
+        #       can't model...?
+        if(drop.missing){
+          .cheat <- c(.cheat, i)
+          pls[i] <- list(NULL)
+        }
+      }
+    }
+    #print("doing these [mrk]")
+    #print(.cheat2)
+    #print("dropping these [mrk]")
+    #print(.cheat)
   } else {
-    lower
-  }
-  upper <- if("upper" %in% names(x.args)){
-    x.args$upper
-  } else {
-    Inf
-  }
+    ######################################
+    #species not a marker
+    ######################################
+    #distribute across existing sources
+    ######################################
 
-  .ls <- lapply(.ns, function(x){start})
-  .ls2 <- lapply(.ns, function(x){lower})
-  .ls3 <- lapply(.ns, function(x){upper})
+    ###############################
+    #remark prints when happy with method
+    ###############################
 
-#print(.data)
+    #########################
+    #like to first better way of doing following
+    #########################
 
-  mod <- nls(.for, data=.data,
-             #weights = (1/.out$test)^power,
-             #no weighting currently because species are all the same here!
-             start=.ls,
-             lower=.ls2,
-             upper=.ls3,
-             algorithm="port",
-             control=nls.control(tol=1e-5) #think about tolerance
-  )
-  .ans <- data.frame(
-    PROFILE_CODE = .data$PROFILE_CODE,
-    SPECIES_ID = parent$SPECIES_ID[1],
-    SPECIES_NAME = parent$SPECIES_NAME[1],
-    t(coefficients(mod)),
-    test = .data$parent
-  )
-  names(.ans) <- gsub("^n_", "", names(.ans))
+    #need to build a unique data set of previous m matrix predictions
+    ##################
+    #.test <- .out[.out$pred>0,]
+    # (had to exclude pred = 0 because these were not yet modelled)
+    #.out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
+    # (replacing with following because above dropped models if first species
+    #  was missing from those profile_code)
+    #
+    .test <- .out[.out$pred>0,]
+    .out <- .test[!duplicated(.test$PROFILE_CODE),]
 
-  for(i in .ans$PROFILE_CODE){
-    .ii <- subset(.ans, PROFILE_CODE==i)
-    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
-    .nn <- pls[[i]]$args$data
-    .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
-    pls[[i]]$args$data <- rbind(.nn, .ii)
-    #rebuild model
-    .for <- as.character(formula(pls[[i]]$mod))
-    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
-    .ms <- names(pls[[i]]$args$data)
-    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
-    .ls <- lapply(.ms, function(x){0})
-    names(.ls) <- paste("m_", .ms, sep="")
-    .da <- pls[[i]]$args$data
+    .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+    .test <- names(.add)[names(.add) %in% .test]
+    .data <- .add[.test]
+
+    names(.data)[2] <- "refit"
+    .data <- merge(.out, .data[c(1:2)])
+
+    #########################
+    #note
+    #if checking .data species may not be unique
+    # just after a unique (all profile_code) m matrix
+    # for the added
+    #print(.data)
+
+    .ms <- names(.data)[grepl("^m_", names(.data))]
+    .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                  sep="", collapse = "+")
+    .for <- as.formula(paste("refit~", .for))
+
+    .ns <- .ms
+    names(.ns) <- gsub("^m_", "n_", .ms)
 
     #note
-    #############################
-    # option to not do this refit?
-    if(refit.profile){
-      pls[[i]]$mod <- nls(.for, data=.da,
-                          weights = (1/.da$test)^power, # think about weighting
-                          start=.ls, lower=.ls,
-                          algorithm="port",
-                          control=nls.control(tol=1e-5) #think about tolerance
-      )
+    ##################
+    #model handling temp update
+    #lower, start and upper
+    lower <- if("lower" %in% names(x.args)){
+      x.args$lower
+    } else {
+      0
+    }
+    start <- if("start" %in% names(x.args)){
+      x.args$start
+    } else {
+      lower
+    }
+    upper <- if("upper" %in% names(x.args)){
+      x.args$upper
+    } else {
+      Inf
+    }
+    .ls <- lapply(.ns, function(x){start})
+    .ls2 <- lapply(.ns, function(x){lower})
+    .ls3 <- lapply(.ns, function(x){upper})
+
+    control <- if("control" %in% names(x.args)){
+      x.args$control
+    } else {
+      nls.control(tol=1e-5)
+    }
+
+    #print(.data)
+    #print(.for)
+
+    mod <- nls(.for, data=.data,
+               #weights = (1/.out$test)^power,
+               #no weighting currently because species are all the same here!
+               start=.ls,
+               lower=.ls2,
+               upper=.ls3,
+               algorithm="port",
+               control=control #think about tolerance
+    )
+    #check.names TRUE was applying make.names
+    #     so turned off when building data.frames for pls model outputs
+    .ans <- data.frame(
+      PROFILE_CODE = .data$PROFILE_CODE,
+      SPECIES_ID = .add$SPECIES_ID[1],
+      SPECIES_NAME = .add$SPECIES_NAME[1],
+      t(coefficients(mod)),
+      test = .data$refit,
+      check.names=FALSE
+    )
+    names(.ans) <- gsub("^n_", "", names(.ans))
+
+    #print("doing these")
+    #print(.ans$PROFILE_CODE)
+
+    #for each build model, put new models in pls
+    ###################################
+    #need to move this to working directly from models
+    for(i in unique(.ans$PROFILE_CODE)){
+      .ii <- subset(.ans, PROFILE_CODE==i)
+      .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+      .nn <- pls[[i]]$args$data
+      .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
+      ###########
+      #cheat
+      #############
+      #print(.nn)
+      #print(.ii)
+      .ii <- .ii[names(.ii) %in% names(.nn)]
+      ########################
+
+      pls[[i]]$args$data <- rbind(.nn, .ii)
+      #rebuild model
+      .for <- as.character(formula(pls[[i]]$mod))
+      .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+      .ms <- names(pls[[i]]$args$data)
+      .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+      .ls <- lapply(.ms, function(x){0})
+      names(.ls) <- paste("m_", .ms, sep="")
+      .da <- pls[[i]]$args$data
+      pls[[i]]$args$weights <- (1/pls[[i]]$args$data$test)^power
+      pls[[i]]$args$control <- control
+      #################
+      #can these go now..?
+      #################
+      if("start" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$start)){
+          #print("adding m_ start")
+          .arg <- pls[[i]]$args$start
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <-0
+          pls[[i]]$args$start <- .arg
+        }
+      }
+      if("lower" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$lower)){
+          #print("adding m_ lower")
+          .arg <- pls[[i]]$args$lower
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <-0
+          pls[[i]]$args$lower <- .arg
+        }
+      }
+      if("upper" %in% names(pls[[i]]$args)){
+        if(!paste("m_", .mrk.nm, sep="") %in% names(pls[[i]]$args$upper)){
+          #print("adding m_ upper")
+          .arg <- pls[[i]]$args$upper
+          #.arg[[paste("m_", .mrk.nm, sep="")]] <- Inf
+          pls[[i]]$args$upper <- .arg
+        }
+      }
+
+    }
+    if(drop.missing){
+      ##########################################
+      #if we are dropping cases were species was
+      #     not available, we need to drop the
+      #         models that were not (re)fit...
+      #print("dropping these!")
+      .test <- names(pls)[!names(pls) %in% unique(.ans$PROFILE_CODE)]
+      #print(.test)
+      if(length(.test)>0){
+        for(i in .test){
+          pls[i] <- list(NULL)
+        }
+      }
     }
   }
 
-  pls
+  ################
+  #refit.profiles
+  ################
+  #this might be a little redundant now
 
+  if(refit.profile){
+    for(i in names(pls)){
+      if(!is.null(pls[[i]])){
+        #print(i)
+        #print(pls[[i]]$args$data)
+        #print(pls[[i]]$args$formula)
+
+        pls[[i]]$mod <- do.call(nls, pls[[i]]$args)
+        #pls[[i]]$mod <- nls(.for, data=.da,
+        #                    weights = (1/.da$test)^power, # think about weighting
+        #                    start=.ls, lower=.ls,
+        #                    algorithm="port",
+        #                    control=nls.control(tol=1e-5) #think about tolerance
+        #)
+        #.for <- as.character(formula(pls[[i]]$mod))
+        #.for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+        #.da <- pls[[i]]$args$data
+        #.ls <- pls[[i]]$args$lower
+        #print(.da)
+        #print(.ls)
+        #print((1/.da$test)^power)
+        #pls[[i]]$mod <- nls(.for, data=.da,
+        #                    weights = (1/.da$test)^power, # think about weighting
+        #                    start=.ls, lower=.ls,
+        #                    algorithm="port",
+        #                    control=nls.control(tol=1e-5) #think about tolerance
+        #)
+        #print("refit.profile")
+      }
+    }
+  }
+  ################
+  #output
+  ################
+  pls
 }
+
+#################
+
+
 
 
 #fix if nulls are an issue
@@ -641,18 +971,13 @@ pls_rebuild <- function(pls, species, power=1,
 ####################
 
 #inc <- readRDS("C:\\Users\\trakradmin\\OneDrive - University of Leeds\\Documents\\pkg\\respeciate\\_projects\\marylebone03\\.tmp.increment.rds")
-#inc$.value <- inc$.value.inc
-#inc$WEIGHT_PERCENT <- inc$.value.inc
 #inc$PROFILE_CODE <- as.character(inc$`Start Date`)
 #inc$PROFILE_NAME <- as.character(inc$`Start Date`)
-
-#inc <- sp_pad(inc, "species")
-#inc <- subset(inc, `Start Date` > "2021-01-01")
+#inc <- sp_build_rsp_x(inc, value=".value.inc")
 
 #sp_match_profile(inc, spq_pm(), matches=20)
 
 #aa <- sp_profile(c("3157", "4330310", "3941", "4027", "3961"))
-
 #inc.metals <- subset(inc, !grepl("[[]avg.AURN[]]", SPECIES_NAME))
 
 #moda <- sp_pls_profile(inc.metals, aa)
@@ -664,12 +989,33 @@ pls_rebuild <- function(pls, species, power=1,
 
 
 
+############################
+#next steps
+############################
 
+#note
 
+# this is rebuild version 2
+#    first version currently pls_rebuild.old (unexported)
 
+#tidy code
+#    go through and tidy messy code
+#    NB: data.frame names might be getting changed in some functions
+#        seemed to be happening in multiple refits....
+#            looked like make.name(BAD-NAME)
+#    think about models with missing input
+#        leave in or drop??
+#           or option to do both... ???
+#    think about power and other nls arguments
+#        need to be handling these better...
+#        currently re-calaculating on rebuild
+#             BUT might need to be able to work with user input???
+#    update the documents
 
-
-
+#    have hidden perfect fit error in pls_report
+#       think that kills it anywhere
+#           but should check pls_plot...
+#       also could add a jigger when fitting marker in rebuild?
 
 
 
@@ -707,160 +1053,240 @@ pls_rebuild <- function(pls, species, power=1,
 #     both pls_plot and rsp_profile_pie need work...
 
 
-pls_plot <- function(pls, n=1, type=1,
-                     ...){
+pls_plot <- function (pls, n, type = 1, ...){
 
-  #main summary plot
-  #require(data.table)
+  #current using lattice/latticeExtra for the panelling/layers...
 
-  #to do
+  #basic plots finished but...
+  #    currently not passing arguments generally
+  #    the par setting seem to be dropped when using plot(p)
+  #         ahead of end of function
+
+  ############################
+  # nags
   ############################
 
-  #general
-
-  #tidy code;
-  #    this was put together fast...
-  #    lots of code can be tidied/simplified...
-
-  #needs external plot control...
-  #    arg passing to barplot in ...???
-  #    at least col control???
-
-  #    temp
-  #    tracking col, xlab, ylab in ...
-
-  #type 1
+  # type = 1
   ############################
-  #like x axes to look like a conventionally numeric
-  #like option for x axes to be mapped onto another
-  #       measurement
-  #       currently an index based on PROFILE_CODE
-  #            maybe as.x or map.x, etc...
 
+  # note sure about the layer naming
+  # zero is not bottom of barchart...
 
-  #type =2 for pie plot...
-  #############################
-  #using modification of pie
-  #      unexported/below
-  #      see notes there...
+  # type = 2
+  ############################
 
+  # the label positioning is messy (see not about nudge)
+
+  # cex setting too small if only one panel...
+
+  #wondering about
+  #    https://latticeextra.r-forge.r-project.org/man/postdoc.html
+  #    as an alternative to type=2
+  #    (but 100 percent measured rather than proportion...)
+
+  #################
+  #setup
+  #################
   .x.args <- list(...)
-  species <- n
-
   dat <- pls_report(pls)
+  .ord.pro.c <- rsp_profile_code_order(dat)
   .sp.ref <- unique(dat$SPECIES_NAME)
-  if(missing(species)){
-    species <- .sp.ref[1]
+  #species
+  #  now defaulting to all plots
+  species <- if (missing(n)) {
+    species <- .sp.ref
   }
-  if(is.numeric(species)){
-    if(all(species == -1)){
+  else {
+    n
+  }
+  if (is.numeric(species)) {
+    if (all(species == -1)) {
       species <- .sp.ref
-    } else {
+    }
+    else {
       species <- .sp.ref[species]
     }
   }
-  if(!any(species %in% .sp.ref)){
-    stop("RSP_PLS> unknown species, please check",
-         call.=FALSE)
+  if (!any(species %in% .sp.ref)) {
+    stop("RSP_PLS> unknown species, please check", call. = FALSE)
   }
-  .sp.ord <- unique(dat$SPECIES_ID) #only need this if I
+  ################################
+  #note:
+  #  could condition here BUT currently
+  #  holding on to everything until just before plot
+  #  might not need to do this....
+  #################################
+
+  .sp.ord <- unique(dat$SPECIES_ID)
   .sp.m.pro <- names(dat)[grep("^m_", names(dat))]
   .sp.pro <- gsub("^m_", "", .sp.m.pro)
 
-  .cols <- if("col" %in% names(.x.args)){
+  #line col....
+  .col <- lattice::trellis.par.get("superpose.line")$col[1]
+
+  #bar cols
+  .cols <- if ("col" %in% names(.x.args)) {
+    #could include if you supply a function..?
+    #could use col.regions?
     .cols <- .x.args$col
-  } else {
-    .cols <- heat.colors(n=length(.sp.m.pro))
   }
-  if(length(.cols)!=length(.sp.m.pro)){
-    stop("pls_plot> halted; expecting ", length(.sp.m.pro), "colours; given ",
-         length(.cols), sep="", call. = FALSE)
+  else {
+    .cols <- heat.colors(n = length(.sp.m.pro))
   }
-
-
-  #could put this is pls_report???
-  for(i in .sp.pro){
-    dat[, paste("x_", i, sep="")] <- dat[, paste("m_", i, sep="")] * dat[,i]
+  if (length(.cols) != length(.sp.m.pro)) {
+    stop("pls_plot> halted; expecting ", length(.sp.m.pro),
+         "colours; given ", length(.cols), sep = "", call. = FALSE)
   }
 
+  ######################
+  # build x_[profile]
+  ######################
+  for (i in .sp.pro) {
+    dat[, paste("x_", i, sep = "")] <- dat[, paste("m_",
+                                                   i, sep = "")] * dat[, i]
+  }
   .sp.x.pro <- names(dat)[grep("^x_", names(dat))]
-
-  .rep <- dat[c("SPECIES_NAME", "SPECIES_ID", "PROFILE_CODE", .sp.x.pro)]
+  .rep <- dat[c("SPECIES_NAME", "SPECIES_ID", "PROFILE_CODE",
+                .sp.x.pro)]
   .rep <- data.table::melt(data.table::as.data.table(.rep),
-               id=c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE"))
-
+                           id = c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE"))
   .tot <- data.table::as.data.table(dat)
   .cs <- c(".value", "pred", .sp.x.pro)
-  .tot <- .tot[, lapply(.SD,
-                        function(x) sum(x, na.rm=TRUE)),
-               .SDcols= .cs,
-               by=c("SPECIES_ID", "SPECIES_NAME")]
+  .tot <- .tot[, lapply(.SD, function(x) sum(x, na.rm = TRUE)),
+               .SDcols = .cs, by = c("SPECIES_ID", "SPECIES_NAME")]
 
-  for(i in species){
-    .rep2 <- as.data.frame(subset(.rep, SPECIES_NAME==i))
-    .rep2$.index <- as.character(.rep2$PROFILE_CODE)
-    .tot2 <- as.data.frame(subset(.tot, SPECIES_NAME==i))
-    .dat <- subset(dat, SPECIES_NAME==i)
-    if(1 %in% type){
-      if(all(is.na(.dat$pred)) | all(.dat$pred==0)){
-        warning(paste("pls_plot: no type 1 ", i, " model", sep=""),
-                call. = FALSE)
-      } else {
-        .scale <- c(.dat$.value, .dat$pred)
-        .scale <- .scale[is.finite((.scale))]
-        .scale <- max(pretty(.scale))
-        .rep2$.index <- as.numeric(ordered(.rep2$.index, levels=unique(.rep2$.index)))
-        .rep2$.index <- ordered(.rep2$.index, levels=unique(.rep2$.index))
-        #.cols <- palette.colors(n = length(.sp.x.pro), palette = "Okabe-Ito",
-        #                        recycle = FALSE)
-        #.cols <- heat.colors(n=length(.sp.x.pro))
-        .ncol <- ceiling(length(.sp.x.pro)/3)
-        .leg.text <- gsub("^x_", "", .sp.x.pro)
-        .ylb <- if("ylab" %in% names(.x.args)){
-          .x.args$ylab
-        } else {
-          "Measurement"
-        }
-        .xlb <- if("xlab" %in% names(.x.args)){
-          .x.args$xlab
-        } else {
-          "Sample [index]"
-        }
-        .bar <- barplot(value~variable + .index,  .rep2, col=.cols,
-                        main = i, ylab=.ylb,
-                        xlab=.xlb,
-                        ylim=c(0, .scale),   #testing
-                        legend.text=.leg.text,
-                        args.legend=list(cex=0.8,
-                                         ncol=.ncol))
-        .dat <- subset(dat, SPECIES_NAME==i)
+  ###########################
+  # now plotting as panels
+  # using
+  ###########################
 
-        lines(.bar, .dat$.value)
-      }
+  ######################################################
+  # now using rsp_ function to track all pls model cases
+  # previous method only tracked valid cases for the plotted data
+  #    so no gaps where models dropped/not built...
+  #########################################################
+  .rep$.index <- as.numeric(factor(.rep$PROFILE_CODE, levels = .ord.pro.c,
+                                   ordered = TRUE))
+  dat$.index <- as.numeric(factor(dat$PROFILE_CODE, levels = .ord.pro.c,
+                                  ordered = TRUE))
+  .tmp <- dat[c("SPECIES_ID", "PROFILE_CODE", ".index", ".value", "pred")]
+  .rep <- data.table::merge.data.table(.rep, .tmp)
+
+  .rep$variable <- gsub("^x_", "", .rep$variable)
+
+  #print(names(.rep))
+  #return(dat)
+
+  .rep <- subset(as.data.frame(.rep), SPECIES_NAME %in% species)
+
+  if (1 %in% type) {
+
+    #lattice sets panel order based
+    .sp <- if(is.factor(.rep$SPECIES_NAME)){
+      levels(.rep$SPECIES_NAME)
+    } else {
+      sort(unique(.rep$SPECIES_NAME))
     }
-    if(2 %in% type){
-        #.cols <- heat.colors(n=length(.sp.x.pro))
-        if(nrow(.tot2)==0){
-          warning(paste("pls_plot: no type 2 ", i, " model", sep=""),
-                  call. = FALSE)
-        } else {
-          .vals <- unlist((.tot2[,.sp.x.pro]/.tot2$.value) * 100)
-          if(all(.vals==0)){
-            warning(paste("pls_plot: no type 2 ", i, " model", sep=""),
-                    call. = FALSE)
-          } else {
-            .labs=paste(gsub("x_", "", .sp.x.pro), " (", signif(.vals, 3) , "%)", sep="")
-            rsp_profile_pie(.vals, col=.cols, edges=1000,
-                            labels=.labs, main=i)
-          }
-        }
-      }
-  }
+    .sp <- .sp[.sp %in% .rep$SPECIES_NAME]
+    #.y.scale <- lapply(unique(.rep$SPECIES_NAME), function(x){
+    .y.scale <- lapply(.sp, function(x){
+      .tmp <- .rep[.rep$SPECIES_NAME==x,]
+      c(0, max(c(.tmp$.value, .tmp$pred), na.rm=TRUE))
+    })
+    ###############################################
+    #use loa method to generalise this?
+    ###############################################
 
-  #output
-  #not sure if dat, .rep or output is most useful??
+
+    p2 <- lattice::xyplot(.value ~ .index | SPECIES_NAME, .rep,
+                          panel=lattice::panel.xyplot,
+                          type="l", xlab="Sample [index]",
+                          ylab="Measurement",
+                          scales=list(relation="free"),
+                          ylim=.y.scale)
+
+    p <- lattice::barchart(value ~ factor(.index) | SPECIES_NAME, .rep,
+                           groups=.rep$variable, stack=TRUE,
+                           panel=function(x, y, col, groups, ..., subscripts){
+                             #grid control like loa
+                             rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                                          lattice::panel.grid, ...)
+                             lattice::panel.barchart(x=x, y=y, col=col,
+                                                     groups=groups,
+                                                     subscripts=subscripts, ...)
+                             .y <- .rep$.value[subscripts]
+                             #col needs to be from option[1]
+                             lattice::panel.xyplot(x=x, y=.y,
+                                                   col=.col,
+                                                   type="l",
+                                                   subscripts=subscripts,...)
+                           },
+                           scales=list(relation="free"),
+                           #auto.key=list(space="top", columns=2,
+                           #               col.line=.cols,
+                           #              points=FALSE, rectangles=TRUE),
+                           ylim=.y.scale,
+                           col=.cols,
+                           border=NA,
+                           #par.settings = list(superpose.polygon = list(col = .cols,
+                           #                          pch =c (15, 15)),
+                           #superpose.symbol = list(fill = .cols)),
+                           auto.key=list(space="top", columns = 3,
+                                         cex=0.8,
+                                         points=FALSE,
+                                         rectangles=TRUE)) #,
+    #xscale.components = function(lim,...){
+    #  lim <- as.numeric(as.character(lim))
+    #  ans <- lattice::xscale.components.default(lim=lim,...)
+    #  print(ans)
+    #  ans
+    #})
+    plot(update(latticeExtra::doubleYScale(p2, p, add.axis = FALSE),
+                par.settings = list(superpose.polygon = list(col = .cols),
+                                    superpose.symbol = list(fill = .cols))))
+
+    #p2 <- lattice::xyplot(.value ~ factor(.index) | SPECIES_NAME, dat,
+    #                      type="l", scales=list(relation="free"))
+    #plot(cheat(p, latticeExtra::as.layer(p2)))
+
+    #plot(latticeExtra::doubleYScale(p, p2, add.axis=FALSE, add.ylab2=FALSE))
+  }
+  if (2 %in% type) {
+
+
+    p <- lattice::xyplot(value ~ .index | SPECIES_NAME, .rep,
+                         groups=.rep$variable,
+                         totals=.rep$.value,
+                         scales=list(relation="free",
+                                     draw=FALSE),
+                         ylab="", xlab="",
+                         col = .cols,
+                         auto.key=list(space="top", columns = 3,
+                                       cex=0.8,
+                                       points=FALSE,
+                                       rectangles=TRUE),
+                         ylim=c(-2,2), xlim=c(-2,2),
+                         between = list(x = 0.2, y = 0.2),
+                         panel=rsp_panel.pie,
+                         par.settings = list(superpose.polygon = list(col = .cols),
+                                             axis.line = list(col = 'transparent'),
+                                             superpose.symbol = list(fill = .cols))
+    )
+    plot(p)
+
+  }
   invisible(.rep)
 }
+
+
+
+#test <- "C:/Users/trakradmin/OneDrive - University of Leeds/Documents/pkg/respeciate"
+#mod <- readRDS(paste(test, "mod2.RDS", sep="/"))
+#pls_plot(mod)
+
+
+
+
 
 
 ####################################
@@ -881,115 +1307,205 @@ pls_plot <- function(pls, n=1, type=1,
 #############################
 
 
-pls_plot_species <- function(pls, n, type=1, ...){
-
-  #various pls model plots for species
-
-  #general
-  ######################################
-
-  #tidy code;
-  #    this was put together fast...
-  #    lots of code can be tidied/simplified...
-
-  #needs external plot control...
-  #    arg passing to barplot in ...???
-  #    at least col control???
-  #    type 2 plot should have a legend
-
-  #temp update
-  #    tracking col (and mod.col), xlab, ylab via ...
-
-
+pls_plot_species <- function (pls, n, type = 1, ...)
+{
+  ###########################
+  # setup
+  ###########################
   .x.args <- list(...)
-  species <- n
-
-  #get (and work from) report
   dat <- pls_report(pls)
-
-  #species handling/erroring
+  .ord.pro.c <- rsp_profile_code_order(dat)
   .sp.ref <- unique(dat$SPECIES_NAME)
-  if(missing(species)){
-    species <- .sp.ref[1]
+  species <- if (missing(n)) {
+    .sp.ref
+    #default option (print the lot...)
+    ############################
+    #possibly a warning if lots of species to plot
+    ##################
+  } else {
+    n
   }
-  if(is.numeric(species)){
-    if(all(species == -1)){
+  if (is.numeric(species)) {
+    if (all(species == -1)) {
       species <- .sp.ref
-    } else {
+    }
+    else {
       species <- .sp.ref[species]
     }
   }
-  if(!any(species %in% .sp.ref)){
-    stop("RSP_PLS> unknown species, please check",
-         call.=FALSE)
+  if (!any(species %in% .sp.ref)) {
+    stop("RSP_PLS> unknown species, please check", call. = FALSE)
   }
-  for(i in species){
-    .xlb <- if("xlab" %in% names(.x.args)){
-      .x.args$xlab
-    } else {
-      "Measurement"
-    }
-    .ylb <- if("ylab" %in% names(.x.args)){
-      .x.args$ylab
-    } else {
-      "Model"
-    }
-    .bc <- if("col" %in% names(.x.args)){
-      .x.args$col
-    } else {
-      par("col")
-    }
-    .mc <- if("mod.col" %in% names(.x.args)){
-      .x.args$mod.col
-    } else {
-      "red"
-    }
-    d2 <- subset(dat, SPECIES_NAME==i)
-    #lims <- range(c(d2$.value, d2$pred))
-    #######################################
-    # update - were seeing NAs in the pls models
-    #          BUT should not be happening
-    lims <- range(c(d2$.value, d2$pred), na.rm = TRUE, finite = TRUE)
-    #############################
-    mod <- lm(pred~0+.value, d2)
-    .sum <- paste("y = ", signif(summary(mod)$coefficients[1,1], 3),
-                  "x (adj.R2 = ", signif(summary(mod)$adj.r.squared, 3),
-                  ")", sep="")
-    if(1 %in% type){
-      plot(d2$.value, d2$pred, type="n",
-           main=i,
-           col=.bc,
-           xlab=.xlb,
-           ylab=.ylb,
-           xlim=lims, ylim=lims)
-      grid()
-      abline(a=0, b=1, col="grey")
-      points(d2$.value, d2$pred)
-      abline(mod, col=.mc, lty=2)
-      text(lims[1], lims[2], .sum, adj=c(0,1), cex=0.75)
-    }
-    if(2 %in% type){
-      .xlb <- if("xlab" %in% names(.x.args)){
-        .x.args$xlab
-      } else {
-        "Sample [index]"
-      }
-      .ylb <- if("ylab" %in% names(.x.args)){
-        .x.args$ylab
-      } else {
-        "Measurement"
-      }
-      plot(d2$.value, type="n",
-           main=i,
-           col=.bc,
-           ylab=.ylb,
-           xlab=.xlb,
-           ylim=lims)
-      lines(d2$.value)
-      lines(d2$pred, col=.mc)
-    }
+  ############################
+  #if not earlier, then here?
+  #possibly a warning if lots of species to plot
+  ##################
+
+  #########################
+  #could drop a lot of this??
+  #########################
+  .xlb <- if ("xlab" %in% names(.x.args)) {
+    .x.args$xlab
+  } else {
+    "Measurement"
   }
-  invisible(NULL)
+  .ylb <- if ("ylab" %in% names(.x.args)) {
+    .x.args$ylab
+  } else {
+    "Model"
+  }
+  .bc <- if ("col" %in% names(.x.args)) {
+    .x.args$col
+  } else {
+    par("col")
+  }
+  .mc <- if ("mod.col" %in% names(.x.args)) {
+    .x.args$mod.col
+  } else {
+    "red"
+  }
+  dat <- subset(dat, SPECIES_NAME %in% species)
+  #    lims <- range(c(d2$.value, d2$pred), na.rm = TRUE, finite = TRUE)
+  #    mod <- lm(pred ~ 0 + .value, d2)
+  #    .sum <- paste("y = ", signif(summary(mod)$coefficients[1,
+  #        1], 3), "x (adj.R2 = ", signif(summary(mod)$adj.r.squared,
+  #        3), ")", sep = "")
+  .lims <- lapply(species, function(x){
+    .d <- subset(dat, SPECIES_NAME==x)
+    range(c(.d$pred, .d$.value), finite=TRUE, na.rm=TRUE)
+  })
+  if (1 %in% type) {
+    p1.ls <- list(x=pred~.value | SPECIES_NAME, data=dat,
+                  #prepanel forces x and y lims to same range
+                  prepanel=function(...){
+                    .tmp <- prepanel.default.xyplot(...)
+                    .tmp$xlim <- range(c(.tmp$xlim, .tmp$ylim))
+                    .tmp$ylim <- .tmp$xlim
+                    .tmp
+                  },
+                  panel= function(x, y, xlim, ylim, ...){
+                    #user control of grid - like loa...
+                    rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                                 lattice::panel.grid, ...)
+                    #TO DO
+                    #user control of y=x
+                    panel.ablineq(a = 0, b = 1, adj = c(0,1),
+                                  col.line ="grey", lty=2, label="")
+                    #user control of main plotted data via
+                    # standard lattice
+                    panel.xyplot(x=x, y=y,  ...)
+                    #CURRENTLY JUST col via mod.col
+                    #user control of model
+                    panel.ablineq(lm(y ~ x + 0), cex = 0.8,
+                                  x = min(c(x, y), na.rm=TRUE),
+                                  y = max(c(x, y), na.rm=TRUE),
+                                  r.squared = TRUE, adj = c(0,1),
+                                  sep = " (", sep.end = ")",
+                                  offset=0, varStyle = NULL,
+                                  col.line = .mc, col.text = .mc, digits = 2)
+                  },
+                  xlab="Measurement", ylab="model",
+                  scales=list(y=list(relation="free",
+                                     rot=90),
+                              x=list(relation="free")))
+    p1.ls <- modifyList(p1.ls, .x.args)
+    p <- do.call(xyplot, p1.ls)
+    plot(p)
+
+    #      plot(d2$.value, d2$pred, type = "n", main = i, col = .bc,
+    #          xlab = .xlb, ylab = .ylb, xlim = lims, ylim = lims)
+    #      grid()
+    #      abline(a = 0, b = 1, col = "grey")
+    #      points(d2$.value, d2$pred)
+    #      abline(mod, col = .mc, lty = 2)
+    #      text(lims[1], lims[2], .sum, adj = c(0, 1), cex = 0.75)
+  }
+  if (2 %in% type) {
+    #xlab
+    if(!"xlab" %in% names(.x.args)){
+      .x.args$xlab <- "Sample [index]"
+    }
+    if(!"ylab" %in% names(.x.args)){
+      .x.args$ylab <- "Measurement, Model"
+    } else {
+      if(length(.x.args$ylab)>1){
+        if(!"key.text" %in% names(.x.args)){
+          .x.args$key.text <- .x.args$ylab[1:2]
+        }
+        .x.args$ylab <- paste(.x.args$ylab[1], .x.args$ylab[2], sep =", ")
+      }
+    }
+    if(!"key.text" %in% names(.x.args)){
+      .x.args$key.text <- c("Measurement", "Model")
+    }
+    if(!"col" %in% names(.x.args)){
+      .x.args$col <- trellis.par.get("superpose.line")$col[1:2]
+    }
+    if("mod.col" %in% names(.x.args)){
+      .x.args$col <- c(.x.args$col[1], .x.args$mod.col)
+    }
+
+
+    #ylab
+    #can to two terms for
+
+    #if("ylab" %in% names(.x.args)){
+    #  if(length(.x.args$ylab)>1){
+    #    if(!"key.text" %in% names(.x.args)){
+    #      .x.args$key.text <- .x.args$ylab[1:2]
+    #    }
+    #    .x.args$ylab <- paste(.x.args$ylab[1], .x.args$ylab[2], sep =", ")
+    #  } else {
+    #    if(!"key.text" %in% names(.x.args)){
+    #      .x.args$key.text <- c("Measurement", "Model")
+    #    }
+    #  }
+    #} else {
+    #  if(!"key.text" %in% names(.x.args)){
+    #    .x.args$key.text <- c("Measurement", "Model")
+    #  }
+    #  .x.args$ylab <- "Measurement, Model"
+    #}
+
+
+
+
+    #########################
+    #previous code
+    #########################
+    #plot(d2$.value, type = "n", main = i, col = .bc,
+    #    ylab = .ylb, xlab = .xlb, ylim = lims)
+    #lines(d2$.value)
+    #lines(d2$pred, col = .mc)
+    ########################
+    #using standardised index
+    #make 'ordered profile codes' at top
+    #      before any subsetting...
+    #      .ord.pro.c <- rsp_profile_code_order(dat)
+    dat$.index <- as.numeric(factor(dat$PROFILE_CODE, levels=.ord.pro.c,
+                                    ordered = TRUE))
+    p2.ls <- list(x= .value + pred ~ .index | SPECIES_NAME, data=dat,
+                  auto.key = list(text=.x.args$key.text,
+                                  space="top", columns=2),
+                  type="l",
+                  panel= function(...){
+                    rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                                 panel.grid, ...)
+                    lattice::panel.xyplot(...)
+                  },
+                  scale=list(relation="free"),
+                  par.settings = simpleTheme(col=.x.args$col))
+    p2.ls <- modifyList(p2.ls, .x.args)
+    p <- do.call(xyplot, p2.ls)
+    plot(p)
+    ######################
+
+    #    or any with any missing are plot on different x scale
+    #    maybe find longest, take range for that
+    #xyplot(.value + .pred ~ )
+  }
+
+  invisible(dat)
 }
 
 
@@ -1007,208 +1523,188 @@ pls_plot_species <- function(pls, n, type=1, ...){
 ##   now imports from xxx.r
 ##   #' @import data.table
 
+
 #############################
 #this needs a lot of work
 #############################
 
+pls_plot_profile <- function (pls, n, log = FALSE, ...)
+{
+  #########################
+  #previous plot used base r graphics
+  #this moved to lattice/latticeExtra
+  #so we can panel outputs
+  #########################
 
-pls_plot_profile <- function(pls, n, log=FALSE, ...){
-
-  #general
-
-  #tidy code;
-  #    this was put together fast...
-  #    lots of code can be tidied/simplified...
-
-  #needs external plot control...
-  #    arg passing to barplot in ...???
-  #    at least col control???
-
-  #temp updates
-  #   tracking col (and y2col), ylab (and y2.lab) via ...
-
-  #type
-  ############################
-  #(currently only one so not needed...)
-  #
-
-  #log logical ONLY
-  ############################
-  #   very fiddly...
-  #
-
-  #require(data.table)
-
+  #setup
   .x.args <- list(...)
-  profile <- n
-
+  .plt.args <- .x.args[names(.x.args %in% c())]
   dat <- pls_report(pls)
-  #need to reset species order after calculating stats
-  #  think about making first half of this function a dedicated function??
-#print(unique(dat$SPECIES_NAME))
-  #need to think this through
-  #  there is a lot here that is very painful...
-
-  #could pass plot commands via the ... args
-
   .sp.ord <- unique(dat$SPECIES_ID)
-#print(unique(.sp.ord))
   .sp.m.pro <- names(dat)[grep("^m_", names(dat))]
   .sp.pro <- gsub("^m_", "", .sp.m.pro)
-  if(missing(profile)){
-    profile <- .sp.pro[1]
+  #defaulting n to all profiles as one plot
+  profile <- if (missing(n)) {
+    profile <- .sp.pro
+  } else {
+    n
   }
-  if(is.numeric(profile)){
-    if(all(profile == -1)){
+  if (is.numeric(profile)) {
+    if (all(profile == -1)) {
       profile <- .sp.pro
-    } else {
+    }
+    else {
       profile <- .sp.pro[profile]
     }
   }
-  if(!any(profile %in% .sp.pro)){
-    stop("RSP_PLS> unknown profile(s), please check",
-         call.=FALSE)
+  if (!any(profile %in% .sp.pro)) {
+    stop("RSP_PLS> unknown profile(s), please check", call. = FALSE)
   }
-  m_profile <- paste("m_", profile, sep="")
 
-  #just profiles asked for
+  #########################
+  #build x_[profile]
+  #########################
+  m_profile <- paste("m_", profile, sep = "")
   dat <- dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE",
                profile, m_profile, "pred", ".value")]
-  #calculate percentage of species
-  for(i in profile){
-    dat[, paste("x_", i, sep="")] <- dat[, paste("m_", i, sep="")] * dat[,i]
+  for (i in profile) {
+    dat[, paste("x_", i, sep = "")] <- dat[, paste("m_",
+                                                   i, sep = "")] * dat[, i]
   }
   .rep <- data.table::as.data.table(dat)
-  .cols <- c(".value", "pred", paste("x_", profile, sep=""))
-  .rep <- .rep[, lapply(.SD, function(x) sum(x, na.rm=TRUE)),
-               .SDcols= .cols, by=c("SPECIES_ID", "SPECIES_NAME")]
+  .cols <- c(".value", "pred", paste("x_", profile, sep = ""))
+  .rep <- .rep[, lapply(.SD, function(x) sum(x, na.rm = TRUE)),
+               .SDcols = .cols, by = c("SPECIES_ID", "SPECIES_NAME")]
   .rep <- as.data.frame(.rep)
 
-  for(i in profile){
-    .rep[, paste("pc_", i, sep="")] <- (.rep[, paste("x_", i, sep="")] / .rep$pred) * 100
+  #########################
+  # y2 setup
+  #########################
+  # by default this is .value
+  #   but might want mod prediction
+  if ("y2" %in% names(.x.args) && .x.args$y2 == "pred") {
+    for (i in profile) {
+      .rep[, paste("pc_", i, sep = "")] <-
+        (.rep[, paste("x_", i, sep = "")]/.rep$pred) * 100
+    }
   }
-
-  #dat <- dat[dat$PROFILE_CODE==unique(dat$PROFILE_CODE)[1],]
-  #   replace above because first profile does not contain all species
-  dat <- dat[!duplicated(dat$SPECIES_NAME),]
+  else {
+    for (i in profile) {
+      .rep[, paste("pc_", i, sep = "")] <-
+        (.rep[, paste("x_", i, sep = "")]/.rep$.value) * 100
+    }
+  }
+  #might not need all of following now we
+  #we are not pulling apart to plot one at time...
+  dat <- dat[!duplicated(dat$SPECIES_NAME), ]
   dat$PROFILE_NAME <- dat$PROFILE_NAME[1]
   dat$PROFILE_CODE <- dat$PROFILE_CODE[1]
+  dat <- merge(.rep, dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE",
+                           profile)], )
+  dat <- dat[order(ordered(dat$SPECIES_ID, levels = .sp.ord)), ]
 
-  dat <- merge(.rep, dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE", profile)],)
-#print(unique(dat$SPECIES_NAME))
-
-  dat <- dat[order(ordered(dat$SPECIES_ID, levels=.sp.ord)), ]
+  ################################
+  # build pc_[profile]
+  ################################
   rownames(dat) <- 1:nrow(dat)
+  .ref <- names(dat)[grep("pc_", names(dat))]
+  .oth <- c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE", ".value", "pred")
+  .temp <- data.table::as.data.table(dat[c(.oth, gsub("pc_", "", .ref))])
+  .d1 <- data.table::melt(.temp, measure.vars = gsub("pc_", "", .ref),
+              variable.name = "pls_profile", value.name = "loading")
+  .temp <- data.table::as.data.table(dat[c(.oth, .ref)])
+  .d2 <- data.table::melt(.temp, measure.vars = .ref,
+              variable.name = "pls_profile", value.name = "percent_contr")
+  .d2$pls_profile <- gsub("pc_", "", .d2$pls_profile)
+  dat <- as.data.frame(merge(.d1, .d2, all=T))
+  #############################
 
-#print(unique(dat$SPECIES_NAME))
-  .old.par <- par(no.readonly = TRUE)
-  for(i in profile){
-    d2 <- dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE",
-                i, paste("pc_", i, sep=""))]
+  ############################
+  #now using lattice to handle logs
+  ###############
+  #.dat <- dat
+  #don't need local version of dat because not changing data ahead of plot
+  #if(log){
+  #  .dat$loading <- log10(.dat$loading)
+  #  .ylim <- lapply(profile, function(x){
+  #    .temp <- subset(.dat, pls_profile==x)
+  #    .temp <- range(.temp$loading, na.rm=TRUE, finite=TRUE)
+  #    if(.temp[1] == .temp[2]){
+  #      .temp <- c(.temp[1]-1, .temp[1]+1)
+  #    }
+  #    range(c(floor(.temp), ceiling(.temp)))
+  #  })
+  #} else {
+  #  .ylim <- lapply(profile, function(x){
+  #    .temp <- subset(.dat, pls_profile==x)
+  #    .temp <- range(.temp$loading, na.rm=TRUE, finite=TRUE)
+  #    range(pretty(.temp))
+  #  })
+  #}
 
-    if(log){
-      #plotting first axis as logs
-      .f.cex = 0.8
-      .x <- d2$SPECIES_NAME
-      .m.x <- max(nchar(.x), na.rm=T)/1.3*.f.cex
-      .y <- d2[,i]
-      .min <- min(.y[.y>0], na.rm=TRUE)/2
-      .y[.y<.min] <- .min
-      .y[is.na(.y)] <- .min
-      .y <- log10(.y)
-      ##############################
-      #testing
-      #this was dying when only one species in a profile...
-      #little useless for any analysis
-      #     but can happen with SPECIATE sources
-      ###############################
-      ##.y1.at <- pretty(.y)
-      ##.y1.at <- .y1.at[.y1.at == round(.y1.at)]
-      ###need to go back in and recalculate min as
-      ###bottom of pretty...
-      .y1.at <- min(floor(.y), na.rm=TRUE): max(ceiling(.y), na.rm=TRUE)
 
-      .y[.y==log10(.min)] <- .y1.at[1]
-
-      #.y1.lb <- as.character(10^(.y1.at))
-      .y1.lb <- c(format(10^(.y1.at), drop0trailing = TRUE, scientific=FALSE))
-      .y <- .y - min(.y1.at)
-      .y1.at <- .y1.at - min(.y1.at)
-
-      .yl <- "Source Loading"
-      .y2 <- d2[, paste("pc_", i, sep="")]
-      .y2 <- ((.y2/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
-      .y2.lb <- seq(0, 100, by=20)
-      .y2.at <- ((.y2.lb/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
-
+  ######################
+  #plot
+  ######################
+  #now using lattice/latticeExtra
+  ##
+  #think there is more here that can be generalized...
+  p1.ls <- list(x = loading~SPECIES_NAME | pls_profile,
+                data=dat, ylab="Source Loading",
+                panel = function(...){
+                  rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                               panel.grid, ...)
+                  panel.barchart(...)
+                },
+                between=list(y=.2),
+                scales=list(x=list(rot=90),
+                            y=list(rot=c(0,90),
+                                   relation="free")),
+                layout=c(1,length(profile)))
+  if(log){
+    p1.ls$scales$y$log=10
+    p1.ls$yscale.components <- rsp_yscale.component.log10
+  }
+  p1.ls <- modifyList(p1.ls, .x.args)
+  if(!"col" %in% names(p1.ls)){
+    p1.ls$col <- trellis.par.get("superpose.line")$col[1]
+  }
+  p1 <- do.call(barchart, p1.ls)
+  if("mod" %in% names(.x.args) && !.x.args$mod){
+    #if mod FALSE just plot 1
+    plot(p1)
+  } else {
+    #add mod layer (total contributions) as y2
+    .col2 <- if("mod.col" %in% names(.x.args)){
+      .x.args$mod.col
     } else {
-      #plotting first axis as is
-      .f.cex = 0.8
-      .x <- d2$SPECIES_NAME
-      .m.x <- max(nchar(.x), na.rm=T)/1.3*.f.cex
-      .y <- d2[,i]
-      .y1.at <- pretty(.y)
-      .y1.lb <- .y1.at
-      .y2 <- d2[, paste("pc_", i, sep="")]
-      .y2 <- ((.y2/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
-      .y2.lb <- seq(0, 100, by=20)
-      .y2.at <- ((.y2.lb/100) * (max(.y1.at) - min(.y1.at))) + min(.y1.at)
-
+      trellis.par.get("superpose.line")$col[2]
     }
-
-    .bc <- if("col" %in% names(.x.args)){
-      .x.args$col
-    } else {
-      NULL
+    p2.ls <- list(x = percent_contr ~ factor(SPECIES_NAME) | pls_profile,
+                  pch=16, type=c("h", "p"), col= c(.col2, .col2),
+                  ylab="Total Contribution (%)",
+                  data=dat)
+    .tmp <- .x.args[grepl("^mod[.]", names(.x.args))]
+    if(length(.tmp)>0){
+      names(.tmp) <- gsub("^mod[.]", "", names(.tmp))
+      p2.ls <- modifyList(p2.ls, .tmp)
     }
-    .yl <- if("ylab" %in% names(.x.args)){
-      .x.args$ylab
-    }
-    else {
-      "Source Loading"
-    }
-
-    #lims <- range(d2[,4], na.rm=TRUE)
-    #.min <- min(d2[,4][d2[,4]>0], na.rm=TRUE)
-
-
-    par(mar = c(.m.x, 4, 4, 4) + 0.3)
-    .bar <- barplot(.y,
-                    names.arg=.x,
-                    ylim = range(.y1.at),
-                    main=i,
-                    cex.lab=.f.cex,
-                    cex.names=.f.cex,
-                    axes=FALSE,
-                    ylab=.yl,
-                    col=.bc,
-                    las=2
-    )
-    .y2c <- if("y2.col" %in% names(.x.args)){
-      .x.args$y2.col
-    } else {
-      "Red"
-    }
-    points(.bar, .y2, col=.y2c, pch=19)
-    axis(2, ylim=range(.y1.at), at=.y1.at, labels=.y1.lb, cex=.f.cex,
-         cex.axis=.f.cex, las=2)
-    axis(4, ylim=range(0, max(.y2.at)), at=.y2.at, labels=.y2.lb,
-         col=.y2c, col.axis=.y2c, cex=.f.cex,
-         cex.axis=.f.cex, las=2)
-    .y2l <- if("y2.lab" %in% names(.x.args)){
-      .x.args$y2.lab
-    } else {
-      "Percent of Total Contribution (%)"
-    }
-    mtext(.y2l, side=4, line=3, col =.y2c,
-          cex=.f.cex)
-
+    p2 <- do.call(xyplot, p2.ls)
+    plot(update(doubleYScale(p1, p2, add.ylab2 = TRUE),
+                par.settings = simpleTheme(col=c(p1.ls$col[1], .col2))))
   }
 
-  par(.old.par)
-
-  invisible(dat)
+  ############
+  #output
+  ############
+  #could pass plot and data as list???
+  return(invisible(dat))
 }
+
+
+
+
+
 
 
 
@@ -1227,6 +1723,200 @@ pls_plot_profile <- function(pls, n, log=FALSE, ...){
 ## unexported
 ################
 ################
+
+# profile code order
+# get profile order in case you need it latter...
+
+rsp_profile_code_order <- function(data){
+  .tmp <-  data.table::as.data.table(data)[, .(ans=length(unique(PROFILE_CODE))),by="SPECIES_NAME"]
+  .tmp <- subset(.tmp, ans == max(.tmp$ans, na.rm=TRUE))$SPECIES_NAME
+  .tmp <- subset(data, SPECIES_NAME %in% .tmp)
+  unique(.tmp$PROFILE_CODE)
+}
+
+
+#log axis hander
+#based on lattice text book method
+
+rsp_yscale.component.log10 <- function(lim, ...) {
+  ans <- yscale.components.default(lim = lim, ...)
+  tick.at <- pretty(lim)
+  tick.at <- tick.at[tick.at == floor(tick.at)]
+  tick.at <- tick.at[tick.at < max(lim, na.rm=TRUE) & tick.at > min(lim, na.rm=TRUE)]
+  ans$left$ticks$at <- tick.at
+  ans$left$labels$at <- tick.at
+  ans$left$labels$labels <- c(format(10^(tick.at),
+                                     drop0trailing = TRUE,
+                                     scientific = FALSE))
+  #print(ans$left$labels$labels)
+  #######################
+  #need to sort of right labeling
+  #   dropped for now...
+  #ans$right <- ans$left
+  ans
+}
+
+
+#lattice panel pal
+#based on panel handler in loa
+
+rsp_panelPal <- function(.name, .ls, .panel, ...){
+  .x.args <- list(...)
+  if(!.name %in% names(.x.args) || !is.logical(.x.args[[.name]]) ||
+     .x.args[[.name]]){
+    .name2 <- paste("^", .name, "[.]", sep="")
+    if(.name %in% names(.x.args) && is.list(.x.args[[.name]])){
+      .tmp <- .x.args[[.name]]
+      if(length(.tmp)>0){
+        names(.tmp) <- paste(.name, names(.tmp), sep=".")
+        .x.args <- modifyList(.tmp, .x.args)
+      }
+    }
+    .x.args <- .x.args[grepl(.name2, names(.x.args))]
+    if(length(.x.args)>0){
+      names(.x.args) <- gsub(.name2, "", names(.x.args))
+      .ls <- modifyList(.ls, .x.args)
+    }
+    do.call(.panel, .ls)
+  }
+}
+
+
+
+# could move this into the function...
+
+rsp_panel.pie <-
+  function (x, y=NULL, groups=NULL, subscripts, totals=NULL,
+            labels = names(x), edges = 200, radius = 0.8, clockwise = FALSE,
+            init.angle = if (clockwise) 90 else 0, density = NULL, angle = 45,
+            col = NULL, border = 1, lty = NULL, main = NULL, ...)
+  {
+
+    #this is graphics::pie with a couple of modifications...
+    #many thanks to...
+    #R Core Team (2023). _R: A Language and Environment for Statistical Computing_. R Foundation
+    #for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
+
+    #if (!is.numeric(x) || any(is.na(x) | x < 0))
+    #    stop("'x' values must be positive.")
+
+    #########################
+    #measurement totals
+    .y <- totals[subscripts]
+    ref <- sapply(unique(groups), function(g){
+      sum(.y[groups==g], na.rm=TRUE)
+    })
+    .total <- mean(ref, na.rm=TRUE)
+
+    ##########################
+    #profile contributions to model
+    # as percentage of measurements
+    ans <- sapply(unique(groups), function(g){
+      sum(y[groups==g], na.rm=TRUE)
+    })
+    ans <- (ans / .total) * 100
+
+    #####################
+    #cheat because following comes from
+    #pie function in base r...
+    x <- ans
+
+    if (is.null(labels))
+      labels <- as.character(unique(groups))
+    else labels <- as.graphicsAnnot(labels)
+    labels = paste(labels, " (",
+                   round(ans, digits=1), "%)", sep = "")
+
+    if (any(x == 0)) {
+      labels <- labels[x != 0]
+      col <- col[x != 0]
+      x <- x[x != 0]
+    }
+    my.tot <- sum(x, na.rm=TRUE)
+    ########################
+    #this adds extra void area
+    #  if does not account for
+    #  99 percent of the
+    #  measurements
+    if (my.tot < 99) {
+      x <- c(x, 100 - my.tot)
+      labels <- c(labels, "[hide]")
+      col <- c(col, NA)
+      init.angle <- init.angle + (((100 - my.tot)/200) * 360)
+    }
+    x <- c(0, cumsum(x)/sum(x))
+    dx <- diff(x)
+    nx <- length(dx)
+
+    ######################
+    #????
+    pin <- par("pin")
+    xlim <- ylim <- c(-1, 1)
+    if (pin[1L] > pin[2L])
+      xlim <- (pin[1L]/pin[2L]) * xlim
+    else ylim <- (pin[2L]/pin[1L]) * ylim
+
+    ########################
+    #col setting
+    #   this needs generalising like
+    #   other pls_plot
+    if (is.null(col))
+      col <- if (is.null(density))
+        c("white", "lightblue", "mistyrose", "lightcyan",
+          "lavender", "cornsilk")
+    else par("fg")
+
+    ########################
+    #border setting
+    #   needs generalising...
+    if (!is.null(border))
+      border <- rep_len(border, nx)
+
+    ##############
+    #lty
+    #   needs generalising...
+    if (!is.null(lty))
+      lty <- rep_len(lty, nx)
+
+    ##############
+    #angle of segment
+    angle <- rep(angle, nx)
+    if (!is.null(density))
+      density <- rep_len(density, nx)
+    twopi <- if (clockwise)
+      -2 * pi
+    else 2 * pi
+    t2xy <- function(t) {
+      t2p <- twopi * t + init.angle * pi/180
+      list(x = radius * cos(t2p), y = radius * sin(t2p))
+    }
+    ###########################
+    #like to nudge these if percent before and
+    #  this one are both small
+    #  (making labels close)
+
+    for (i in 1L:nx) {
+      if (!as.character(labels[i]) == "[hide]") {
+        n <- max(2, floor(edges * dx[i]))
+        P <- t2xy(seq.int(x[i], x[i + 1], length.out = n))
+        lattice::lpolygon(c(P$x, rev(P$x * 0.5)), c(P$y, rev(P$y *
+                                                               0.5)), density = density[i], angle = angle[i],
+                          border = border[1], col = col[i], lty = lty[i])
+        P <- t2xy(mean(x[i + 0:1]))
+        lab <- as.character(labels[i])
+        if (!is.na(lab) && nzchar(lab)) {
+          lattice::llines(c(1, 1.2) * P$x, c(1, 1.2) * P$y)
+          lattice::ltext(1.3 * P$x, 1.3 * P$y, labels[i], xpd = TRUE,
+                         cex=0.7, adj = ifelse(P$x < 0, 1, 0), ...)
+        }
+      }
+    }
+    lattice::ltext(0, 0, label = paste("sum\n", signif(my.tot, 3), "%",
+                                       sep = ""), cex=0.7)
+  }
+
+
+
 
 
 #think about
@@ -1519,6 +2209,163 @@ rsp_pls_fit_parent <- function(pls, parent, power=1,
                         algorithm="port",
                         control=nls.control(tol=1e-5) #think about tolerance
     )
+  }
+
+  pls
+
+}
+
+
+
+#previous version of rebuild...
+
+
+rsp_pls_rebuild.old <- function(pls, species, power=1,
+                        refit.profile=TRUE, ...){
+
+  x.args <- list(...)
+  #hiding model args
+
+  .out <- pls_report(pls)
+  #species / parent should only have one species
+  #   note: parent is name from previous function
+  #         maybe change now???
+  #and have same profiles as pls model data
+  #and its contribution to all sources is set by .value
+
+  #note
+  ################################
+  #following just done quickly to replace
+  #    two previous functions pls_fit_parent and pls_refit_species
+
+  if(is.character(species)){
+    #assuming this is SPECIES_NAME of the species to be fit
+    #and species was in modelled data when pls was built...
+    if(!species[1] %in% .out$SPECIES_NAME){
+      stop("RSP_PLS> 'species' not in PLS, please check",
+           call. = FALSE)
+    }
+    parent <- subset(.out, SPECIES_NAME == species[1])
+    .out <- subset(.out, SPECIES_NAME != species[1])
+
+  } else {
+    #assuming this is respeciate object data.frame of right structure
+    parent <- species
+  }
+  #get a 'safe' profile
+  #not sure this will work if any sources are not fit to first species
+  .test <- .out[.out$pred>0,]
+  .out <- subset(.out, SPECIES_ID == unique(.test$SPECIES_ID)[1])
+  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+  .test <- names(parent)[names(parent) %in% .test]
+  .data <- parent[.test]
+  names(.data)[2] <- "parent"
+  .data <- merge(.out, .data[c(1:2)])
+
+  ######################
+  #for trace
+  #add parent to this as m_dummy?
+  #that should fit as n_dummy = 1...
+
+  ###########
+  #cheat
+  #############
+
+  #print(.data)
+
+  #formula
+  #changed .out to .data in next line
+  .ms <- names(.data)[grepl("^m_", names(.data))]
+  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                sep="", collapse = "+")
+  .for <- as.formula(paste("parent~", .for))
+
+  .ns <- .ms
+  names(.ns) <- gsub("^m_", "n_", .ms)
+
+  #note
+  ##################
+  #model handling temp update
+  #lower, start and upper
+  lower <- if("lower" %in% names(x.args)){
+    x.args$lower
+  } else {
+    0
+  }
+  start <- if("start" %in% names(x.args)){
+    x.args$start
+  } else {
+    lower
+  }
+  upper <- if("upper" %in% names(x.args)){
+    x.args$upper
+  } else {
+    Inf
+  }
+
+  .ls <- lapply(.ns, function(x){start})
+  .ls2 <- lapply(.ns, function(x){lower})
+  .ls3 <- lapply(.ns, function(x){upper})
+
+  #print(.data)
+  #print(.for)
+
+  mod <- nls(.for, data=.data,
+             #weights = (1/.out$test)^power,
+             #no weighting currently because species are all the same here!
+             start=.ls,
+             lower=.ls2,
+             upper=.ls3,
+             algorithm="port",
+             control=nls.control(tol=1e-5) #think about tolerance
+  )
+  .ans <- data.frame(
+    PROFILE_CODE = .data$PROFILE_CODE,
+    SPECIES_ID = parent$SPECIES_ID[1],
+    SPECIES_NAME = parent$SPECIES_NAME[1],
+    t(coefficients(mod)),
+    test = .data$parent
+  )
+  names(.ans) <- gsub("^n_", "", names(.ans))
+
+  #print(.ans)
+
+  for(i in .ans$PROFILE_CODE){
+    .ii <- subset(.ans, PROFILE_CODE==i)
+    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+    .nn <- pls[[i]]$args$data
+    .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
+    ###########
+    #cheat
+    #############
+    #print(i)
+    #print(names(.nn))
+    #print(names(.ii))
+    ########################
+
+    pls[[i]]$args$data <- rbind(.nn, .ii)
+    #rebuild model
+    .for <- as.character(formula(pls[[i]]$mod))
+    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+    .ms <- names(pls[[i]]$args$data)
+    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ls <- lapply(.ms, function(x){0})
+    names(.ls) <- paste("m_", .ms, sep="")
+    .da <- pls[[i]]$args$data
+
+
+    #print(.for)
+    #note
+    #############################
+    # option to not do this refit?
+    if(refit.profile){
+      pls[[i]]$mod <- nls(.for, data=.da,
+                          weights = (1/.da$test)^power, # think about weighting
+                          start=.ls, lower=.ls,
+                          algorithm="port",
+                          control=control #think about tolerance
+      )
+    }
   }
 
   pls

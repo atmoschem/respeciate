@@ -12,11 +12,15 @@
 #' typically one or concatenated character or numeric entries, but can also
 #' be a \code{respeciate} object or similar \code{data.frame} containing
 #' the \code{code}s as a named \code{PROFILE_NAME} column.
-#' @param include.refs logical, include profile reference information when
-#' getting the requested profile(s) from the archive, default \code{FALSE}.
-#' @param x (for \code{sp_build}s only) A \code{data.frame} or similar to
-#' be converted into a \code{respeciate} object for comparison with
-#' SPECIATE profiles.
+#' @param ... additional arguments, ignored except by \code{sp_profile} which
+#' treats these as additional sources for \code{code}.
+#' @param include.refs logical, (for \code{sp_profile} only) include profile
+#' reference information when getting the requested profile(s) from the
+#' archive, default \code{FALSE}.
+#' @param x (for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
+#' something that can be converted to a \code{data.frame} using
+#' \code{as.data.frame}) to be converted into a \code{respeciate} object for
+#' comparison with SPECIATE profiles.
 #' @param profile_name,profile_code (for \code{sp_build}s only;
 #' \code{character})  The name of the column in \code{x} containing
 #' profile name and code, respectively. If not already named according
@@ -28,7 +32,6 @@
 #' @param value (for \code{sp_build}s only; \code{character})  The name
 #' of the column in \code{x} containing measurement values. If not already
 #' named according to SPECIATE conventions, this will need to be assigned.
-#' @param ... additional arguments, currently ignored.
 #' @return \code{sp_profile} returns a object of
 #' \code{respeciate} class, a \code{data.frame} containing a
 #' (re)SPECIATE profile.
@@ -54,7 +57,7 @@
 #' to discuss if anyone has ideas), but current best suggestion is: (1)
 #' identify the SPECIATE species code for all the species in your data set,
 #' and (2) assign these as \code{species_id} when \code{sp_build}ing. The
-#' function will associate the \code{species_name}.
+#' function will then associate the \code{species_name}.
 #'
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
@@ -107,23 +110,44 @@
 #   based on previous sp_profile but using data.table
 #   (0.1 version currently unexported sp_profile.old)
 
-sp_profile <- function(code, include.refs=FALSE) {
+sp_profile <- function(code, ..., include.refs=FALSE) {
 
   # code currently handles:
-  # respeciate.ref, numerics and characters characters
+  # respeciate.ref, data.frames containing profile_code,
+  # numerics and characters
 
   #######################
-  #could replace code with ...???
+  #could replace code AND ... with just ...???
+  #   but would need to think about options
+  #   if any in ... were data.frames
   ######################
+  .try <- lapply(list(code, ...), function(.code){
+    if(is.data.frame(.code) && "PROFILE_CODE" %in% names(.code)){
+      .code <- unique(.code$PROFILE_CODE)
+    }
+    if(is.numeric(.code)) {
+      .code <- as.character(.code)
+    }
+    if(!is.character(.code)) {
+      warning("unexpected 'code' object found and ignored",
+           call.=FALSE)
+      .code <- NULL
+    }
+    .code
+  })
+  code <- do.call(c, .try)
 
-  if(is.data.frame(code) && "PROFILE_CODE" %in% names(code)){
-    code <- unique(code$PROFILE_CODE)
-  }
-  if(is.numeric(code)) code <- as.character(code)
-  if(!is.character(code)) {
-    stop("unexpected 'code' class",
-         call.=FALSE)
-  }
+  ################
+  #previous....
+  ################
+  #if(is.data.frame(code) && "PROFILE_CODE" %in% names(code)){
+  #  code <- unique(code$PROFILE_CODE)
+  #}
+  #if(is.numeric(code)) code <- as.character(code)
+  #if(!is.character(code)) {
+  #  stop("unexpected 'code' class",
+  #       call.=FALSE)
+  #}
 
   PROFILES <- data.table::as.data.table(sysdata$PROFILES)
   SPECIES <- data.table::as.data.table(sysdata$SPECIES)
@@ -166,6 +190,23 @@ sp_profile <- function(code, include.refs=FALSE) {
 # sp_build_rsp_x
 ##############################
 
+# notes
+##############################
+
+# sp_build_rsp_x currently converts x as.data.frame(x)
+#     if tibble is loaded, any tibbles complicate things
+
+#     BUT might want to revisit this because it looked like:
+#           the data structure was fine but
+#           print.respeciate was having problems...
+
+#           BUT might be other problems I did not spot
+
+#           BUT be nice if c("respeciate", class("tibble")) could be use...
+#               to retain the data type history
+#               and drop back to tibble rather than data.frame....
+
+
 #' @rdname sp
 #' @export
 
@@ -174,10 +215,19 @@ sp_build_rsp_x <-
            species_name, species_id,
            value, ...){
 
+
     # light build for a rsp_x data object
     # might need spec_mwt
 
+    ###########################
     # current build rules
+    ###########################
+
+    # must be a data.frame or something that can be converted
+    #        using as.data.frame(x)
+
+    # profile and species columns must be character...
+
     # profile_name:  if not there, if sent in call use,
     #                              else if there use profile_code
     # profile_code:  if not there, if sent in call use,
@@ -189,7 +239,8 @@ sp_build_rsp_x <-
     #                              else if there use species_name to look-up
     #                              if any missing, warn
     # .value:        if not there, if sent in call use.
-    # WEIGHT_PERCENT:if not there, if sent in call use.
+    #                              (NEW/TESTING) else if there use WEIGHT_PERCENT
+    # WEIGHT_PERCENT:if not there, if sent in call use
     #                              else if there use .value to look-up
 
     # don't build/error if any of these missing and end of build
@@ -197,6 +248,37 @@ sp_build_rsp_x <-
     # redundant?
     # currently not using ...
     .x.args <- list(...)
+
+    #adding the as.data.frame because
+    #    code is not planning nicely with Dennis' tibbles
+    #        if tibble is loaded before respeciate...
+    x <- as.data.frame(x)
+
+    #rationalise this?...
+    #    could they be else options when
+    #        check for species and profile columns?
+    ################################
+    # notes
+    # profile and species columns all need to character
+    #    user could supply any thing  and previously
+    #        only applying as.character when making something new...
+    #    else may at start then when making something new...
+    #    (at end did not work for species if building one of species_name
+    #         and species_id from other...)
+    # also
+    #    do values need to be as.numeric???
+    if("PROFILE_NAME" %in% names(x)){
+      x$PROFILE_NAME <- as.character(x$PROFILE_NAME)
+    }
+    if("PROFILE_CODE" %in% names(x)){
+      x$PROFILE_CODE <- as.character(x$PROFILE_CODE)
+    }
+    if("SPECIES_NAME" %in% names(x)){
+      x$SPECIES_NAME <- as.character(x$SPECIES_NAME)
+    }
+    if("SPECIES_ID" %in% names(x)){
+      x$SPECIES_ID <- as.character(x$SPECIES_ID)
+    }
 
     #if not there and sent in call
 
@@ -230,13 +312,32 @@ sp_build_rsp_x <-
       }
       x$SPECIES_ID <- as.character(x[, species_id])
     }
-    if(!".value" %in% names(x) & (!missing(value))){
-      if(!value %in% names(x)){
-        stop("sp_build> '", as.character(value)[1],
-             "' not in 'x'...", sep="", call. = FALSE)
+    if(!".value" %in% names(x)){
+      if(missing(value)){
+        if("WEIGHT_PERCENT" %in% names(x)){
+          x$.value <- x[, "WEIGHT_PERCENT"]
+        } else {
+          stop("sp_build> 'value' not found for 'x'...",
+               sep="", call. = FALSE)
+        }
+      } else {
+        if(!value %in% names(x)){
+           stop("sp_build> '", as.character(value)[1],
+                "' not in 'x'...", sep="", call. = FALSE)
+        }
       }
       x$.value <- x[, value]
     }
+    #################
+    #old
+    #################
+    #if(!".value" %in% names(x) & (!missing(value))){
+    #  if(!value %in% names(x)){
+    #    stop("sp_build> '", as.character(value)[1],
+    #         "' not in 'x'...", sep="", call. = FALSE)
+    #  }
+    #  x$.value <- x[, value]
+    #}
 
     #if still not there try to assign using what is there
 
@@ -265,6 +366,7 @@ sp_build_rsp_x <-
     }
 
     #test what we have
+    ########################
 
     .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_NAME", "SPECIES_ID",
                ".value", "WEIGHT_PERCENT")
@@ -278,6 +380,9 @@ sp_build_rsp_x <-
               "(respeciate needs valid species entries)\n",
               sep="", call.=FALSE)
     }
+
+    #output
+    ######################
 
     x <- as.data.frame(x)
     class(x) <- c("rsp_x", "respeciate", "data.frame")
