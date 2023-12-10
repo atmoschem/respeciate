@@ -1,7 +1,7 @@
 Package: respeciate
 Title: Speciation profiles for gases and aerosols
-Version: 0.2.6
-Date: 2023-12-01
+Version: 0.2.7
+Date: 2023-12-10
 Description: Acess to the US.EPA Speciate (v5.2) tool, to generate speciation
          profiles for gases and particles. More details in Simon et al (2010)
          <doi:10.5094/APR.2010.026>.

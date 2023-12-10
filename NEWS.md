@@ -1,5 +1,9 @@
 # Version 0.0 - Release Notes
 
+* [0.2.7] 
+    * released 2023-12-10
+    * sp_plot_species update; species order forced  
+
 * [0.2.6] 
     * released 2023-12-01
     * sp_build_rsp_x update; added further value handling 

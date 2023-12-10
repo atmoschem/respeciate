@@ -364,8 +364,9 @@ sp_plot_species <- function(x, id, multi.species = "group",
   ####################################
   species <- unique(x$SPECIES_NAME)
   #should think about other naming options???
+  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=species)
 
-#ignoreing order at moment
+#ignoring option to re-order at moment
 
   #order largest to smallest
   #############################
@@ -424,6 +425,10 @@ sp_plot_species <- function(x, id, multi.species = "group",
   #       but then by default lattice shows all factors labels...
   #  format using a supplied function???
   x$x.id <- as.numeric(factor(x$PROFILE_CODE))
+
+  ##############################
+  #species alignment
+
 
 
   p1.ls <- list(x= .value~x.id,
