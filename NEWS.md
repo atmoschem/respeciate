@@ -1,8 +1,8 @@
 # Version 0.0 - Release Notes
 
 * [0.2.7] 
-    * released 2023-12-10
-    * sp_plot_species update; species order forced  
+    * released 2023-12-16
+    * sp_plot_species update; species order forced; added reset.x 
 
 * [0.2.6] 
     * released 2023-12-01

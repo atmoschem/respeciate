@@ -38,6 +38,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 #' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
 #' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
+#' panel.abline
 #' @importFrom latticeExtra doubleYScale panel.ablineq
 #' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC

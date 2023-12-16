@@ -1,6 +1,6 @@
 #' @name sp.plot
 #' @title plotting (re)SPECIATE profiles
-#' @aliases sp_plot_profile
+#' @aliases sp_plot_profile sp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
 
@@ -8,10 +8,12 @@
 #' (re)SPECIATE profile data sets.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
-#' @param id numeric, indices of profiles to use when
-#' plotting (e.g. \code{id=1:6} plots first 6 profiles).
-#' @param multi.profile character, how plot should handle
-#' multiple profiles, e.g. 'group' or 'panel' (default
+#' @param id numeric, the indices of profiles (or species) to use when
+#' plotting with \code{sp_plot_profile} (or \code{sp_plot_species}). For
+#' example \code{sp_plot_profile(x, id=1:6)} plots first 6 profiles in
+#' \code{x}.
+#' @param multi.profile character, how \code{sp_plot_profile} should
+#' handle multiple profiles, e.g. 'group' or 'panel' (default
 #' group).
 #' @param order logical, order the species in the
 #' profile(s) by relative abundance before plotting.
@@ -38,10 +40,14 @@
 #JOBS
 #######################
 
-#reference lattice and latticeEXtra packages in documents...
+#reference lattice, latticeEXtra and loa packages in documents...
 
 #all functions need work
 #see function fix, tidy, etc job notes in code
+
+# dennis asked for data as part of return
+#    that is do-able but may need an object class
+
 
 #thinking about an sp_plot_compare(x, y)
 #  to compare profile x and profile(s) y
@@ -290,8 +296,8 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 #so lots of redundancy
 
 sp_plot_species <- function(x, id, multi.species = "group",
-                              order=FALSE, log=FALSE, ...,
-                              silent=FALSE){
+                            order = FALSE, log = FALSE,
+                            ..., silent = FALSE){
 
   #setup
   .x.args <- list(...)
@@ -312,6 +318,10 @@ sp_plot_species <- function(x, id, multi.species = "group",
 
 
   #need to get species as character
+  ##############################
+  #if already factor ???
+  #   user could be forcing order
+  ##############################
   .sp.ord <- as.character(unique(x$SPECIES_ID))
   #.sp.pro <- unique(x$PROFILE_CODE)
   #n/profile handling
@@ -360,21 +370,34 @@ sp_plot_species <- function(x, id, multi.species = "group",
   }
 
   ####################################
-  #like sp_plot_profile...
+  #current species ordering by id arg...
+  #(see below about reordering)
   ####################################
-  species <- unique(x$SPECIES_NAME)
+  species <- species[species %in% unique(x$SPECIES_ID)]
+  x$SPECIES_ID <- factor(x$SPECIES_ID, levels=species)
+  x <- x[order(x$SPECIES_ID),]
+  x$SPECIES_NAME <- factor(x$SPECIES_NAME, unique(x$SPECIES_NAME))
+  species<- levels(x$SPECIES_NAME)
+  sp.ord <- as.numeric(factor(species, levels=sort(species)))
+
+  ##################################
   #should think about other naming options???
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=species)
+  ##################################
+  #print(species)
+  #print(sp.ord)
 
 #ignoring option to re-order at moment
 
   #order largest to smallest
   #############################
+  #like to enable this
   #like to also be able to order by molecular weight
+  #need to decide handling if species is already a factor... ???
+  #need to decide if this should work off species_id or species_name... ???
   ##############################
   if(order){
     ################################
-    #bit of a cheat...
+    #taken from _profile plots
     ################################
     test <- x
     test$PROFILE_CODE <- ".default"
@@ -392,16 +415,14 @@ sp_plot_species <- function(x, id, multi.species = "group",
   }
   x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
 
-
   ##################
-  #profile bar chart
+  #species trend line plot
   ##################
 
   #dcast and melt to add in any missed entries as NAs
-  #(for the plot trail)
-  #not padding
+  #(to force trend line gaps)
+  #not padding, obviously not dropping nas...
   x <- sp_melt_wide(sp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
-
 
   ###############################
   #species handling
@@ -424,20 +445,31 @@ sp_plot_species <- function(x, id, multi.species = "group",
   #  convert to factor
   #       but then by default lattice shows all factors labels...
   #  format using a supplied function???
-  x$x.id <- as.numeric(factor(x$PROFILE_CODE))
+
+  if("reset.x" %in% names(.x.args)){
+    #initial test reset.x
+    #  this is a function and it is applied to profile_code
+    #      to build the x axis...
+    x$.x <- .x.args$reset.x(x$PROFILE_CODE)
+    .xlab <- ""
+  } else {
+    x$.x <- as.numeric(factor(x$PROFILE_CODE))
+    .xlab <- "Sample [index]"
+  }
+
 
   ##############################
   #species alignment
 
-
-
-  p1.ls <- list(x= .value~x.id,
-                data=x, ylab="Measurement", xlab="Sample [index]",
+  p1.ls <- list(x= .value~.x,
+                data=x, ylab="Measurement", xlab=.xlab,
                 type="l",
                 #NB: prepanel seemed to break ylim when stacking
                 panel = function(x, y, ...){
-                  rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
-                               panel.grid, ...)
+                  at.x <- pretty(x)
+                  at.y <- pretty(y)
+                  rsp_panelPal("grid", list(h=at.y,v=at.x, col="grey", lty=3),
+                               panel.abline, ...)
                   panel.xyplot(x=x, y=y, ...)
                 },
                 between=list(y=.2),
@@ -454,10 +486,10 @@ sp_plot_species <- function(x, id, multi.species = "group",
   if(length(species)>1){
     if(tolower(multi.species) %in% c("panel", "panels")){
       #paneling multiple panels
-      p1.ls$x <- .value~x.id | SPECIES_NAME
+      p1.ls$x <- .value~.x | SPECIES_NAME
     } else {
       #grouping multiple panels
-      p1.ls$x <- .value~x.id
+      p1.ls$x <- .value~.x
       p1.ls$groups <- x$SPECIES_NAME
     }
   }
@@ -506,7 +538,7 @@ sp_plot_species <- function(x, id, multi.species = "group",
                  #title="Legends",
                  lines=list(col=rep(p1.ls$col,
                                     length.out=length(species))),
-                 text = list(species, cex=0.7))
+                 text = list(levels(x$SPECIES_NAME), cex=0.7))
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
     } else {
