@@ -15,16 +15,23 @@
 #' also see note.
 #' @param x the \code{respeciate}
 #' object to be printed, plotted, etc.
-#' @param n when printing a multi-profile object, the
-#' maximum number of profiles to report.
+#' @param n when plotting or printing a multi-profile object, the
+#' maximum number of profiles to report. (When plotting, \code{n}
+#' is ignored if \code{id} is also set.)
 #' @param ... any extra arguments, mostly ignored except by
-#' \code{plot} which passes them to \code{\link{sp_plot_profile}}.
+#' \code{plot} which passes them to \code{\link{barplot}}.
 #' @param object like \code{x} but for \code{summary}.
+#' @param id numeric, indices of profiles to use when
+#' plotting (\code{id=1:6} is equivalent to \code{n=6}).
+#' @param order logical, order the species in the
+#' profile(s) by relative abundance before plotting.
 #' @note \code{respeciate} objects revert to
 #' \code{data.frame}s when not doing anything
 #' package-specific, so you can still
-#' use as previously with other data handling and
-#' plotting packages.
+#' use as previously with \code{lattice} or
+#' \code{ggplot2}, useful if you are pulling multiple
+#' profiles and you exceed the base \code{\link{barplot}}
+#' capacity...
 
 
 #notes
@@ -103,19 +110,440 @@ print.rsp_pls <- function(x, n = NULL, ...){
 
 
 
+
 #' @rdname respeciate.generics
 #' @method plot respeciate
 #' @export
 
+##########################
+#notes
+##########################
+#like....
+#better handling of factor axis labels
+#better handling of axes and legend font sizes
+#    (I think previous code may have handled this a little better)
+#    (but not perfectly...)
+#like horiz=total scales to be other way around?
+#    could also mean rethinking the legend position for this?
+
+############################
+#added warning/handling for
+#  duplicate species in profiles (handling merge/mean)
+#  duplicated profile names (handling make unique)
+
+#test is now set up to use data.table
+
+
+
 plot.respeciate <-
-  function(x, ...){
-    sp_plot_profile(x, ...)
+  function(x, n=NULL, id=NULL, order=TRUE, ...){
+
+    #add .value if not there
+    ## don't think .value works
+    x <- rsp_tidy_profile(x)
+
+    ##test object type
+    test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+    if(test != "respeciate"){
+      if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
+        stop("No plot method for respeciate.reference files.")
+      } else {
+        stop("suspect respeciate object!")
+      }
+      #don't stop - respeciate profile
+    }
+
+    ##test something to plot
+    if(nrow(x)==0){
+      ######################
+      #think about this
+      ######################
+      #maybe stop() instead???
+      #stop("empty respeciate object?")
+      return(invisible(NULL))
+    }
+
+    #hold extra args
+    #  passing to plot
+    .xargs <- list(...)
+
+    #test number of profiles
+    #and subset x, etc...
+    test <- unique(x$PROFILE_CODE)
+    if(is.null(n) & is.null(id)){
+      id <- 1:length(test)
+    } else {
+      if(!is.null(n)){
+        id <- 1:n
+      }
+    }
+    test <- test[id]
+    x <- x[x$PROFILE_CODE %in% test,]
+    #above will die if n-th profile not there
+    if(length(n)>6){
+      warning(paste("\n\t", length(test),
+                    " profiles (might be too many; suggest 6 or less...)",
+                    "\n", sep=""))
+    }
+
+    x <- rsp_test_profile(x)
+
+
+    if(any(x$.n>1)){
+      warning(paste("\n\t",
+                    " found duplicate species in profiles (merged and averaged...)",
+                    "\n", sep=""))
+    }
+    x$SPECIES_NAME <- rsp_tidy_species_name(x$SPECIES_NAME)
+
+    ####################################
+    #issue profile names are not always unique
+    ####################################
+    test <- x
+    test$SPECIES_ID <- ".default"
+    test <- rsp_test_profile(test)
+    ###################
+    #rep_test
+    #can now replace this with data.table version
+    #BUT check naming conventions for .n
+    ###################
+
+    #does this need a warning?
+    if(length(unique(test$PROFILE_NAME))<nrow(test)){
+      warning(paste("\n\t",
+                    " found profiles with common names (making unique...)",
+                    "\n", sep=""))
+      test$PROFILE_NAME <- make.unique(test$PROFILE_NAME)
+      x <- x[names(x) != "PROFILE_NAME"]
+      x <- merge(x, test[c("PROFILE_NAME", "PROFILE_CODE")], by="PROFILE_CODE")
+    }
+
+
+    #x$PROFILE_NAME <- make.unique(x$PROFILE_NAME)
+
+    #order largest to smallest
+    #############################
+    #like to also be able to order by molecular weight
+    ##############################
+    if(order){
+      ################################
+      #bit of a cheat...
+      ################################
+      test <- x
+      test$PROFILE_CODE <- ".default"
+      test <- rsp_test_profile(test)
+      if("beside" %in% names(.xargs) && .xargs$beside){
+        test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
+        xx <- unique(test$SPECIES_NAME)
+      } else {
+        test <- test[order(test$.total, decreasing = TRUE),]
+        xx <- unique(test$SPECIES_NAME)
+      }
+    } else {
+      xx <- unique(x$SPECIES_NAME)
+    }
+    x <- x[c("WEIGHT_PERCENT", "PROFILE_NAME", "SPECIES_NAME")]
+
+    x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+                             levels = xx)
+
+    .xargs$formula <- WEIGHT_PERCENT~PROFILE_NAME+SPECIES_NAME
+    .xargs$data <- x
+    .xargs$las <- 2
+    .xargs$legend <- TRUE
+    if(!"xlab" %in% names(.xargs)){
+      .xargs$xlab <- ""
+    }
+    if(!"ylab" %in% names(.xargs)){
+      .xargs$ylab <- ""
+    }
+    #################################
+    #would like better control of the
+    #factor axis font size
+    #and graphical white space
+    #################################
+    if(!"cex.names" %in% names(.xargs)){
+      .xargs$cex.names <- 0.5
+    }
+    ##################################
+    #would like better legend handling
+    ##################################
+    if(!"args.legend" %in% names(.xargs)){
+      .xargs$args.legend <- list()
+    }
+    if(!"cex" %in% names(.xargs$args.legend)){
+      .xargs$args.legend$cex <- 0.5
+    }
+
+    #and shuffle so it always leads with formula for right method...
+    .xargs <- .xargs[unique(c("formula", names(.xargs)))]
+
+    #plot
+    do.call(barplot, .xargs)
+
   }
 
 
 
+##############################
+#plot.respeciate using lattice
+##############################
+
+#to do
+#####################
+
+#layout ???
+#n > 6 warning not appearing !!!
+#option to have col as a function ???
+
+#decide what to do about stacking
+#log / bad.log???
+
+#say no to stack logs!
+
+#would like it to handle logs force origin to 0 for standard
+#    and minimum for logs ???
+
+#strip label font size???
+
+#key? to reorder the auto.key test and rectangles???
+# key=list(space="right",adj=0,title="Legends",
+#    points=list(pch=1,
+#            col=trellis.par.get("superpose.symbol")$col[1:length(labels)]),
+# text=list(labels))
+
+#plot types???
+
+#
+
+#test
+#my <- "C:\\Users\\trakradmin\\OneDrive - University of Leeds\\Documents\\pkg\\respeciate\\test\\uk.metals.aurn.2b.rds"
+#my <- sp_build_rsp_x(readRDS(my))
+#rsp_plot(my)
 
 
+#########################
+#next
+##########################
+
+#now very messy...
+#what can we rationalise???
+#profile name shortening
+#profile name to code option???
+#species name to species id option???
+
+rsp_plot <-
+  function(x, id, order=TRUE,
+           log=FALSE, ...){
+
+    #setup
+    ##################
+    #add .value if not there
+    x <- rsp_tidy_profile(x)
+    #others refs
+    .x.args <- list(...)
+    .sp.ord <- unique(x$SPECIES_ID)
+    .sp.pro <- unique(x$PROFILE_NAME)
+    #n/profile handling
+    profile <- if (missing(id)) {
+      profile <- .sp.pro
+    } else {
+      id
+    }
+    if (is.numeric(profile)) {
+      if (all(profile == -1)) {
+        profile <- .sp.pro
+      }
+      else {
+        profile <- .sp.pro[profile]
+      }
+    }
+    if (!any(profile %in% .sp.pro) | any(is.na(profile))) {
+      stop("RSP> unknown profile(s) or missing ids, please check", call. = FALSE)
+    }
+
+    if(length(profile)>8 & missing(id)){
+      warning("RSP> ", length(profile), " profiles... ",
+              "plot foreshorten to 8 to reduce cluttering",
+              "\n\t (maybe use id to force larger range if sure)",
+              sep="", call.=FALSE)
+      profile <- profile[1:8]
+    }
+    x <- x[x$PROFILE_NAME %in% profile,]
+
+    ##test object type
+    test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+    if(test != "respeciate"){
+      if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
+        stop("RSP> No plot method for respeciate.reference files.",
+             call. = FALSE)
+      } else {
+        stop("RSP> suspect respeciate object!",
+             call. = FALSE)
+      }
+      #don't stop - respeciate profile
+    }
+
+    ##test something to plot
+    if(nrow(x)==0){
+      ######################
+      #think about this
+      ######################
+      #maybe stop() instead???
+      #stop("empty respeciate object?")
+      #maybe warning() aw well??
+      return(invisible(NULL))
+    }
+
+    x <- rsp_test_profile(x)
+
+    if(any(x$.n>1)){
+      warning(paste("RSP> found duplicate species in profiles (merged and averaged...)",
+                    sep=""), call.=FALSE)
+    }
+    x$SPECIES_NAME <- rsp_tidy_species_name(x$SPECIES_NAME)
+
+    ####################################
+    #issue profile names are not always unique
+    ####################################
+    test <- x
+    test$SPECIES_ID <- ".default"
+    test <- rsp_test_profile(test)
+    ###################
+    #rep_test
+    #can now replace this with data.table version
+    #BUT check naming conventions for .n
+    ###################
+
+    #does this need a warning?
+    if(length(unique(test$PROFILE_NAME))<nrow(test)){
+      warning(paste("RSP> found profiles with common names (making unique...)",
+                    sep=""), call. = FALSE)
+      test$PROFILE_NAME <- make.unique(test$PROFILE_NAME)
+      x <- x[names(x) != "PROFILE_NAME"]
+      x <- merge(x, test[c("PROFILE_NAME", "PROFILE_CODE")], by="PROFILE_CODE")
+    }
+
+
+    #x$PROFILE_NAME <- make.unique(x$PROFILE_NAME)
+
+    #order largest to smallest
+    #############################
+    #like to also be able to order by molecular weight
+    ##############################
+    if(order){
+      ################################
+      #bit of a cheat...
+      ################################
+      test <- x
+      test$PROFILE_CODE <- ".default"
+      test <- rsp_test_profile(test)
+      #previous barplot had bedside
+      if("stack" %in% names(.x.args) && .x.args$stack){
+        test <- test[order(test$.total, decreasing = TRUE),]
+        xx <- unique(test$SPECIES_NAME)
+      } else {
+        test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
+        xx <- unique(test$SPECIES_NAME)
+      }
+    } else {
+      xx <- unique(x$SPECIES_NAME)
+    }
+    x <- x[c("WEIGHT_PERCENT", "PROFILE_NAME", "SPECIES_NAME")]
+
+    x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+                             levels = xx)
+
+    ##################
+    #profile bar chart
+    ##################
+    p1.ls <- list(x= WEIGHT_PERCENT~SPECIES_NAME,
+                  data=x, ylab="Profile Loading", xlab="",
+                  #NB: prepanel seemed to break ylim when stacking
+                  panel = function(x, y, origin, ylim, ...){
+                    rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                                 panel.grid, ...)
+                    if(missing(origin)){
+                      origin <- if(min(y, na.rm=TRUE) < 0 ) {
+                        min(y, na.rm=TRUE) - 0.02
+                      } else {
+                        0
+                      }
+                    }
+                    panel.barchart(x=x, y=y, origin=origin, ylim=ylim, ...)
+                  },
+                  between=list(y=.2),
+                  scales=list(x=list(rot=90,
+                                     cex=0.7,
+                                     alternating=1),
+                              y=list(rot=c(0,90),
+                                     cex=0.7,
+                                     alternating=3,
+                                     relation="free"))
+                  )
+                  #,
+                  #auto.key=list(space="right", columns = 1,
+                  #              cex=0.7,
+                  #              points=FALSE,
+                  #              rectangles=TRUE))
+    #################
+    #this may need refining...
+
+    #####################
+    #this is involved...
+
+    if("col" %in% names(.x.args)){
+      if(is.function(.x.args$col)){
+        .x.args$col <- .x.args$col(length(profile))
+      }
+    }
+
+    if(length(profile)>1){
+      #panel or group profiles?
+      if("panel.profiles" %in% names(.x.args)){
+        p1.ls$x <- WEIGHT_PERCENT~SPECIES_NAME | PROFILE_NAME
+      } else {
+        p1.ls$groups <- x$PROFILE_NAME
+        if(!"col" %in% names(p1.ls)){
+          p1.ls$col <- rep(trellis.par.get("superpose.polygon")$col,
+                           length.out=length(profile))
+        }
+      }
+    }
+
+    if(log){
+      if("stack" %in% names(.x.args) && .x.args$stack){
+        stop("RSP> sorry currently don't stack logs...",
+        call. = FALSE)
+      }
+      #previous
+      p1.ls$scales$y$log <- 10
+      p1.ls$yscale.components <- rsp_yscale.component.log10
+    }
+    p1.ls <- modifyList(p1.ls, .x.args)
+    if("groups" %in% names(p1.ls) & length(profile)>1){
+      #add key... if auto.key not there
+      .tmp <- if("col" %in% names(p1.ls)){
+        rep(p1.ls$col, length.out = length(profile))
+      } else {
+        rep(trellis.par.get("superpose.polygon")$col,
+            length.out=length(profile))
+      }
+      p1.ls$key <- list(space="right",
+                        #title="Legends",
+                        rectangles=list(col=.tmp),
+                        text = list(profile, cex=0.7))
+    }
+    if("key" %in% names(.x.args)){
+      p1.ls$key <- modifyList(p1.ls$key, .x.args$key)
+    }
+    if("col" %in% names(p1.ls)){
+      p1.ls$par.settings = list(superpose.polygon = list(col = p1.ls$col),
+                              superpose.symbol = list(fill = p1.ls$col))
+    }
+    p1 <- do.call(barchart, p1.ls)
+    return(p1)
+  }
 
 ##################################
 #summary

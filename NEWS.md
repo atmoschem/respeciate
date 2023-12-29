@@ -1,15 +1,16 @@
 # Version 0.0 - Release Notes
 
 * [0.2.7] 
-    * released 2023-12-16
-    * sp_plot_species update; species order forced; added reset.x 
+    * released 2023-12-29
+    * sp_plot_species update; species order forced, added reset.x 
+    * sp_match_profile update; fit methods for pd and sid (Belis)
 
 * [0.2.6] 
     * released 2023-12-01
     * sp_build_rsp_x update; added further value handling 
     * summary.respeciate update; removed output print
     * pls_rebuild update; option to add species as marker  
-    * now importing lattice and latticeExtra for plot panelling
+    * now importing lattice and latticeExtra for plot paneling
     * pls_plots and plot.respeciate now using lattice/latticeExtra 
     * added sp_plot_profile and sp_profile_species 
     * reduced padding on log scale y-axis  

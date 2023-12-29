@@ -12,7 +12,7 @@
 
 \method{print}{rsp_pls}(x, n = NULL, ...)
 
-\method{plot}{respeciate}(x, ...)
+\method{plot}{respeciate}(x, n = NULL, id = NULL, order = TRUE, ...)
 
 \method{summary}{respeciate}(object, ...)
 }
@@ -20,11 +20,18 @@
 \item{x}{the \code{respeciate}
 object to be printed, plotted, etc.}
 
-\item{n}{when printing a multi-profile object, the
-maximum number of profiles to report.}
+\item{n}{when plotting or printing a multi-profile object, the
+maximum number of profiles to report. (When plotting, \code{n}
+is ignored if \code{id} is also set.)}
 
 \item{...}{any extra arguments, mostly ignored except by
-\code{plot} which passes them to \code{\link{sp_plot_profile}}.}
+\code{plot} which passes them to \code{\link{barplot}}.}
+
+\item{id}{numeric, indices of profiles to use when
+plotting (\code{id=1:6} is equivalent to \code{n=6}).}
+
+\item{order}{logical, order the species in the
+profile(s) by relative abundance before plotting.}
 
 \item{object}{like \code{x} but for \code{summary}.}
 }
@@ -43,6 +50,8 @@ also see note.
 \code{respeciate} objects revert to
 \code{data.frame}s when not doing anything
 package-specific, so you can still
-use as previously with other data handling and
-plotting packages.
+use as previously with \code{lattice} or
+\code{ggplot2}, useful if you are pulling multiple
+profiles and you exceed the base \code{\link{barplot}}
+capacity...
 }

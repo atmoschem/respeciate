@@ -47,8 +47,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #' @importFrom graphics axis barplot par legend lines rect text abline
 #' grid mtext plot.new plot.window points polygon title
 #' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
-#' dev.flush dev.hold heat.colors
-
+#' dev.flush dev.hold heat.colors rainbow
 
 
 #might be able to drop legend?

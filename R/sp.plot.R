@@ -5,13 +5,13 @@
 #' @description General plots for \code{respeciate} objects.
 
 #' @description \code{sp_plot} functions generate plots for supplied
-#' (re)SPECIATE profile data sets.
+#' (re)SPECIATE data sets.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
-#' @param id numeric, the indices of profiles (or species) to use when
-#' plotting with \code{sp_plot_profile} (or \code{sp_plot_species}). For
-#' example \code{sp_plot_profile(x, id=1:6)} plots first 6 profiles in
-#' \code{x}.
+#' @param id numeric, the indices of profiles or species to use when
+#' plotting with \code{sp_plot_profile} or \code{sp_plot_species},
+#' respectively. For example, \code{sp_plot_profile(x, id=1:6)} plots
+#' first 6 profiles in \code{respeciate} object \code{x}.
 #' @param multi.profile character, how \code{sp_plot_profile} should
 #' handle multiple profiles, e.g. 'group' or 'panel' (default
 #' group).
@@ -22,9 +22,25 @@
 #' plotting functions.
 #' @param silent logical, hide warnings when generating plots (default
 #' \code{FALSE})
-#' @param multi.species, like \code{multi.profile} but for species.
+#' @param multi.species, character, like \code{multi.profile} in
+#' \code{sp_plot_profile} but for species in \code{sp_plot_species}.
 #' @return \code{sp_plot} graph, plot, etc usually as a trellis object.
 #' @note These functions are currently in development, so may change.
+#' @references Most \code{respeciate} plots make extensive use of
+#' \code{lattice} and \code{latticeExtra} code:
+#'
+#' Sarkar D (2008). \emph{Lattice: Multivariate Data Visualization with R}.
+#' Springer, New York. ISBN 978-0-387-75968-5, \url{http://lmdvr.r-forge.r-project.org}.
+#'
+#' Sarkar D, Andrews F (2022). \emph{latticeExtra: Extra Graphical Utilities Based
+#' on Lattice}. R package version 0.6-30,
+#' \url{https://CRAN.R-project.org/package=latticeExtra}.
+#'
+#' They also incorporate ideas from \code{loa}:
+#'
+#' Ropkins K (2023). \emph{loa: various plots, options and add-ins for use with lattice}.
+#' R package version 0.2.48.3, \url{https://CRAN.R-project.org/package=loa}.
+
 
 #functions
 # sp_plot_profile
@@ -32,26 +48,50 @@
 
 # plot.respeciate is wrapper for sp_plot_profile
 
-#use unexported
-# rsp_plot_fix
+#uses unexported code
+#  rsp_plot_fix
+#  rsp_yscale.component.log10 (currently in sp.pls.r)
+
 
 
 
 #JOBS
 #######################
 
-#reference lattice, latticeEXtra and loa packages in documents...
+#references may need formatting tidying
+#   currently these are lattice, latticeEXtra and loa...
+#   check roxygen2 guidance ???
 
 #all functions need work
 #see function fix, tidy, etc job notes in code
+#     ALL need better colour handling for large numbers of cases
+#         typically group handling...
+#            maybe a variation on col=rainbow ???
+
+#examples
+# maybe
+# sp_plot_profile(spq_pm.ae8())
+#   (allows most lattice style plot control, etc key=list(...))
+#   (but includes some short cuts to common handling, e.g. log=T to
+#      log y scales and reformat y axes)
+# sp_plot_profile(spq_pm.ae8(), key=list(space="top", columns=2), log=T)
+
+#color defaults...
+#issue current default wraps if you exceed number of cols in default set.
+#from: https://stackoverflow.com/questions/26314701/r-reducing-colour-saturation-of-a-colour-palette
+#function(x) colorRampPalette(rainbow(12, s = 0.5, v = 1)[2:11],interpolate = "spline")(x)
+##   ?? could extrapolate the default colors using something like above ???
+
+
 
 # dennis asked for data as part of return
 #    that is do-able but may need an object class
-
+#         (maybe like the openair code...)
 
 #thinking about an sp_plot_compare(x, y)
 #  to compare profile x and profile(s) y
 #  started project (in own-notes)
+
 
 ###################################
 #sp_plot_profile
@@ -77,6 +117,14 @@
 
 #see in code notes about jobs
 
+##############################
+#testing
+#   reset.x as option to change
+#        x access handing
+#        wondering about a general fix
+#             upfront so applied to x (rsp data.frame)
+#               what is x, how is it formatted, etc
+#               then same for y, groups and cond...
 
 sp_plot_profile <-   function(x, id, multi.profile = "group",
                               order=TRUE, log=FALSE, ...,
@@ -292,7 +340,7 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 
 #in development
 
-#taken straight from sp_plot_profile
+#lot taken straight from sp_plot_profile
 #so lots of redundancy
 
 sp_plot_species <- function(x, id, multi.species = "group",
@@ -446,6 +494,10 @@ sp_plot_species <- function(x, id, multi.species = "group",
   #       but then by default lattice shows all factors labels...
   #  format using a supplied function???
 
+  ############################
+  #could move this top and apply
+  #before plotting??
+
   if("reset.x" %in% names(.x.args)){
     #initial test reset.x
     #  this is a function and it is applied to profile_code
@@ -517,8 +569,15 @@ sp_plot_species <- function(x, id, multi.species = "group",
     }
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
-      rep(trellis.par.get("superpose.line")$col,
-          length.out=length(species))
+      colorRampPalette(rainbow(12, s = 0.5, v = 1),
+                               interpolate = "spline")(length(species))
+      #or:
+      #colorRampPalette(rainbow(12, s = 0.5, v = 1),interpolate = "spline")(x)
+      #was:
+      #colorRampPalette(trellis.par.get("superpose.line")$col,
+      #    interpolate = "spline")(length(species))
+      #rep(trellis.par.get("superpose.line")$col,
+      #    length.out=length(species))
     } else {
       trellis.par.get("superpose.line")$col[1]
     }

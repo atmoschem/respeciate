@@ -1738,6 +1738,9 @@ rsp_profile_code_order <- function(data){
 #log axis hander
 #based on lattice text book method
 
+#issues??
+#   could be problem with y padding when log=T and .value range is wide...
+
 rsp_yscale.component.log10 <- function(lim, ...) {
   ans <- yscale.components.default(lim = lim, ...)
   tick.at <- pretty(lim)
