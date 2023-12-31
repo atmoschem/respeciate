@@ -5,6 +5,18 @@
 
 #currently no hooks, etc...
 
+
+#####################
+# to think about
+#####################
+
+# standardise error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
+
+# make respeciate object argument rsp rather than x
+#     that helps sp_plot..() but maybe not plot()
+
+
+
 #####################
 #to check
 #####################

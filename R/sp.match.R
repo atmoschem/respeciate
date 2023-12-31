@@ -183,7 +183,8 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #          but then maybe need to check requires
   #          cols are there???
 
-  .tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
+  #.tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
+  .tmp <- data.table::as.data.table(sp_rescale_profile(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -286,9 +287,25 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
       x <- x[.ref]
       if(length(x)>min.n){
         .test <- as.vector(unlist(.test))[.ref]
-        abs((sqrt(2)/length(x))* (sum(((.test-x)/(.test+x)), na.rm = TRUE)))
-        #if(.ans < 0) NA else .ans
+        .ans <- (sqrt(2)/length(x))* (sum(((.test-x)/(.test+x)), na.rm = TRUE))
+        if(.ans < 0) NA else .ans
         #.ans
+      } else{
+        NA
+      }
+    }
+  }
+  if(tolower(method)=="sid.2"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test)
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        mean(abs(x-.test)/.test, na.rm=TRUE)
       } else{
         NA
       }
