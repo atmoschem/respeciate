@@ -38,7 +38,7 @@ See also \code{\link{sp_species_cor}}.}
 
 \item{method}{Character (default 'pd'), the similarity measure to use, current
 options 'pd', the Pearson's Distance (1- Pearson's correlation coefficient),
-or 'sid', the Standardized Identity Distance.}
+or 'sid', the Standardized Identity Distance (See References).}
 
 \item{test.x}{Logical (default FALSE). The match process self-tests by adding
 \code{x} to \code{ref}, which should generate a perfect fit=0 score. Setting

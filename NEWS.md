@@ -1,9 +1,11 @@
 # Version 0.0 - Release Notes
 
 * [0.2.7] 
-    * released 2023-12-29
+    * released 2024-02-17
     * sp_plot_species update; species order forced, added reset.x 
-    * sp_match_profile update; fit methods for pd and sid (Belis)
+    * sp_match_profile update; fit methods for pd and sid (Belis) 
+    * sp_match_profile update; added sid variations 
+    * pls_plot patch; forcing profile order   
 
 * [0.2.6] 
     * released 2023-12-01

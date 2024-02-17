@@ -106,6 +106,7 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
   if(any(c("species", "standard", "all") %in% tolower(pad))){
     SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
     .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
+    print(.tmp)
     if(length(.tmp) >0){
       out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
                    all.x=TRUE, allow.cartesian=TRUE)
@@ -121,6 +122,8 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
                    all.x=TRUE, allow.cartesian=TRUE)
     }
   }
+
+  #return(out)
 
   #references
   if(any(c("reference", "references", "all") %in% tolower(pad))){
@@ -138,6 +141,12 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
     }
   }
 
+  #################################################
+  #need to think about this
+  #weight_percent not there if up don't pad weights
+  #     or profiles and will be NA for anything not
+  #     in the SPECIATE archive
+  #################################################
   #drop.nas.
   if(drop.nas){
     out <- out[!is.na(out$WEIGHT_PERCENT),]

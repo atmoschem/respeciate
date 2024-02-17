@@ -23,7 +23,7 @@
 #' See also \code{\link{sp_species_cor}}.
 #' @param method Character (default 'pd'), the similarity measure to use, current
 #' options 'pd', the Pearson's Distance (1- Pearson's correlation coefficient),
-#' or 'sid', the Standardized Identity Distance.
+#' or 'sid', the Standardized Identity Distance (See References).
 #' @param test.x Logical (default FALSE). The match process self-tests by adding
 #' \code{x} to \code{ref}, which should generate a perfect fit=0 score. Setting
 #' \code{test.x} to \code{TRUE} retains this as an extra record.
@@ -276,7 +276,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
       }
     }
   }
-  if(tolower(method)=="sid"){
+  if(tolower(method)=="sid.1"){
     # method SID
     ####################################
     #need to check this with dennis
@@ -311,6 +311,53 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
       }
     }
   }
+  if(tolower(method)=="sid.3"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        #rescale x and ref may be different
+        temp <- .test/x
+        temp <- temp[is.finite(temp)]
+        temp <- mean(temp, na.rm=TRUE)
+        x <- x * temp
+        ans <- mean(abs(x-.test)/.test, na.rm=TRUE)
+        #rounding issue somewhere... or jitter... ???
+        round(ans, digits=10)
+      } else{
+        NA
+      }
+    }
+  }
+
+
+  if(tolower(method)=="sid"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        #rescale x and ref may be different
+        mod <- lm(.test~0+x, weights=1/x)
+        x <- predict(mod)
+        ans <- mean(abs(x-.test)/.test, na.rm=TRUE)
+        #rounding issue somewhere... or jitter... ???
+        round(ans, digits=10)
+      } else{
+        NA
+      }
+    }
+  }
+
   if(!is.function(f)){
     stop("RSP> sp_match_profile 'method' unknown", call. = FALSE)
   }

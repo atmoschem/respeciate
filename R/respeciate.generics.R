@@ -136,6 +136,12 @@ plot.respeciate <- function(x, ...){
 
 
 
+#########################
+#to do
+#########################
+
+#check below and then remove???
+
 rsp_plot.respeciate.old <-
   function(x, n=NULL, id=NULL, order=TRUE, ...){
 
