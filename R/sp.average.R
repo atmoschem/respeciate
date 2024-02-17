@@ -143,3 +143,28 @@ sp_average_profile <- function(x, code = NULL, name = NULL, method = 1,
 }
 
 
+
+
+#####################################
+#sp_species_calc
+#####################################
+
+sp_species_calc <- function(x, calc = NULL,
+                            id = NULL, name = NULL,
+                               ...){
+  #x is an rsp object
+  #calc is the calculation to apply to species in x
+
+  .temp <- x
+  #test we can use this..?
+  print(calc)
+  .temp <- sp_dcast_species(.temp)
+  if(length(grep("=", calc)) > 0){
+    print("is equals")
+  } else {
+    print("no equals")
+  }
+
+  #out
+  return(NULL)
+}

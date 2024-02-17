@@ -1731,12 +1731,15 @@ rsp_profile_code_order <- function(data){
   .tmp <-  data.table::as.data.table(data)[, .(ans=length(unique(PROFILE_CODE))),by="SPECIES_NAME"]
   .tmp <- subset(.tmp, ans == max(.tmp$ans, na.rm=TRUE))$SPECIES_NAME
   .tmp <- subset(data, SPECIES_NAME %in% .tmp)
-  unique(.tmp$PROFILE_CODE)
+  sort(unique(.tmp$PROFILE_CODE))
 }
 
 
 #log axis hander
 #based on lattice text book method
+
+#issues??
+#   could be problem with y padding when log=T and .value range is wide...
 
 rsp_yscale.component.log10 <- function(lim, ...) {
   ans <- yscale.components.default(lim = lim, ...)

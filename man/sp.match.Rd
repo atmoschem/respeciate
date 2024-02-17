@@ -5,7 +5,15 @@
 \alias{sp_match_profile}
 \title{Find nearest matches from reference set of profiles}
 \usage{
-sp_match_profile(x, ref, matches = 10, rescale = 5, min.n = 8, test.x = FALSE)
+sp_match_profile(
+  x,
+  ref,
+  matches = 10,
+  rescale = 5,
+  min.n = 8,
+  method = "pd",
+  test.x = FALSE
+)
 }
 \arguments{
 \item{x}{A \code{respeciate} object or similar \code{data.frame} containing
@@ -28,8 +36,12 @@ comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
 species measurements in two profiles required for a match to be assessed.
 See also \code{\link{sp_species_cor}}.}
 
+\item{method}{Character (default 'pd'), the similarity measure to use, current
+options 'pd', the Pearson's Distance (1- Pearson's correlation coefficient),
+or 'sid', the Standardized Identity Distance (See References).}
+
 \item{test.x}{Logical (default FALSE). The match process self-tests by adding
-\code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
+\code{x} to \code{ref}, which should generate a perfect fit=0 score. Setting
 \code{test.x} to \code{TRUE} retains this as an extra record.}
 }
 \value{
@@ -42,4 +54,19 @@ reference profile data set, \code{ref}.
 (re)SPECIATE profile and a reference set of supplied profiles and
 attempt to identify nearest matches on the basis of correlation
 coefficient.
+}
+\references{
+Distance metrics are based on recommendations by Belis et al (2015)
+and as implemented in Mooibroek et al (2022):
+
+Belis, C.A., Pernigotti, D., Karagulian, F., Pirovano, G., Larsen, B.R.,
+Gerboles, M., Hopke, P.K., 2015. A new methodology to assess the performance
+and uncertainty of source apportionment models in intercomparison
+exercises. Atmospheric Environment, 119, 35–44.
+https://doi.org/10.1016/j.atmosenv.2015.08.002.
+
+Mooibroek, D., Sofowote, U.M. and Hopke, P.K., 2022. Source apportionment of
+ambient PM10 collected at three sites in an urban-industrial area with
+multi-time resolution factor analyses. Science of The Total Environment,
+850, p.157981. http://dx.doi.org/10.1016/j.scitotenv.2022.157981.
 }

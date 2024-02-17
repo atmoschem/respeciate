@@ -20,7 +20,7 @@
 \item{x}{the \code{respeciate}
 object to be printed, plotted, etc.}
 
-\item{n}{when printing a multi-profile object, the
+\item{n}{when plotting or printing a multi-profile object, the
 maximum number of profiles to report.}
 
 \item{...}{any extra arguments, mostly ignored except by
@@ -36,13 +36,15 @@ object or similar, \code{\link{print}} manages its appearance.
 
 When supplied a \code{respeciate}
 object, \code{\link{plot}} provides a basic plot
-output. This uses base function \code{\link{barplot}};
+output. This uses base function \code{\link{barchart}};
 also see note.
 }
 \note{
 \code{respeciate} objects revert to
 \code{data.frame}s when not doing anything
 package-specific, so you can still
-use as previously with other data handling and
-plotting packages.
+use as previously with \code{lattice} or
+\code{ggplot2}, useful if you are pulling multiple
+profiles and you exceed the base \code{\link{barchart}}
+capacity...
 }

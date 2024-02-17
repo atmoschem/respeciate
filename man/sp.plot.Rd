@@ -30,11 +30,13 @@ sp_plot_species(
 \item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 profiles.}
 
-\item{id}{numeric, indices of profiles to use when
-plotting (e.g. \code{id=1:6} plots first 6 profiles).}
+\item{id}{numeric, the indices of profiles or species to use when
+plotting with \code{sp_plot_profile} or \code{sp_plot_species},
+respectively. For example, \code{sp_plot_profile(x, id=1:6)} plots
+first 6 profiles in \code{respeciate} object \code{x}.}
 
-\item{multi.profile}{character, how plot should handle
-multiple profiles, e.g. 'group' or 'panel' (default
+\item{multi.profile}{character, how \code{sp_plot_profile} should
+handle multiple profiles, e.g. 'group' or 'panel' (default
 group).}
 
 \item{order}{logical, order the species in the
@@ -48,7 +50,8 @@ plotting functions.}
 \item{silent}{logical, hide warnings when generating plots (default
 \code{FALSE})}
 
-\item{multi.species, }{like \code{multi.profile} but for species.}
+\item{multi.species, }{character, like \code{multi.profile} in
+\code{sp_plot_profile} but for species in \code{sp_plot_species}.}
 }
 \value{
 \code{sp_plot} graph, plot, etc usually as a trellis object.
@@ -57,8 +60,24 @@ plotting functions.}
 General plots for \code{respeciate} objects.
 
 \code{sp_plot} functions generate plots for supplied
-(re)SPECIATE profile data sets.
+(re)SPECIATE data sets.
 }
 \note{
 These functions are currently in development, so may change.
+}
+\references{
+Most \code{respeciate} plots make extensive use of
+\code{lattice} and \code{latticeExtra} code:
+
+Sarkar D (2008). \emph{Lattice: Multivariate Data Visualization with R}.
+Springer, New York. ISBN 978-0-387-75968-5, \url{http://lmdvr.r-forge.r-project.org}.
+
+Sarkar D, Andrews F (2022). \emph{latticeExtra: Extra Graphical Utilities Based
+on Lattice}. R package version 0.6-30,
+\url{https://CRAN.R-project.org/package=latticeExtra}.
+
+They also incorporate ideas from \code{loa}:
+
+Ropkins K (2023). \emph{loa: various plots, options and add-ins for use with lattice}.
+R package version 0.2.48.3, \url{https://CRAN.R-project.org/package=loa}.
 }

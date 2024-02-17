@@ -243,7 +243,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
   }
   if(is.character(pad)){
 
-    out <- sp_pad(out)
+    out <- sp_pad(out, pad)
 
 #    PROFILES <- as.data.table(sysdata$PROFILES)
 #    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)

@@ -21,12 +21,28 @@
 #' @param min.n \code{numeric} (default 8), the minimum number of paired
 #' species measurements in two profiles required for a match to be assessed.
 #' See also \code{\link{sp_species_cor}}.
+#' @param method Character (default 'pd'), the similarity measure to use, current
+#' options 'pd', the Pearson's Distance (1- Pearson's correlation coefficient),
+#' or 'sid', the Standardized Identity Distance (See References).
 #' @param test.x Logical (default FALSE). The match process self-tests by adding
-#' \code{x} to \code{ref}, which should generate a perfect fit=1 score. Setting
+#' \code{x} to \code{ref}, which should generate a perfect fit=0 score. Setting
 #' \code{test.x} to \code{TRUE} retains this as an extra record.
 #' @return \code{sp_match_profile} returns a fit report: a \code{data.frame} of
 #' up to \code{n} fit reports for the nearest matches to \code{x} from the
 #' reference profile data set, \code{ref}.
+#' @references Distance metrics are based on recommendations by Belis et al (2015)
+#' and as implemented in Mooibroek et al (2022):
+#'
+#' Belis, C.A., Pernigotti, D., Karagulian, F., Pirovano, G., Larsen, B.R.,
+#' Gerboles, M., Hopke, P.K., 2015. A new methodology to assess the performance
+#' and uncertainty of source apportionment models in intercomparison
+#' exercises. Atmospheric Environment, 119, 35–44.
+#' https://doi.org/10.1016/j.atmosenv.2015.08.002.
+#'
+#' Mooibroek, D., Sofowote, U.M. and Hopke, P.K., 2022. Source apportionment of
+#' ambient PM10 collected at three sites in an urban-industrial area with
+#' multi-time resolution factor analyses. Science of The Total Environment,
+#' 850, p.157981. http://dx.doi.org/10.1016/j.scitotenv.2022.157981.
 
 #NOTE
 
@@ -99,7 +115,7 @@
 #                     but might need to rethink n, min.bin, etc???
 
 sp_match_profile <- function(x, ref, matches=10, rescale=5,
-                             min.n=8, test.x=FALSE){
+                             min.n=8, method = "pd", test.x=FALSE){
 
   #######################
   #if ref missing
@@ -167,7 +183,8 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #          but then maybe need to check requires
   #          cols are there???
 
-  .tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
+  #.tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
+  .tmp <- data.table::as.data.table(sp_rescale_profile(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -228,13 +245,123 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #   compare this and code in sp_species_cor
   #   if/when we deal with this stop message this code may need to be updated
 
-  f <- function(x) {
-    if(length(x[!is.na(x) & !is.na(.test)])>min.n){
-      suppressWarnings(cor(x, .test, use ="pairwise.complete.obs"))
-    } else {
-      NA
+  #########################
+  #method
+  ########################
+  #to do
+  #   check with dennis re SID negative handling
+  #   think about adding a log.pd
+  #        but three options would mean we need stricter method handling...
+  f <- FALSE
+  if(tolower(method)=="pd"){
+    # method pd
+    f <- function(x) {
+      if(length(x[!is.na(x) & !is.na(.test)])>min.n){
+        suppressWarnings(1-cor(x, .test, use ="pairwise.complete.obs"))
+      } else {
+        NA
+      }
     }
   }
+  if(tolower(method)=="log.pd"){
+    # method log pd
+    # to think about
+    #    drops if a lot are set to zero...
+    f <- function(x) {
+      if(length(x[!is.na(x) & !is.na(.test)])>min.n){
+        suppressWarnings(1-cor(log10(x), log10(.test),
+                               use ="pairwise.complete.obs"))
+      } else {
+        NA
+      }
+    }
+  }
+  if(tolower(method)=="sid.1"){
+    # method SID
+    ####################################
+    #need to check this with dennis
+    #how are negatives handled??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test)
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        .ans <- (sqrt(2)/length(x))* (sum(((.test-x)/(.test+x)), na.rm = TRUE))
+        if(.ans < 0) NA else .ans
+        #.ans
+      } else{
+        NA
+      }
+    }
+  }
+  if(tolower(method)=="sid.2"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test)
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        mean(abs(x-.test)/.test, na.rm=TRUE)
+      } else{
+        NA
+      }
+    }
+  }
+  if(tolower(method)=="sid.3"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        #rescale x and ref may be different
+        temp <- .test/x
+        temp <- temp[is.finite(temp)]
+        temp <- mean(temp, na.rm=TRUE)
+        x <- x * temp
+        ans <- mean(abs(x-.test)/.test, na.rm=TRUE)
+        #rounding issue somewhere... or jitter... ???
+        round(ans, digits=10)
+      } else{
+        NA
+      }
+    }
+  }
+
+
+  if(tolower(method)=="sid"){
+    # method SID
+    ####################################
+    # based on reading I think this is closer??
+    ####################################
+    f <- function(x) {
+      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+      x <- x[.ref]
+      if(length(x)>min.n){
+        .test <- as.vector(unlist(.test))[.ref]
+        #rescale x and ref may be different
+        mod <- lm(.test~0+x, weights=1/x)
+        x <- predict(mod)
+        ans <- mean(abs(x-.test)/.test, na.rm=TRUE)
+        #rounding issue somewhere... or jitter... ???
+        round(ans, digits=10)
+      } else{
+        NA
+      }
+    }
+  }
+
+  if(!is.function(f)){
+    stop("RSP> sp_match_profile 'method' unknown", call. = FALSE)
+  }
+
   .out <- .tmp[, (.cols) := lapply(.SD, f), .SDcols = .cols]
 
   ##########################
@@ -246,7 +373,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #    might be a better way of doing this???
 
   .out <- as.data.frame(.out[1, -1:-2])
-  .out <- sort(unlist(.out), decreasing = TRUE)
+  .out <- sort(unlist(.out), decreasing = FALSE)
   if(length(.out) > matches){
     .out <- .out[1:matches]
   }

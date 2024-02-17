@@ -5,6 +5,18 @@
 
 #currently no hooks, etc...
 
+
+#####################
+# to think about
+#####################
+
+# standardise error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
+
+# make respeciate object argument rsp rather than x
+#     that helps sp_plot..() but maybe not plot()
+
+
+
 #####################
 #to check
 #####################
@@ -14,7 +26,7 @@
 #        (not keeping unless we can get it to work better)
 
 
-utils::globalVariables(c("sysdata", ".SD", "ans",
+utils::globalVariables(c("sysdata", ".SD", "ans", "control",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
@@ -38,6 +50,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans",
 
 #' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
 #' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
+#' panel.abline
 #' @importFrom latticeExtra doubleYScale panel.ablineq
 #' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
@@ -46,8 +59,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans",
 #' @importFrom graphics axis barplot par legend lines rect text abline
 #' grid mtext plot.new plot.window points polygon title
 #' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
-#' dev.flush dev.hold heat.colors
-
+#' dev.flush dev.hold heat.colors rainbow
 
 
 #might be able to drop legend?
