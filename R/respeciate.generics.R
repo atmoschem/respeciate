@@ -7,6 +7,10 @@
 #    hard to keep style consistent when docs are in between
 #    multiple functions
 
+#' @description When supplied a \code{data.frame} or similar,
+#' \code{\link{as.respeciate}} attempts to coerce it into a
+#' \code{respeciate} objects.
+
 #' @description When supplied a \code{respeciate}
 #' object or similar, \code{\link{print}} manages its appearance.
 #' @description When supplied a \code{respeciate}
@@ -29,6 +33,70 @@
 #' capacity...
 
 
+
+
+#################################
+# as.respeciate
+#################################
+
+
+# notes
+##################################
+
+# currently only allows for data.frames and object that can be converted
+#    to data.frames using as.data.frames...
+
+# might also want to add setAs ????
+
+#' @rdname respeciate.generics
+#' @export
+
+as.respeciate <- function(x, ...)
+{
+  if (is.null(x))
+    return(as.respeciate(list()))
+  UseMethod("as.respeciate")
+}
+
+#' @rdname respeciate.generics
+#' @method as.respeciate default
+#' @export
+
+as.respeciate.default <- function(x, ...){
+
+  #setup
+  .xargs <- list(...)
+
+  #try to make data.frame
+  .try <- try(as.data.frame(x), silent=TRUE)
+  if(class(.try)[1]=="try-error"){
+    stop("as.respeciate> x needs to be data.frame or similar...",
+         sep="", call. = FALSE)
+  }
+
+  #test structure
+  if(!"test.rsp" %in% names(.xargs) || .xargs$test.rsp){
+    .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_NAME", "SPECIES_ID",
+               ".value", "WEIGHT_PERCENT")
+    .test <- .test[!.test %in% names(.try)]
+    if(length(.test)>0){
+      stop("as.respeciate> bad data structure, expected column(s) missing/unassigned:\n",
+           paste(.test, sep="", collapse = ", "), "\n", sep="", call.=FALSE)
+    }
+    if(any(is.na(.try$SPECIES_ID)) | any(is.na(.try$SPECIES_NAMES))){
+      warning("as.respeciate> suspect species data, values missing:\n",
+              "(respeciate needs valid species entries)\n",
+              sep="", call.=FALSE)
+    }
+  }
+
+  #output
+  class(.try) <- c("respeciate", class(.try))
+  .try
+}
+
+
+
 #notes
 ##################################
 
@@ -37,6 +105,7 @@
 
 #         with different print outputs?
 #         only plot for class plot, etc???
+
 
 #' @rdname respeciate.generics
 #' @method print respeciate
@@ -805,6 +874,12 @@ summary.respeciate <-
 #class builds
 ###################################
 
+###################################
+# hoping to drop this
+#     as.respeciate to supersede
+###################################
+
+
 #rsp_build_respeciate.spcs <-
 #  function(x, ...){
     #build
@@ -823,8 +898,11 @@ summary.respeciate <-
 
 rsp_build_respeciate <-
   function(x, ...){
-    #build
-    class(x) <- c("respeciate", "data.frame")
+    x <- as.data.frame(x)
+    if("WEIGHT_PERCENT" %in% names(x)) {
+      x$.value <- x$WEIGHT_PERCENT
+    }
+    class(x) <- c("respeciate", class(x))
     x
   }
 

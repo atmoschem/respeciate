@@ -3,20 +3,9 @@
 \name{sp}
 \alias{sp}
 \alias{sp_profile}
-\alias{sp_build_rsp_x}
-\title{sp_ functions}
+\title{sp_profile}
 \usage{
 sp_profile(code, ..., include.refs = FALSE)
-
-sp_build_rsp_x(
-  x,
-  profile_code,
-  profile_name,
-  species_name,
-  species_id,
-  value,
-  ...
-)
 }
 \arguments{
 \item{code}{character, numeric or data.frame, the SPECIATE code
@@ -31,43 +20,16 @@ treats these as additional sources for \code{code}.}
 \item{include.refs}{logical, (for \code{sp_profile} only) include profile
 reference information when getting the requested profile(s) from the
 archive, default \code{FALSE}.}
-
-\item{x}{(for \code{sp_build}s only) A \code{data.frame} or similar (i.e.
-something that can be converted to a \code{data.frame} using
-\code{as.data.frame}) to be converted into a \code{respeciate} object for
-comparison with SPECIATE profiles.}
-
-\item{profile_name, profile_code}{(for \code{sp_build}s only;
-\code{character})  The name of the column in \code{x} containing
-profile name and code, respectively. If not already named according
-to SPECIATE conventions, at least one of these will need to be assigned.}
-
-\item{species_name, species_id}{(for \code{sp_build}s only;
-\code{character})  The name of the column in \code{x} containing
-species name and id, respectively. If not already named according
-to SPECIATE conventions, at least one of these will need to be assigned.}
-
-\item{value}{(for \code{sp_build}s only; \code{character})  The name
-of the column in \code{x} containing measurement values. If not already
-named according to SPECIATE conventions, this will need to be assigned.}
 }
 \value{
 \code{sp_profile} returns a object of
 \code{respeciate} class, a \code{data.frame} containing a
 (re)SPECIATE profile.
-
-\code{sp_build}s attempt to build and return a (re)SPECIATE-like profile
-that can be compared with with data in re(SPECIATE).
 }
 \description{
-sp function to get profiles from the R (re)SPECIATE archive
-
-\code{\link{sp_profile}} extracts a
-SPECIATE profile from the local (re)SPECIATE archive.
+sp function to get profile(s) from the R (re)SPECIATE archive
 }
 \note{
-With \code{sp_profile}:
-
 The option \code{include.refs} adds profile source reference
 information to the returned \code{respeciate} data set. The default option
 is to not include these because some profiles have several associated
@@ -76,16 +38,6 @@ references and including these replicates records, once per reference.
 own methods or code and include references in any profile build you may be
 biasing some analyses in favor of those multiple-reference profile unless
 you check and account such cases.
-
-With \code{sp_build}s:
-
-It is particularly IMPORTANT that you use EPA SPECIATE conventions when
-assign species information if you want to compare your data with SPECIATE
-profiles. Currently, working on option to improve on this (and very happy
-to discuss if anyone has ideas), but current best suggestion is: (1)
-identify the SPECIATE species code for all the species in your data set,
-and (2) assign these as \code{species_id} when \code{sp_build}ing. The
-function will then associate the \code{species_name}.
 }
 \examples{
 \dontrun{

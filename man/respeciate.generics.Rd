@@ -2,12 +2,18 @@
 % Please edit documentation in R/respeciate.generics.R
 \name{respeciate.generics}
 \alias{respeciate.generics}
+\alias{as.respeciate}
+\alias{as.respeciate.default}
 \alias{print.respeciate}
 \alias{print.rsp_pls}
 \alias{plot.respeciate}
 \alias{summary.respeciate}
 \title{respeciate.generics}
 \usage{
+as.respeciate(x, ...)
+
+\method{as.respeciate}{default}(x, ...)
+
 \method{print}{respeciate}(x, n = NULL, ...)
 
 \method{print}{rsp_pls}(x, n = NULL, ...)
@@ -20,16 +26,20 @@
 \item{x}{the \code{respeciate}
 object to be printed, plotted, etc.}
 
-\item{n}{when plotting or printing a multi-profile object, the
-maximum number of profiles to report.}
-
 \item{...}{any extra arguments, mostly ignored except by
 \code{plot} which passes them to \code{\link{sp_plot_profile}}.}
+
+\item{n}{when plotting or printing a multi-profile object, the
+maximum number of profiles to report.}
 
 \item{object}{like \code{x} but for \code{summary}.}
 }
 \description{
 \code{respeciate} object classes and generic functions.
+
+When supplied a \code{data.frame} or similar,
+\code{\link{as.respeciate}} attempts to coerce it into a
+\code{respeciate} objects.
 
 When supplied a \code{respeciate}
 object or similar, \code{\link{print}} manages its appearance.
