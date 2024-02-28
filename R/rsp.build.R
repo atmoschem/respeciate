@@ -1,9 +1,9 @@
-#' @name sp.build
-#' @title sp_build functions
-#' @aliases sp_build_rsp_x
+#' @name rsp.build
+#' @title Building respeciate-like Objects
+#' @aliases rsp_build_x
 
 
-#' @description sp function(s) to reconfigure data.frames (and similar
+#' @description rsp function(s) to reconfigure data.frames (and similar
 #' object classes) for use with data and functions in re(SPECIATE).
 
 #' @param x \code{data.frame} or similar (i.e.
@@ -20,14 +20,14 @@
 #' @param value (\code{character})  The name of the column in \code{x}
 #' containing measurement values. If not already named according to SPECIATE
 #' conventions, this will need to be assigned.
-#' @return \code{sp_build}s attempt to build and return a (re)SPECIATE-like
-#' profile that can be compared with data in re(SPECIATE).
+#' @return \code{rsp_build}s attempt to build and return a (re)SPECIATE-like
+#' object that can be compared with data from re(SPECIATE).
 #' @note If you want to compare your data with profiles in the SPECIATE archive,
 #' you need to use EPA SPECIATE conventions when assigning species names and
 #' identifiers. Currently, we are working on options to improve on this (and
 #' very happy to discuss if anyone has ideas), but current best suggestion is:
 #' (1) identify the SPECIATE species code for each of the species in your data set,
-#' and (2) assign these as \code{species_id} when \code{sp_build}ing. The
+#' and (2) assign these as \code{species_id} when \code{rsp_build}ing. The
 #' function will then associate the \code{species_name} from SPECIATE species
 #' records.
 
@@ -49,7 +49,12 @@
 # notes
 ##############################
 
-# sp_build_rsp_x currently converts x as.data.frame(x)
+# 0.3. notes
+# went from sp_build_rsp_x to rsp_build_x
+# using as.respeciate and adding rsp_x
+
+
+# rsp_build_x currently converts x as.data.frame(x)
 #     if tibble is loaded, any tibbles complicate things
 
 #     BUT might want to revisit this because it looked like:
@@ -66,7 +71,7 @@
 #' @rdname sp.build
 #' @export
 
-sp_build_rsp_x <-
+rsp_build_x <-
   function(x, profile_code, profile_name,
            species_name, species_id,
            value, ...){
@@ -225,7 +230,7 @@ sp_build_rsp_x <-
     #   note: this replaces previous local testing
     x <- as.respeciate(x, test.rsp=TRUE)
     #slip in rsp_x tag
-    class(x) <- c("rsp_x", class(x))
+    class(x) <- unique(c("rsp_x", class(x)))
     x
   }
 

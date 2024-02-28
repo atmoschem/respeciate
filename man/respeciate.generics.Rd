@@ -14,7 +14,7 @@ as.respeciate(x, ...)
 
 \method{as.respeciate}{default}(x, ...)
 
-\method{print}{respeciate}(x, n = NULL, ...)
+\method{print}{respeciate}(x, n = 6, ...)
 
 \method{print}{rsp_pls}(x, n = NULL, ...)
 
@@ -39,7 +39,7 @@ maximum number of profiles to report.}
 
 When supplied a \code{data.frame} or similar,
 \code{\link{as.respeciate}} attempts to coerce it into a
-\code{respeciate} objects.
+\code{respeciate} object.
 
 When supplied a \code{respeciate}
 object or similar, \code{\link{print}} manages its appearance.

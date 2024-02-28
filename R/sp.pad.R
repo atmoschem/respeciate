@@ -87,7 +87,7 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
   #should argument within sp_pad be method??
 
   #tidy x
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(x)
   #save class
   .cls <- class(x)
   out <- data.table::as.data.table(x)
@@ -161,7 +161,7 @@ sp_pad <- function(x, pad = "standard", drop.nas = TRUE){
   # could return as input class
   # see notes
   out <- as.data.frame(out)
-  rsp_build_respeciate(out)
+  .rsp_build_respeciate(out)
 
 }
 

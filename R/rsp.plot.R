@@ -1,18 +1,18 @@
-#' @name sp.plot
+#' @name rsp.plot
 #' @title plotting (re)SPECIATE profiles
-#' @aliases sp_plot_profile sp_plot_species
+#' @aliases rsp_plot_profile rsp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
 
-#' @description \code{sp_plot} functions generate plots for supplied
+#' @description \code{rsp_plot} functions generate plots for supplied
 #' (re)SPECIATE data sets.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param id numeric, the indices of profiles or species to use when
-#' plotting with \code{sp_plot_profile} or \code{sp_plot_species},
-#' respectively. For example, \code{sp_plot_profile(x, id=1:6)} plots
-#' first 6 profiles in \code{respeciate} object \code{x}.
-#' @param multi.profile character, how \code{sp_plot_profile} should
+#' plotting with \code{rsp_plot_profile} or \code{rsp_plot_species},
+#' respectively. For example, \code{rsp_plot_profile(rsp, id=1:6)} plots
+#' first 6 profiles in \code{respeciate} object \code{rsp}.
+#' @param multi.profile character, how \code{rsp_plot_profile} should
 #' handle multiple profiles, e.g. 'group' or 'panel' (default
 #' group).
 #' @param order logical, order the species in the
@@ -43,14 +43,14 @@
 
 
 #functions
-# sp_plot_profile
-# sp_plot_species
+# rsp_plot_profile
+# rsp_plot_species
 
-# plot.respeciate is wrapper for sp_plot_profile
+# plot.respeciate is wrapper for rsp_plot_profile
 
 #uses unexported code
-#  rsp_plot_fix
-#  rsp_yscale.component.log10 (currently in sp.pls.r)
+#  .rsp_plot_fix
+#  .rsp_yscale.component.log10 (currently in sp.pls.r)
 
 
 
@@ -97,7 +97,7 @@
 #sp_plot_profile
 ###################################
 
-#' @rdname sp.plot
+#' @rdname rsp.plot
 #' @export
 #   now done in xxx.r
 
@@ -107,12 +107,12 @@
 #moved this to lattice for paneling option
 
 ############################
-#using rsp_plot_fix for warning/handling for
+#using .rsp_plot_fix for warning/handling for
 #  duplicate species in profiles (handling merge/mean)
 #  duplicated profile names (handling make unique)
 
 #############################
-#using rsp_test_profile
+#using .rsp_test_profile
 #   when ordering...
 
 #see in code notes about jobs
@@ -126,11 +126,12 @@
 #               what is x, how is it formatted, etc
 #               then same for y, groups and cond...
 
-sp_plot_profile <-   function(x, id, multi.profile = "group",
+rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
                               order=TRUE, log=FALSE, ...,
                               silent=FALSE){
 
   #setup
+  x <- rsp ## this needs sorting...
   .x.args <- list(...)
 
   #currently not even trying to stack logs...
@@ -177,7 +178,7 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 
   #check for duplicates, etc...
   #tidy naming etc...
-  x <- rsp_plot_fix(x, silent=silent, ...)
+  x <- .rsp_plot_fix(x, silent=silent, ...)
 
   ##test something to plot
   if(nrow(x)==0){
@@ -207,7 +208,7 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
     ################################
     test <- x
     test$PROFILE_CODE <- ".default"
-    test <- rsp_test_profile(test)
+    test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
@@ -315,7 +316,7 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
   #like to track border as well as col...
   #want to add box behind legend when key in plot...
   if("groups" %in% names(p1.ls)){
-    .tmp <- list(space="right",
+    .tmp <- list(space="top",
                  #title="Legends",
                  rectangles=list(col=rep(p1.ls$col,
                                          length.out=length(profile))),
@@ -335,7 +336,7 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 #sp_plot_species
 ###################################
 
-#' @rdname sp.plot
+#' @rdname rsp.plot
 #' @export
 
 #in development
@@ -343,11 +344,12 @@ sp_plot_profile <-   function(x, id, multi.profile = "group",
 #lot taken straight from sp_plot_profile
 #so lots of redundancy
 
-sp_plot_species <- function(x, id, multi.species = "group",
+rsp_plot_species <- function(rsp, id, multi.species = "group",
                             order = FALSE, log = FALSE,
                             ..., silent = FALSE){
 
   #setup
+  x <- rsp ## this needs sorting...
   .x.args <- list(...)
 
   ######################################
@@ -404,7 +406,7 @@ sp_plot_species <- function(x, id, multi.species = "group",
 
   #check for duplicates, etc...
   #tidy naming etc...
-  x <- rsp_plot_fix(x, silent=silent, ...)
+  x <- .rsp_plot_fix(x, silent=silent, ...)
 
   ##test something to plot
   if(nrow(x)==0){
@@ -449,7 +451,7 @@ sp_plot_species <- function(x, id, multi.species = "group",
     ################################
     test <- x
     test$PROFILE_CODE <- ".default"
-    test <- rsp_test_profile(test)
+    test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]

@@ -1,21 +1,21 @@
-#' @name sp.reshape
+#' @name rsp.reshape
 #' @title (re)SPECIATE profile reshaping functions
-#' @aliases sp_dcast sp_dcast_profile sp_dcast_species sp_melt_wide
+#' @aliases rsp_dcast rsp_dcast_profile rsp_dcast_species rsp_melt_wide
 
 #' @description Functions for reshaping (re)SPECIATE profiles
 
-#' @description \code{sp_dcast} and \code{sp_melt_wide} reshape supplied
-#' (re)SPECIATE profile(s). \code{sp_dcast} converts these from their supplied
+#' @description \code{rsp_dcast} and \code{rsp_melt_wide} reshape supplied
+#' (re)SPECIATE profile(s). \code{rsp_dcast} converts these from their supplied
 #' long form to a widened form, \code{dcast}ing the data set by either species
 #' or profiles depending on the \code{widen} setting applied.
-#' \code{sp_dcast_profile} and \code{sp_dcast_species} are wrappers for these
-#' options. \code{sp_melt_wide} attempts to return a previously widened data
+#' \code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
+#' options. \code{rsp_melt_wide} attempts to return a previously widened data
 #' set to the original long form.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
-#' profiles in standard long form or widened form for
-#' \code{\link{sp_dcast}} and \code{\link{sp_melt_wide}}, respectively.
-#' @param widen character, when widening \code{x} with
-#' \code{\link{sp_dcast}}, the data type to \code{dcast},
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' profiles in standard long form or widened form using
+#' \code{\link{rsp_dcast}} and \code{\link{rsp_melt_wide}}, respectively.
+#' @param widen character, when widening \code{rsp} with
+#' \code{\link{rsp_dcast}}, the data type to \code{dcast},
 #' currently \code{'species'} (default) or \code{'profile'}. See Note.
 #' @param pad logical or character, when \code{melt}ing a previously widened
 #' data set, should output be re-populated with species and/or profile
@@ -30,14 +30,14 @@
 #' attempt account for that when working with standard re(SPECIATE)
 #' profiles. It is, however, sometimes useful to check first, e.g. when
 #' building profiles yourself.
-#' @return \code{sp_dcast} returns the wide form of the supplied
-#' \code{respeciate} profile. \code{sp_melt_wide}
+#' @return \code{rsp_dcast} returns the wide form of the supplied
+#' \code{respeciate} profile. \code{rsp_melt_wide}
 #' returns the (standard) long form of a previously widened profile.
 
 #' @note Conventional long-to-wide reshaping of data, or \code{dcast}ing, can
 #' be slow and memory inefficient. So, \code{respeciate} uses the
 #' \code{\link[data.table:dcast]{data.table::dcast}}
-#' method. The \code{sp_dcast_species} method,
+#' method. The \code{rsp_dcast_species} method,
 #' applied using \code{widen='species'}, is effectively:
 #'
 #' \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
@@ -56,7 +56,7 @@
 
 #NOTE
 
-#' @rdname sp.reshape
+#' @rdname rsp.reshape
 #' @export
 
 ##   now imports from xxx.r
@@ -74,7 +74,7 @@
 #long_to_wide reshape
 ######################
 
-sp_dcast <- function(x, widen = "species"){
+rsp_dcast <- function(rsp, widen = "species"){
 
   ####################
   #see ?data.table::dcast for examples
@@ -92,7 +92,7 @@ sp_dcast <- function(x, widen = "species"){
 
   #adds .value if missing
   ## using .value rather the WEIGHT_PERCENT in case rescaled
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   #save class
   cls <- class(x)
@@ -134,30 +134,34 @@ sp_dcast <- function(x, widen = "species"){
   #   could use an output arg??? as.is, data.frame, etc...
 
   out <- as.data.frame(out)
-  #class(out) <- cls
+  if(widen=="species"){
+    class(out) <- c("rsp_sw", cls)
+  } else {
+    class(out) <- c("rsp_pw", cls)
+  }
   out
 }
 
-#' @rdname sp.reshape
+#' @rdname rsp.reshape
 #' @export
 
-sp_dcast_profile <- function(x, widen = "profile"){
-  sp_dcast(x=x, widen=widen)
+rsp_dcast_profile <- function(rsp, widen = "profile"){
+  rsp_dcast(rsp=rsp, widen=widen)
 }
 
 
 
-#' @rdname sp.reshape
+#' @rdname rsp.reshape
 #' @export
 
-sp_dcast_species <- function(x, widen = "species"){
-  sp_dcast(x=x, widen=widen)
+rsp_dcast_species <- function(rsp=rsp, widen = "species"){
+  rsp_dcast(rsp=rsp, widen=widen)
 }
 
 
 
 
-#' @rdname sp.reshape
+#' @rdname rsp.reshape
 #' @export
 
 ##   now imports from xxx.r
@@ -179,7 +183,7 @@ sp_dcast_species <- function(x, widen = "species"){
 #wide_to_long reshape
 ######################
 
-sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
+rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
 
   ####################
   #see ?data.table::melt for examples
@@ -187,7 +191,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
 
   #adds .value if missing
   ## using .value rather the WEIGHT_PERCENT in case rescaled
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   #save class
   cls <- class(x)
@@ -207,7 +211,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
   .test.sp <- length(grep("PROFILE", .test))
   .test.pr <- length(grep("SPECIES", .test))
   if(.test.pr>0 & .test.sp>0){
-    stop("sp_melt_wide halted; x already looks suspect.", call.=FALSE)
+    stop("rsp_melt_wide halted; x already looks suspect.", call.=FALSE)
   }
   .long <- "bad"
   if(.test.pr>0 & length(.test)==.test.pr){
@@ -219,7 +223,7 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
     .long <- "SPECIES_NAME"
   }
   if(.long=="bad"){
-    stop("sp_melt_wide halted; x already looks suspect.", call.=FALSE)
+    stop("rsp_melt_wide halted; x already looks suspect.", call.=FALSE)
   }
 
   #should only be species.wide or profile.wide
@@ -284,11 +288,13 @@ sp_melt_wide <- function(x, pad = TRUE, drop.nas = TRUE){
         #if so, in else here??
     }
   }
+
+  #output
   out <- as.data.frame(out)
-
   #need to rationalise outputs!!!
-  rsp_build_respeciate(out)
-
+  #.rsp_build_respeciate(out)
+  class(out) <- cls[!cls %in% c("rsp_pw", "rsp_sw")]
+  out
 }
 
 

@@ -91,12 +91,12 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 
 
-rsp_plot_fix <- function(x, silent = FALSE, ...){
+.rsp_plot_fix <- function(x, silent = FALSE, ...){
 
   .x.args <- list(...)
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(x)
   ##test object type
-  test <- rsp_test_respeciate(x, level=2, silent=TRUE)
+  test <- .rsp_test_respeciate(x, level=2, silent=TRUE)
   if(test != "respeciate"){
     if(test %in% c("respeciate.profile.ref", "respeciate.species.ref")){
       stop("RSP> No plot method for respeciate.reference files.",
@@ -108,20 +108,20 @@ rsp_plot_fix <- function(x, silent = FALSE, ...){
     #don't stop - respeciate profile
   }
   #check for duplicates
-  x <- rsp_test_profile(x)
+  x <- .rsp_test_profile(x)
   if(any(x$.n>1) & !silent){
     warning(paste("RSP> found duplicate species in profiles (merged and averaged...)",
                   sep=""), call.=FALSE)
   }
   #shorten names for plotting
-  x$SPECIES_NAME <- rsp_tidy_species_name(x$SPECIES_NAME)
+  x$SPECIES_NAME <- .rsp_tidy_species_name(x$SPECIES_NAME)
 
   ####################################
   #issue profile names are not always unique
   ####################################
   test <- x
   test$SPECIES_ID <- ".default"
-  test <- rsp_test_profile(test)
+  test <- .rsp_test_profile(test)
   ###################
   #rep_test
   #can now replace this with data.table version
@@ -167,7 +167,7 @@ rsp_plot_fix <- function(x, silent = FALSE, ...){
 
 ## could also test for .value
 
-rsp_test_respeciate <- function(x, level = 1,
+.rsp_test_respeciate <- function(x, level = 1,
                                 silent = FALSE){
   test <- class(x)
   out <- "bad"
@@ -209,7 +209,7 @@ rsp_test_respeciate <- function(x, level = 1,
 ##     enabled in plot.respeciate, sp_profile_rescale, sp_profile_dcast
 ##                rsp_test_profile
 
-rsp_tidy_profile <- function(x){
+.rsp_tidy_profile <- function(x){
   #.value is local version of weight
   if(!".value" %in% names(x)){
     x$.value <- x$WEIGHT_PERCENT
@@ -237,7 +237,7 @@ rsp_tidy_profile <- function(x){
 #    option foreshorten any names longer than [n] characters???
 #    similar function to tidy profile names
 
-rsp_tidy_species_name <- function(x){
+.rsp_tidy_species_name <- function(x){
 
   #attempts shorten names by remove other versions
   #names seem to be in format a (or b || c)
@@ -267,10 +267,10 @@ rsp_tidy_species_name <- function(x){
 #file:///C:/Users/trakradmin/Downloads/datatable.pdf
 ##rsp_test_profile(aa)
 
-rsp_test_profile <- function(x){
+.rsp_test_profile <- function(x){
 
   #set up .value if not there
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(x)
 
   #######################################
   #track and return original class?
@@ -486,7 +486,7 @@ rsp_test_profile <- function(x){
 
 
 
-rsp_col_key <- function(key, cols, x, y = NULL,
+.rsp_col_key <- function(key, cols, x, y = NULL,
                         ticks, nticks,
                         na.col = "grey", na.cex = 0.25,
                         title = "", axes, bg, border,

@@ -9,7 +9,7 @@
 
 #' @description When supplied a \code{data.frame} or similar,
 #' \code{\link{as.respeciate}} attempts to coerce it into a
-#' \code{respeciate} objects.
+#' \code{respeciate} object.
 
 #' @description When supplied a \code{respeciate}
 #' object or similar, \code{\link{print}} manages its appearance.
@@ -111,24 +111,155 @@ as.respeciate.default <- function(x, ...){
 #' @method print respeciate
 #' @export
 
-print.respeciate <- function(x, n = NULL, ...){
-  test <- rsp_test_respeciate(x, level = 2, silent = TRUE)
+
+print.respeciate <-
+  function(x, n=6, ...){
+
+    ################################
+    #new general respeciate print method
+    .tmp <- getOption("width")
+    .x <- x
+
+    #species info
+    if(class(.x)[1] == "rsp_si"){
+      .y <- unique(.x$SPECIES_ID)
+      report <- paste("respeciate species list:",
+                      length(.y), "\n",
+                      "[NO PROFILES]", "\n", sep="")
+      if(length(.y)>0){
+        yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+        for(i in yy){
+          .m1 <- paste("  (", "ID ", i, ") ",
+                       subset(.x, SPECIES_ID == i)$SPECIES_NAME[1],
+                       "\n", sep="")
+          if(nchar(.m1)>.tmp){
+            .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+          }
+          report <- paste(report, .m1, sep="")
+        }
+      }
+    }
+
+    #profile info
+    if(class(x)[1] == "rsp_pi"){
+      .y <- unique(x$PROFILE_CODE)
+      report <- paste("respeciate profile list: ",
+                      length(.y), "\n",
+                      "[NO SPECIES]", "\n", sep="")
+      if(length(.y)>0){
+        yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+        for(i in yy){
+          .m1 <- paste("  (", "CODE ", i, ") ",
+                       subset(.x, PROFILE_CODE == i)$PROFILE_NAME[1],
+                       "\n", sep="")
+          if(nchar(.m1)>.tmp){
+            .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+          }
+          report <- paste(report, .m1, sep="")
+        }
+      }
+    }
+
+    ####################################
+    #to do
+    ####################################
+    #handling for wide frames
+    #melt .x and carry on...
+    # could include a warning...?
+    # how to handle if profile_code is missing???
+    # or profile_name ????
+    # or species_name or species_id ???
+
+
+    rsp.rep <- "respeciate profile(s):"
+    if(class(.x)[1] == "rsp_sw"){
+      rsp.rep <- "respeciate (wide/species):"
+      .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
+      .x$SPECIES_ID <- .x$SPECIES_NAME
+    }
+    if(class(.x)[1] == "rsp_pw"){
+      rsp.rep <- "respeciate (wide/profiles):"
+      .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
+      #.x$PROFILE_NAME <- .x$PROFILE_CODE
+    }
+    if(class(.x)[1] == "rsp_x"){
+      rsp.rep <- "respeciate-like x:"
+      class(.x) <- class(.x)[class(.x) != "rsp_x"]
+    }
+
+    #standard respeciate
+    if(class(.x)[1] == "respeciate"){
+      .y <- unique(.x$PROFILE_CODE)
+      report <- paste(rsp.rep, " count ",
+                      length(.y), "\n", sep="")
+      if(length(.y)>0){
+        yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+        for(i in yy){
+          if("PROFILE_NAME" %in% names(.x)){
+            i2 <- .x$PROFILE_NAME[.x$PROFILE_CODE==i][1]
+          } else {
+            i2 <- "[unknown]"
+          }
+          if("SPECIES_ID" %in% names(.x)){
+            .spe <- length(unique(.x$SPECIES_ID[.x$PROFILE_CODE==i]))
+          } else {
+            .spe <- "0!"
+          }
+          .m1 <- paste("  ", i, " (", .spe, " species) ",
+                       i2, "\n", sep="")
+          if(nchar(.m1)>.tmp){
+            .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+          }
+          report <- paste(report, .m1, sep="")
+        }
+      }
+    }
+
+    #cat output
+    if(length(.y)<1){
+      cat(paste(report,
+                "empty (or bad?) respeciate object\n",
+                sep=""))
+    } else {
+      if(length(.y)>n){
+        #rather no showing last...???
+        report <- paste(report,
+                        "    > showing ", n, " of ", length(.y),
+                        sep="")
+      }
+      cat(report)
+    }
+
+    #return x (not .x)
+    return(invisible(x))
+  }
+
+
+
+
+
+
+
+
+
+rsp_print.respeciate.old <- function(x, n = NULL, ...){
+  test <- .rsp_test_respeciate(x, level = 2, silent = TRUE)
   if(test == "respeciate.profile.ref"){
     if(is.null(n)){
       n <- 100
     }
-    return(rsp_print_respeciate_profile(x=x, n=n, ...))
+    return(.rsp_print_respeciate_profile(x=x, n=n, ...))
   }
   if(test == "respeciate.species.ref"){
     if(is.null(n)){
       n <- 10
     }
-    return(rsp_print_respeciate_species(x=x, n=n, ...))
+    return(.rsp_print_respeciate_species(x=x, n=n, ...))
   }
   if(is.null(n)){
     n <- 10
   }
-  rsp_print_respeciate(x=x, n=n, ...)
+  .rsp_print_respeciate(x=x, n=n, ...)
 }
 
 ## rsp_print functions unexported
@@ -200,7 +331,7 @@ print.rsp_pls <- function(x, n = NULL, ...){
 #this is now sp_plot_profile
 
 plot.respeciate <- function(x, ...){
-  sp_plot_profile(x, ...)
+  rsp_plot_profile(x, ...)
 }
 
 
@@ -216,7 +347,7 @@ rsp_plot.respeciate.old <-
 
     #add .value if not there
     ## don't think .value works
-    x <- rsp_tidy_profile(x)
+    x <- .rsp_tidy_profile(x)
 
     ##test object type
     test <- rsp_test_respeciate(x, level=2, silent=TRUE)
@@ -408,14 +539,14 @@ rsp_plot.respeciate.old <-
 #profile name to code option???
 #species name to species id option???
 
-rsp_plot <-
+.rsp_plot <-
   function(x, id, order=TRUE,
            log=FALSE, ...){
 
     #setup
     ##################
     #add .value if not there
-    x <- rsp_tidy_profile(x)
+    x <- .rsp_tidy_profile(x)
     #others refs
     .x.args <- list(...)
     .sp.ord <- unique(x$SPECIES_ID)
@@ -896,7 +1027,7 @@ summary.respeciate <-
 #    x
 #  }
 
-rsp_build_respeciate <-
+.rsp_build_respeciate <-
   function(x, ...){
     x <- as.data.frame(x)
     if("WEIGHT_PERCENT" %in% names(x)) {
@@ -923,7 +1054,7 @@ rsp_build_respeciate <-
 #    i think rsp_test, then rsp_test.2 replaced
 #    and code in plot.respeciate.old ???
 
-rsp_split_profile <- function(x){
+.rsp_split_profile <- function(x){
   ref <- unique(x$PROFILE_CODE)
   lapply(ref, function(y) x[x$PROFILE_CODE==y,])
 }
@@ -953,8 +1084,127 @@ rsp_split_profile <- function(x){
 # could make other respeciate print outputs
 #      look like this?
 
-rsp_print_respeciate <-
+#########################################
+########################################
+## thinking about making this main print.respeciate
+#########################################
+#########################################
+
+#then removing all the other print.respeciate related functions ???
+
+.rsp_p2_ <-
   function(x, n=6, ...){
+
+    ################################
+    #new general respeciate print method
+    .tmp <- getOption("width")
+    .x <- x
+
+    #species info
+    if(class(.x)[1] == "rsp_si"){
+        .y <- unique(.x$SPECIES_ID)
+        report <- paste("respeciate species list:",
+                        length(.y), "\n",
+                        "[NO PROFILES]", "\n", sep="")
+        if(length(.y)>0){
+          yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+          for(i in yy){
+            .m1 <- paste("  (", "ID ", i, ") ",
+                         subset(.x, SPECIES_ID == i)$SPECIES_NAME[1],
+                         "\n", sep="")
+            if(nchar(.m1)>.tmp){
+              .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+            }
+            report <- paste(report, .m1, sep="")
+          }
+        }
+    }
+
+    #profile info
+    if(class(x)[1] == "rsp_pi"){
+        .y <- unique(x$PROFILE_CODE)
+        report <- paste("respeciate profile list: ",
+                        length(.y), "\n",
+                        "[NO SPECIES]", "\n", sep="")
+        if(length(.y)>0){
+          yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+          for(i in yy){
+            .m1 <- paste("  (", "CODE ", i, ") ",
+                         subset(.x, PROFILE_CODE == i)$PROFILE_NAME[1],
+                         "\n", sep="")
+            if(nchar(.m1)>.tmp){
+              .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+            }
+            report <- paste(report, .m1, sep="")
+          }
+        }
+    }
+
+    ####################################
+    #to do
+    ####################################
+    #handling for wide frames
+    #melt .x and carry on...
+    # could include a warning...?
+    # how to handle if profile_code is missing???
+    # or profile_name ????
+    # or species_name or species_id ???
+
+
+
+    #standard respeciate
+    if(class(.x)[1] == "respeciate"){
+      .y <- unique(.x$PROFILE_CODE)
+      report <- paste("respeciate profile(s): count ",
+                      length(.y), "\n", sep="")
+      if(length(.y)>0){
+        yy <- if(length(.y)>n) {.y[1:n]} else {.y}
+        for(i in yy){
+          if("PROFILE_NAME" %in% names(.x)){
+            i2 <- .x$PROFILE_NAME[.x$PROFILE_CODE==i][1]
+          } else {
+            i2 <- "[unknown]"
+          }
+          if("SPECIES_ID" %in% names(.x)){
+            .spe <- length(unique(.x$SPECIES_ID[.x$PROFILE_CODE==i]))
+          } else {
+            .spe <- "0!"
+          }
+          .m1 <- paste("  ", i, " (", .spe, " species) ",
+                        i2, "\n", sep="")
+          if(nchar(.m1)>.tmp){
+            .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
+          }
+          report <- paste(report, .m1, sep="")
+        }
+      }
+    }
+
+    #cat output
+    if(length(.y)<1){
+      cat(paste(report,
+                "empty (or bad?) respeciate object\n",
+                sep=""))
+    } else {
+      if(length(.y)>n){
+        #rather no showing last...???
+        report <- paste(report,
+                        "    > showing ", n, " of ", length(.y),
+                        sep="")
+      }
+      cat(report)
+    }
+
+    #return x (not .x)
+    return(invisible(x))
+  }
+
+
+
+
+.rsp_print_respeciate <-
+  function(x, n=6, ...){
+    #######################################
     #profile_code is (I think) only term unique to a profile
     y <- unique(x$PROFILE_CODE)
     report <- paste("respeciate profile(s): count ",
@@ -1001,7 +1251,7 @@ rsp_print_respeciate <-
 # #' @rdname respeciate.generics
 # #' @method print respeciate.ref
 # #' @export
-rsp_print_respeciate_profile <-
+.rsp_print_respeciate_profile <-
   function(x, n = 100, ...){
     xx <- nrow(x)
     wi <- getOption("width")
@@ -1029,7 +1279,7 @@ rsp_print_respeciate_profile <-
 # #' @rdname respeciate.generics
 # #' @method print respeciate.spcs
 # #' @export
-rsp_print_respeciate_species <-
+.rsp_print_respeciate_species <-
   function(x, n = 10, ...){
     xx <- nrow(x)
     wi <- getOption("width")

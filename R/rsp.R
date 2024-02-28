@@ -1,23 +1,24 @@
-#' @name sp
-#' @title sp_profile
-#' @aliases sp_profile
+#' @name rsp
+#' @title rsp_profile
+#' @aliases rsp rsp_profile
 
 
-#' @description sp function to get profile(s) from the R (re)SPECIATE archive
+#' @description  Getting profile(s) from the R (re)SPECIATE archive
 
-#' @param code character, numeric or data.frame, the SPECIATE code
-#' of the required profile (EPA SPECIATE identifier PROFILE_CODE). This is
-#' typically one or concatenated character or numeric entries, but can also
-#' be a \code{respeciate} object or similar \code{data.frame} containing
-#' the \code{code}s as a named \code{PROFILE_NAME} column.
-#' @param ... additional arguments, ignored except by \code{sp_profile} which
-#' treats these as additional sources for \code{code}.
-#' @param include.refs logical, (for \code{sp_profile} only) include profile
-#' reference information when getting the requested profile(s) from the
-#' archive, default \code{FALSE}.
-#' @return \code{sp_profile} returns a object of
-#' \code{respeciate} class, a \code{data.frame} containing a
-#' (re)SPECIATE profile.
+#' @param ... The function assumes all inputs (except \code{include.refs})
+#' are \code{SPECIES_CODE}s (the unique descriptor the EPA assigns to all
+#' profiles in SPECIATE) or sources of profile information and requests these
+#' form the local (re)SPECIATE archive. Typically, simple
+#' objects like character and numeric vectors, as assumed to profile codes and
+#' composite data-types like \code{respeciate} objects or \code{data.frame},
+#' are assumed to contain a named \code{PROFILE_CODE} column. All potential
+#' profile codes are requested and unrecognized codes are ignored.
+#' @param include.refs logical, if profile reference information should be
+#' included when extracting the requested profile(s) from the archive, default
+#' \code{FALSE}.
+#' @return \code{rsp_profile} or the short-hand \code{rsp} return an object of
+#' \code{respeciate} class, a \code{data.frame} containing one or more profile
+#' from the local (re)SPECIATE archive.
 #' @note The option \code{include.refs} adds profile source reference
 #' information to the returned \code{respeciate} data set. The default option
 #' is to not include these because some profiles have several associated
@@ -32,11 +33,17 @@
 #' The development and uses of EPA SPECIATE database.
 #' Atmospheric Pollution Research, 1(4), pp.196-206.
 #' @examples \dontrun{
-#' x <- sp_profile(c(8833, 8850))
+#' x <- rsp_profile(8833, 8850)
 #' plot(x)}
 
 #NOTES
 #######################
+
+# 0.3. notes
+# went from sp_profile to rsp_profile (and rsp)
+# dropped code argument
+# using as.respeciate in generics to build rsp object
+
 
 #to think about
 #######################
@@ -44,15 +51,15 @@
 #add functions to build or add respeciate-like data of own,
 #              e.g. x matrices for pls modelling
 
-#  (build functions started as separate script, sp.build.R)
+#  (build functions started as separate script, rsp.build.R)
 
-## sp_import_profile to import a profile from an external source
+## rsp_import_profile to import a profile from an external source
 ##     extension of above to import data from specific sources
 ##           might be very code intensive..?
 
 ## local function to pad data using database???
 
-#' @rdname sp
+#' @rdname rsp
 #' @export
 ##     (now importing via xxx.r)
 ##     #' @import data.table
@@ -75,7 +82,7 @@
 #   based on previous sp_profile but using data.table
 #   (0.1 version currently unexported sp_profile.old)
 
-sp_profile <- function(code, ..., include.refs=FALSE) {
+rsp_profile <- function(..., include.refs=FALSE) {
 
   # code currently handles:
   # respeciate.ref, data.frames containing profile_code,
@@ -86,7 +93,7 @@ sp_profile <- function(code, ..., include.refs=FALSE) {
   #   but would need to think about options
   #   if any in ... were data.frames
   ######################
-  .try <- lapply(list(code, ...), function(.code){
+  .try <- lapply(list(...), function(.code){
     if(is.data.frame(.code) && "PROFILE_CODE" %in% names(.code)){
       .code <- unique(.code$PROFILE_CODE)
     }
@@ -94,7 +101,7 @@ sp_profile <- function(code, ..., include.refs=FALSE) {
       .code <- as.character(.code)
     }
     if(!is.character(.code)) {
-      warning("unexpected 'code' object found and ignored",
+      warning("RSP> unexpected 'PROFILE_CODE' source found and ignored",
            call.=FALSE)
       .code <- NULL
     }
@@ -157,6 +164,9 @@ sp_profile <- function(code, ..., include.refs=FALSE) {
   return(rsp)
 }
 
+#' @rdname rsp
+#' @export
+rsp <- function(...) { rsp_profile(...) }
 
 
 
