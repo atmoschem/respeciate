@@ -1,13 +1,13 @@
 # Release Notes Version 0.3
 
 * [0.3.0] 
-    * released 2024-02-28 
+    * released 2024-05-07 
     * code and documentation refresh...  
     * added as.respeciate method; replacing related unexported code 
     * sp_profile, sp_build_rsp_x updates; both now use as.respeciate 
     * sp_profile to rsp_profile; sp_dcast/melt to rsp_dcast/melt; both as 
     part of object class rebuild 
-    * 
+    * sp_pad to rsp_pad; sp_match_profile to rsp_match_profile;  
 
 # Release Notes Version 0.2
 
