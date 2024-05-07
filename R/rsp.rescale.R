@@ -1,12 +1,12 @@
-#' @name sp.rescale
+#' @name rsp.rescale
 #' @title (re)SPECIATE profile rescaling functions
 #' @aliases sp_rescale sp_rescale_profile sp_rescale_species
 
 #' @description Functions for rescaling
 
-#' @description \code{sp_rescale} rescales the percentage weight records in
+#' @description \code{rsp_rescale} rescales the percentage weight records in
 #' a supplied (re)SPECIATE profile data set. This can be by profile or species
-#' subsets, and \code{sp_rescale_profile} and \code{sp_rescale_species} provide
+#' subsets, and \code{rsp_rescale_profile} and \code{rsp_rescale_species} provide
 #' short-cuts to these options.
 #' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
@@ -38,7 +38,7 @@
 
 #NOTE
 
-#' @rdname sp.rescale
+#' @rdname rsp.rescale
 #' @export
 ## #' @import data.table
 #   now done in xxx.r
@@ -63,13 +63,13 @@
 
 
 
-sp_rescale <- function(x, method = 2, by = "species"){
+rsp_rescale <- function(rsp, method = 2, by = "species"){
 
   #################################
   #check x is a respeciate object??
 
   #check it has .value
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   #save to return as is..
   #    thinking about this
@@ -197,18 +197,18 @@ sp_rescale <- function(x, method = 2, by = "species"){
 }
 
 
-#' @rdname sp.rescale
+#' @rdname rsp.rescale
 #' @export
 
-sp_rescale_profile <- function(x, method = 1, by ="profile"){
-  sp_rescale(x=x, method=method, by=by)
+rsp_rescale_profile <- function(rsp, method = 1, by ="profile"){
+  rsp_rescale(rsp=rsp, method=method, by=by)
 }
 
-#' @rdname sp.rescale
+#' @rdname rsp.rescale
 #' @export
 
-sp_rescale_species <- function(x, method = 2, by ="species"){
-  sp_rescale(x=x, method=method, by=by)
+rsp_rescale_species <- function(rsp, method = 2, by ="species"){
+  rsp_rescale(rsp=rsp, method=method, by=by)
 }
 
 
@@ -233,13 +233,13 @@ sp_rescale_species <- function(x, method = 2, by ="species"){
 # may need to think about additional local scaling
 #      e.g. within in profile [species conc]/[sum of all species concs]
 
-rsp_rescale_species <- function(x, method = 2){
+.rsp_rescale_species <- function(x, method = 2){
 
   #################################
   #check x is a respeciate object??
 
   #check it has .value
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(x)
 
   #save to return as is..
   #    thinking about this

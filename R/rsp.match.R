@@ -1,34 +1,34 @@
-#' @name sp.match
+#' @name rsp.match
 #' @title Find nearest matches from reference set of profiles
-#' @aliases sp_match_profile
+#' @aliases rsp_match_profile
 
-#' @description \code{sp_match_profile} compares a supplied species
-#' (re)SPECIATE profile and a reference set of supplied profiles and
-#' attempt to identify nearest matches on the basis of correlation
-#' coefficient.
-#' @param x A \code{respeciate} object or similar \code{data.frame} containing
-#' a species profile to be compared with profiles in \code{ref}. If \code{x}
+#' @description \code{rsp_match_profile} compares a supplied species
+#' (re)SPECIATE profile (or similar data set) and a reference set of
+#' supplied profiles and attempt to identify nearest matches on the
+#' basis of similarity.
+#' @param rsp A \code{respeciate} object or similar \code{data.frame} containing
+#' a species profile to be compared with profiles in \code{ref}. If \code{rsp}
 #' contains more than one profile, these are averaged (using
-#' \code{\link{sp_average_profile}}), and the average compared.
+#' \code{\link{rsp_average_profile}}), and the average compared.
 #' @param ref A \code{respeciate} object, a \code{data.frame} containing a
 #' multiple species profiles, to be used as reference library when identifying
-#' nearest matches for \code{x}.
+#' nearest matches for \code{rsp}.
 #' @param matches Numeric (default 10), the maximum number of profile matches to
 #' report.
 #' @param rescale Numeric (default 5), the data scaling method to apply before
-#' comparing \code{x} and profiles in \code{ref}: options 0 to 5 handled by
-#' \code{\link{sp_rescale}}.
+#' comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
+#' \code{\link{rsp_rescale}}.
 #' @param min.n \code{numeric} (default 8), the minimum number of paired
 #' species measurements in two profiles required for a match to be assessed.
-#' See also \code{\link{sp_species_cor}}.
+#' See also \code{\link{rsp_species_cor}}.
 #' @param method Character (default 'pd'), the similarity measure to use, current
-#' options 'pd', the Pearson's Distance (1- Pearson's correlation coefficient),
+#' options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
 #' or 'sid', the Standardized Identity Distance (See References).
-#' @param test.x Logical (default FALSE). The match process self-tests by adding
-#' \code{x} to \code{ref}, which should generate a perfect fit=0 score. Setting
-#' \code{test.x} to \code{TRUE} retains this as an extra record.
-#' @return \code{sp_match_profile} returns a fit report: a \code{data.frame} of
-#' up to \code{n} fit reports for the nearest matches to \code{x} from the
+#' @param test.rsp Logical (default FALSE). The match process self-tests by adding
+#' \code{rsp} to \code{ref}, which should generate a perfect fit=0 score. Setting
+#' \code{test.rsp} to \code{TRUE} retains this as an extra record.
+#' @return \code{rsp_match_profile} returns a fit report: a \code{data.frame} of
+#' up to \code{n} fit reports for the nearest matches to \code{rsp} from the
 #' reference profile data set, \code{ref}.
 #' @references Distance metrics are based on recommendations by Belis et al (2015)
 #' and as implemented in Mooibroek et al (2022):
@@ -46,7 +46,7 @@
 
 #NOTE
 
-#' @rdname sp.match
+#' @rdname rsp.match
 #' @export
 
 ######################
@@ -54,16 +54,25 @@
 #find ref profile 'most similar to x
 ######################
 
-#  the sp_dcast uses data.table
-#      sp_match uses rbindlist from data.table
+############################
+############################
+##need to go through notes and code and tidy
+## this is first goes at x->rsp
+##  will need tidy and rethink?
+###########################
+###########################
+
+
+#  the rsp_dcast uses data.table
+#      rsp_match uses rbindlist from data.table
 
 #in development
 
 #to do
 #########################
 
-##aa <- sp_profile(sp_find_profile("composite", by="profile_name"))
-##sp_match_profile(sp_profile("41220C"), aa)
+##aa <- rsp_profile(rsp_find_profile("composite", by="profile_name"))
+##rsp_match_profile(rsp_profile("41220C"), aa)
 ##assuming 41220C exists
 
 ##NOTE sp_profile code is case sensitive
@@ -79,11 +88,11 @@
 #       when (I guess) nothing there to compare...
 
 #default for ref
-#    using sp_profile(sp_find_profile("composite", by="profile_name"))
+#    using rsp_profile(rsp_find_profile("composite", by="profile_name"))
 #        in example.
 
 #could add error if x is more than one profile
-#    could use sp_profile_mean when written if we want to force to one
+#    could use rsp_profile_mean when written if we want to force to one
 #         one profile [?? nb: that function name not decided yet]
 
 #do we want an output option?
@@ -91,8 +100,8 @@
 
 #option to exclude test? from report
 
-#how can users make x if not from (re)SPECIATE archive
-#    currently using rsp_ [code after this function]
+#how can users make rsp if not from (re)SPECIATE archive
+#    currently using .rsp_ [code after this function]
 #         to anonymise a speciate profile
 #    suggestion:
 #         identify needed columns, formats and names
@@ -114,18 +123,18 @@
 #                  could also do this earlier if min.bin set in formals
 #                     but might need to rethink n, min.bin, etc???
 
-sp_match_profile <- function(x, ref, matches=10, rescale=5,
-                             min.n=8, method = "pd", test.x=FALSE){
+rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
+                             min.n=8, method = "pd", test.rsp=FALSE){
 
   #######################
   #if ref missing
   ##################
   #to do
-  #   using sp_profile(sp_find_profile("composite", by="profile_name"))
+  #   using rsp_profile(rsp_find_profile("composite", by="profile_name"))
   #   looked promising
 
   #add .value if not there
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   #tidy x for testing
   #.x.pr.cd <- as.character(x$PROFILE_CODE)
@@ -136,9 +145,9 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #   might think about changing this in future
 
   if(length(unique(x$PROFILE_CODE))>1){
-    x <- sp_average_profile(x, code = "test")
+    x <- rsp_average_profile(x, code = "test")
   } else {
-    x <- sp_average_profile(x, code = "test",
+    x <- rsp_average_profile(x, code = "test",
                             name = paste("test>", x$PROFILE_NAME[1], sep=""))
   }
 
@@ -152,7 +161,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   ###############
   #do test anyway
   ###############
-  #if(test.x){
+  #if(test.rsp){
     matches <- matches + 1
   #}
 
@@ -184,7 +193,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #          cols are there???
 
   #.tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
-  .tmp <- data.table::as.data.table(sp_rescale_profile(.tmp, method=rescale))
+  .tmp <- data.table::as.data.table(rsp_rescale_profile(.tmp, method=rescale))
 
   ###################
   #keep species names and ids for renaming
@@ -210,7 +219,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   #              na.rm=TRUE,
   #              value.var = ".value")
 
-  .tmp <- data.table::as.data.table(sp_dcast(.tmp, widen="profile"))
+  .tmp <- data.table::as.data.table(rsp_dcast(.tmp, widen="profile"))
 
   #nb: need the as.data.table() because sp_profile_dcast
   #    currently returns data.frame
@@ -359,7 +368,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   }
 
   if(!is.function(f)){
-    stop("RSP> sp_match_profile 'method' unknown", call. = FALSE)
+    stop("RSP> rsp_match_profile 'method' unknown", call. = FALSE)
   }
 
   .out <- .tmp[, (.cols) := lapply(.SD, f), .SDcols = .cols]
@@ -387,7 +396,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
   if(length(.out)<1){
     #see notes....
     #sometimes this is because there are less than min.n species in the x profile
-    stop("sp_match_profile> No (", min.n, " point) matches for x", call. = FALSE)
+    stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
   }
 
   .tmp <- names(.out)
@@ -405,7 +414,7 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
                      row.names = 1:length(.out))
 
   #conflicted!!!
-  if(!test.x){
+  if(!test.rsp){
     matches <- matches - 1
     if("test" %in% x$PROFILE_CODE){
       .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
@@ -428,14 +437,15 @@ sp_match_profile <- function(x, ref, matches=10, rescale=5,
 
 
 
-
-
 #need something to replace this that helps users build local profiles
 
 #basic build needs
 #   profile_name and profile_code
 #   species_name and species_id
 #   weight_percent (and possibly .value)
+
+###########################
+# think this can go because we now have rsp_build_x???
 
 rsp_ <- function(x){
   .o <- sp_profile(x)

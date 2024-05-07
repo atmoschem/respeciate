@@ -1,14 +1,14 @@
-#' @name sp.average
-#' @title speciate data averaging functions
-#' @aliases sp_average_profile
+#' @name rsp.average
+#' @title (re)SPECIATE data averaging functions
+#' @aliases rsp_average_profile
 
 
 #' @description Functions to build composite (re)SPECIATE profiles
 
 
-#' @description \code{sp_average_profile} generates an average composite
+#' @description \code{rsp_average_profile} generates an average composite
 #' of a supplied multi-profile \code{respeciate} object.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param code required character, the unique profile code to assign to the
 #' average profile.
@@ -16,9 +16,9 @@
 #' profile. If not supplied, this defaults to a collapsed list of the codes
 #' of all the profiles averaged.
 #' @param method numeric, the averaging method to apply: Currently only 1 (default)
-#' \code{mean(x)}.
+#' \code{mean(rsp)}.
 #' @param ... additional arguments, currently ignored
-#' @return \code{sp_average_profile} returns a single profile average
+#' @return \code{rsp_average_profile} returns a single profile average
 #' version of the supplied \code{respeciate} profile.
 #' @note In development function; arguments and outputs likely to be subject to
 #' change.
@@ -29,7 +29,7 @@
 
 #NOTE
 
-#' @rdname sp.average
+#' @rdname rsp.average
 #' @export
 
 ## #' @import data.table (in xxx.r)
@@ -66,18 +66,18 @@
 #test
 ###########################
 
-#aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
-#sp_average_profile(aa)
+#aa <- rsp_profile(sp_find_profile("ae8", by="profile_type"))
+#rsp_average_profile(aa)
 
 
-sp_average_profile <- function(x, code = NULL, name = NULL, method = 1,
+rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
                                ...){
 
   #################################
   #check x is a respeciate object??
 
   #check it has .value
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   #save class to return as is..
   #    thinking about this

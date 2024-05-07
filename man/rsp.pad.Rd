@@ -35,6 +35,6 @@ Some data handling can remove (re)SPECIATE meta-data,
 and \code{rsp_pad}s provide a quick rebuild/repair. For example,
 \code{\link{rsp_dcast}}ing to a (by-species or by-profile) widened
 form strips some meta-data, and padding is used as part of the
-\code{\link{rsp_melt_wide}} re-add this meta-data
+\code{\link{rsp_melt_wide}} to re-add this meta-data
 when returning the data set to its standard long form.
 }
