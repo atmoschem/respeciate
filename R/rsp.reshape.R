@@ -20,9 +20,9 @@
 #' @param pad logical or character, when \code{melt}ing a previously widened
 #' data set, should output be re-populated with species and/or profile
 #' meta-data, discarded when widening. This is currently handled by
-#' \code{\link{sp_pad}}. The default \code{TRUE} applies standard settings,
+#' \code{\link{rsp_pad}}. The default \code{TRUE} applies standard settings,
 #' so does not include profile sources reference meta-data. (See
-#' \code{\link{sp_pad}} for other options).
+#' \code{\link{rsp_pad}} for other options).
 #' @param drop.nas logical, when \code{melt}ing a previously widened
 #' data set, should output be stripped of any rows containing empty
 #' weight/value columns. Because not all profile contains all species, the
@@ -55,6 +55,18 @@
 #'   R package version 1.14.8, <https://CRAN.R-project.org/package=data.table>.
 
 #NOTE
+
+#############################
+# these use
+#############################
+# .rsp_tidy_profile
+# data.table::as.data.table
+# data.table::dcast
+# data.table::melt
+# rsp_pad
+
+
+
 
 #' @rdname rsp.reshape
 #' @export
@@ -206,12 +218,12 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
              "WEIGHT_PERCENT", ".value")
   .test <- .test[.test %in% names(xx)]
   if(length(.test)>2){
-    stop("sp_melt_wide halted; x already looks like a long profile.", call.=FALSE)
+    stop("RSP> melt halted; rsp already looks like a long profile.", call.=FALSE)
   }
   .test.sp <- length(grep("PROFILE", .test))
   .test.pr <- length(grep("SPECIES", .test))
   if(.test.pr>0 & .test.sp>0){
-    stop("rsp_melt_wide halted; x already looks suspect.", call.=FALSE)
+    stop("RSP> melt halted; rsp looks looks suspect.", call.=FALSE)
   }
   .long <- "bad"
   if(.test.pr>0 & length(.test)==.test.pr){
@@ -223,7 +235,7 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
     .long <- "SPECIES_NAME"
   }
   if(.long=="bad"){
-    stop("rsp_melt_wide halted; x already looks suspect.", call.=FALSE)
+    stop("RSP> melt halted; rsp looks suspect.", call.=FALSE)
   }
 
   #should only be species.wide or profile.wide
@@ -232,50 +244,51 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   out <- data.table::melt(xx, id.vars = .id.vars)
   names(out)[names(out)=="variable"] <- .long
   names(out)[names(out)=="value"] <- ".value"
+  if("SPECIES_ID" %in% names(out)){
+    out$SPECIES_ID <- as.character(out$SPECIES_ID)
+  }
+  if("SPECIES_NAME" %in% names(out)){
+    out$SPECIES_NAME <- as.character(out$SPECIES_NAME)
+  }
+  if("PROFILE_CODE" %in% names(out)){
+    out$PROFILE_CODE <- as.character(out$PROFILE_CODE)
+  }
 
   #out$WEIGHT_PERCENT <- out$.value
 
   #merge if padding
   #####################
   #might not be best way of doing it
-  #testing sp_pad as an alternative to previous remarked code???
-  #     first need to standardise method, decide where to drop.nas,
-  #        finalise formals, decide best data.table methods, etc
+  #   could pass other args to pad
+  #   might need to think about the .value/WEIGHT_PERCENT handling
 
   if(is.logical(pad) && pad){
     pad <- "standard"
   }
   if(is.character(pad)){
+    out <- rsp_pad(out, pad, drop.nas)
+    #tidy bad profile_name
+    if(all(is.na(out$PROFILE_NAME)) && "PROFILE_CODE" %in% names(out)){
+      out$PROFILE_NAME <- out$PROFILE_CODE
+    }
+    #tidy bad species_id
+    if(all(is.na(out$SPECIES_ID)) && "SPECIES_NAME" %in% names(out)){
+      out$SPECIES_ID <- as.character(-as.numeric(factor(out$SPECIES_NAME)))
+    }
 
-    out <- sp_pad(out, pad)
-
-#    PROFILES <- as.data.table(sysdata$PROFILES)
-#    SPECIES_PROPERTIES <- as.data.table(sysdata$SPECIES_PROPERTIES)
-#    if(.long=="PROFILE_CODE"){
-#      out <- merge(out, PROFILES, by = .long, all.y=FALSE,
-#                   all.x=TRUE, allow.cartesian=TRUE)
-#      .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
-#      out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
-#                   all.x=TRUE, allow.cartesian=TRUE)
-#    } else {
-#      #.long must be "SPECIES_NAME"
-#      out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
-#                  all.x=TRUE, allow.cartesian=TRUE)
-#      .tmp <- intersect(names(out), names(PROFILES))
-#      out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
-#                   all.x=TRUE, allow.cartesian=TRUE)
-#    }
-#    #to get weight_percentage etc
-#    SPECIES <- as.data.table(sysdata$SPECIES)
-#    .tmp <- intersect(names(out), names(SPECIES))
-#    print(.tmp)
-#    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
-#                 all.x=TRUE, allow.cartesian=TRUE)
-#  } else {
-#    #not great but...
-#    #if not padding WEIGHT_PERCENT has to be .value
-#    out$WEIGHT_PERCENT <- out$.value
   }
+
+  ################################
+  # could tidy structure here??
+  ################################
+
+  # if weight_percent but not .value add .value
+  # if.value but not weight_percent add .value
+  # similar for profile_name/code and species_name/id
+
+  # is that done in rsp_build_x ??
+
+
   #drop.nas...
   if(drop.nas){
     if(".value" %in% names(out)){
@@ -289,10 +302,12 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
     }
   }
 
+
+
   #output
-  out <- as.data.frame(out)
   #need to rationalise outputs!!!
   #.rsp_build_respeciate(out)
+  out <- as.data.frame(out)
   class(out) <- cls[!cls %in% c("rsp_pw", "rsp_sw")]
   out
 }

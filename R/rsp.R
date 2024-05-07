@@ -148,7 +148,7 @@ rsp_profile <- function(..., include.refs=FALSE) {
 
   #add .value if weight_percent to copy...
   x <- as.data.frame(dt)
-  if("WEIGHT_PERCENT" %in% names(x)) {
+  if("WEIGHT_PERCENT" %in% names(x) & !".value" %in% names(x)) {
     x$.value <- x$WEIGHT_PERCENT
   }
 

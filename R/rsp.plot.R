@@ -361,7 +361,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
       ######################
       #to do
       #document issues
-      stop("RSP> Sorry, currently not stacking logs.",
+      stop("RSP> Sorry, currently not stacking logs",
            call. = FALSE)
     }
   }
@@ -465,6 +465,8 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   }
   x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
 
+  #print(xx)
+
   ##################
   #species trend line plot
   ##################
@@ -472,7 +474,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #dcast and melt to add in any missed entries as NAs
   #(to force trend line gaps)
   #not padding, obviously not dropping nas...
-  x <- sp_melt_wide(sp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
+  x <- rsp_melt_wide(rsp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
 
   ###############################
   #species handling
@@ -595,11 +597,15 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #could be issue here if user uses auto.key???
   #like to track border as well as col...
   if("groups" %in% names(p1.ls)){
+    #print(x$SPECIES_NAME)
     .tmp <- list(space="right",
                  #title="Legends",
                  lines=list(col=rep(p1.ls$col,
                                     length.out=length(species))),
-                 text = list(levels(x$SPECIES_NAME), cex=0.7))
+                 ##########################
+                 #text = list(levels(x$SPECIES_NAME), cex=0.7))
+                 text = list(species, cex=0.7))
+                 #changed from above because x$SPECIES_NAME
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
     } else {

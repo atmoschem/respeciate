@@ -28,9 +28,9 @@ currently \code{'species'} (default) or \code{'profile'}. See Note.}
 \item{pad}{logical or character, when \code{melt}ing a previously widened
 data set, should output be re-populated with species and/or profile
 meta-data, discarded when widening. This is currently handled by
-\code{\link{sp_pad}}. The default \code{TRUE} applies standard settings,
+\code{\link{rsp_pad}}. The default \code{TRUE} applies standard settings,
 so does not include profile sources reference meta-data. (See
-\code{\link{sp_pad}} for other options).}
+\code{\link{rsp_pad}} for other options).}
 
 \item{drop.nas}{logical, when \code{melt}ing a previously widened
 data set, should output be stripped of any rows containing empty
