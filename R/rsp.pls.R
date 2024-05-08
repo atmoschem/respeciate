@@ -1,6 +1,6 @@
-#' @name sp.pls
-#' @title (re)SPECIATE profile Positive Least Squares
-#' @aliases sp_pls_profile pls_report pls_test pls_fit_species
+#' @name rsp.pls
+#' @title (re)SPECIATE profile Positive Least Squares models
+#' @aliases rsp_pls_profile pls_report pls_test pls_fit_species
 #' pls_refit_species pls_rebuild pls_plot
 #' pls_plot_species pls_plot_profile
 
@@ -8,7 +8,7 @@
 #' (re)SPECIATE profiles
 
 #' @description
-#' \code{sp_pls_profile} builds PSL models for supplied profile(s) using
+#' \code{rsp_pls_profile} builds PSL models for supplied profile(s) using
 #' the \code{\link{nls}} function, the 'port' algorithm and a lower
 #' limit of zero for all model outputs to enforce the positive fits. The
 #' modeled profiles are typically from an external source, e.g. a
@@ -16,15 +16,15 @@
 #' profiles, here typically from (re)SPECIATE, to provide a measure of
 #' source apportionment based on the assumption that the profiles in the
 #' reference set are representative of the mix that make up the modeled
-#' sample. The \code{pls_} functions work with \code{sp_pls_profile}
+#' sample. The \code{pls_} functions work with \code{rsp_pls_profile}
 #' outputs, and are intended to be used when refining and analyzing
 #' these PLS models.
 
-#' @param x A \code{respeciate} object, a \code{data.frame} of
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of
 #' profiles in standard long form, intended for PLS modelling.
 #' @param ref A \code{respeciate} object, a \code{data.frame} of
 #' profiles also in standard long form, used as the set of candidate
-#' source profiles when fitting \code{x}.
+#' source profiles when fitting \code{rsp}.
 #' @param power A numeric, an additional factor to be added to
 #' weightings when fitting the PLS model. This is applied in the form
 #' \code{weight^power}, and increasing this, increases the relative
@@ -74,8 +74,8 @@
 #      The zero handling is a based on offset in plot(..., log="y", off.set)
 #      but automatically estimated...
 
-#' @return \code{sp_pls_profile} returns a list of nls models, one per
-#' profile/measurement set in \code{x}. The \code{pls_} functions work with
+#' @return \code{rsp_pls_profile} returns a list of nls models, one per
+#' profile/measurement set in \code{rsp}. The \code{pls_} functions work with
 #' these outputs. \code{pls_report} generates a \code{data.frame} of
 #' model outputs, and is used of several of the other \code{pls_}
 #' functions. \code{pls_fit_species}, \code{pls_refit_species} and
@@ -86,13 +86,13 @@
 
 #' @note This implementation of PLS applies the following modeling constraints:
 #'
-#' 1. It generates a model of \code{x} that is positively constrained linear
+#' 1. It generates a model of \code{rsp} that is positively constrained linear
 #' product of the profiles in \code{ref}, so outputs can only be
 #' zero or more.  Although the model is generated using \code{\link{nls}},
 #' which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 #' in this case is linear.
 #'
-#' 2. The number of species in \code{x} must be more that the number of
+#' 2. The number of species in \code{rsp} must be more that the number of
 #' profiles in \code{ref} to reduce the likelihood of over-fitting.
 #'
 #'
@@ -109,12 +109,9 @@
 
 ############################
 ############################
-## sp_pls_profile
+## rsp_pls_profile
 ############################
 ############################
-
-#' @rdname sp.pls
-#' @export
 
 ##   now importing locally where possible
 ##   data.table::[function]
@@ -123,17 +120,35 @@
 #This is version 2
 
 #version 1 combined version2 and pls_report
-#now separated because it simplified pls model reworking
+#now separated because it simplified pls_ model reworking
 
 #currently keeping the function args
 #   might not need to do this BUT
-#   model does not seem to be tracking them when ...
+#   model does not seem to be tracking them ...
 
 # check power handling is right
 
-sp_pls_profile <- function(x, ref,
+#########################
+#think about ?
+#########################
+
+# should first arg be rsp.x rather than x or rsp ???
+
+# maybe get formula into docs ???
+
+# maybe split this into rsp.pls and then separate pls. documents ???
+
+#' @rdname rsp.pls
+#' @export
+
+rsp_pls_profile <- function(rsp, ref,
                             power = 1,
                             ...){
+
+  ##################
+  #quick tidy for now
+  ##################
+  x <- rsp
 
   ##################
   #from rough code
@@ -142,7 +157,7 @@ sp_pls_profile <- function(x, ref,
   ########################
   #only allowing profiles < species
   if(length(unique(ref$PROFILE_CODE)) >= length(unique(x$SPECIES_ID))){
-    stop("sp_pls: #.need species > #.profiles, more species or less profiles?",
+    stop("rsp_pls: need n.species > n.profiles, more species or less profiles?",
          call. = FALSE)
   }
 
@@ -156,7 +171,7 @@ sp_pls_profile <- function(x, ref,
   ##  .xx <- respeciate:::rsp_tidy_profile(x)
   .xx <- lapply(.pr.cd, function(y){
     .x <- x[x$PROFILE_CODE==y,]
-    .x <- sp_average_profile(.x, y, .x$PROFILE_NAME[1])
+    .x <- rsp_average_profile(.x, y, .x$PROFILE_NAME[1])
     .x
   })
   .xx <- data.table::rbindlist(.xx)
@@ -204,7 +219,7 @@ sp_pls_profile <- function(x, ref,
     .test <- try({
       #need to try this because it does not always work
       .x <- as.data.frame(.xx[.xx$PROFILE_CODE==y,])
-      .x <- sp_average_profile(.x, "test", "1_test")
+      .x <- rsp_average_profile(.x, "test", "1_test")
 
       #might not need one of this-and-same-above
       #might be better doing it here...
@@ -213,7 +228,7 @@ sp_pls_profile <- function(x, ref,
       #could change this with rbindlist version??
       .ref <- intersect(names(.x), names(.tmp))
       .out <- rbind(.x[.ref], .tmp[.ref])
-      .out <- sp_dcast_profile(.out)
+      .out <- rsp_dcast_profile(.out)
 
       #build formula and model args
       .tmp <- names(.out)
@@ -309,7 +324,7 @@ sp_pls_profile <- function(x, ref,
 #############################
 #############################
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 ##   now imports from xxx.r
@@ -427,7 +442,7 @@ pls_report <- function(pls){
 #############################
 #############################
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 ##   now imports from xxx.r
@@ -480,7 +495,7 @@ pls_test <- function(pls){
 #   pls_rebuild
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 pls_fit_species <- function(pls, species, power=1,
@@ -509,7 +524,7 @@ pls_fit_species <- function(pls, species, power=1,
 
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 pls_refit_species <- function(pls, species, power=1,
@@ -539,7 +554,7 @@ pls_refit_species <- function(pls, species, power=1,
 
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 
@@ -1037,7 +1052,7 @@ pls_rebuild <- function(pls, species, power=1,
 ####################################
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 ##   now imports via data.table::
@@ -1296,7 +1311,7 @@ pls_plot <- function (pls, n, type = 1, ...){
 ####################################
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 ##   now imports from xxx.r
@@ -1517,7 +1532,7 @@ pls_plot_species <- function (pls, n, type = 1, ...)
 ####################################
 
 
-#' @rdname sp.pls
+#' @rdname rsp.pls
 #' @export
 
 ##   now imports from xxx.r
