@@ -117,8 +117,8 @@ multiple options are available.}
 applies 'log' scaling to the primary Y axes of the plot.}
 }
 \value{
-\code{sp_pls_profile} returns a list of nls models, one per
-profile/measurement set in \code{x}. The \code{pls_} functions work with
+\code{rsp_pls_profile} returns a list of nls models, one per
+profile/measurement set in \code{rsp}. The \code{pls_} functions work with
 these outputs. \code{pls_report} generates a \code{data.frame} of
 model outputs, and is used of several of the other \code{pls_}
 functions. \code{pls_fit_species}, \code{pls_refit_species} and
@@ -146,12 +146,12 @@ these PLS models.
 \note{
 This implementation of PLS applies the following modeling constraints:
 
-1. It generates a model of \code{x} that is positively constrained linear
+1. It generates a model of \code{rsp} that is positively constrained linear
 product of the profiles in \code{ref}, so outputs can only be
 zero or more.  Although the model is generated using \code{\link{nls}},
 which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 in this case is linear.
 
-2. The number of species in \code{x} must be more that the number of
+2. The number of species in \code{rsp} must be more that the number of
 profiles in \code{ref} to reduce the likelihood of over-fitting.
 }

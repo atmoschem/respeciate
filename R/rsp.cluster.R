@@ -1,20 +1,20 @@
-#' @name sp.cluster
-#' @title sp_profile clustering
-#' @aliases sp_profile_distance
+#' @name rsp.cluster
+#' @title (re)SPECIATE profile cluster analysis methods
+#' @aliases rsp_distance_profile
 
-#' @description sp_profile functions for studying similarities (or
-#' dissimilarities) within multi-profile (re)SPECIATE data sets
+#' @description (re)SPECIATE functions for studying similarities (or
+#' dissimilarities) within (re)SPECIATE data sets
 
-#' @description \code{\link{sp_profile_distance}} calculates the statistical distance
+#' @description \code{\link{rsp_distance_profile}} calculates the statistical distance
 #' between re(SPECIATE) profiles, and clusters profiles according to nearness.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param output Character vector, required function output: \code{'report'} the
 #' calculated distance matrix; \code{'plot'} a heat map of that distance
 #' matrix.
 #' @note Please note: function in development; structure and arguments may be
 #' subject to change.
-#' @return Depending on the \code{output} option, \code{sp_profile_distance} returns
+#' @return Depending on the \code{output} option, \code{sp_distance_profile} returns
 #' one or more of the following: the correlation matrix, a heat map of the
 #' correlation matrix.
 
@@ -32,9 +32,6 @@
 
 #NOTE
 
-#' @rdname sp.cluster
-#' @export
-
 #  using data.table for dcast
 
 # start build the code for the matching method
@@ -45,33 +42,34 @@
 #    needs thinking through
 #    needs options/formals
 
-#output like in sp_species_cor
+#output like in rsp_cor_species
 
 #also check through and consider other options in sp_profile_cor
 
 #currently tracking
 
 #think about how we handle too-big matrices, e.g.
-#   aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
-#   sp_profile_distance(aa)
-
+#   aa <- rsp_profile(rsp_find_profile("ae6", by="profile_type"))
+#   rsp_distance_profile(aa)
 
 
 #test
 ######################
 
-#aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
-#sp_profile_distance(aa)
+#aa <- rsp_profile(rsp_find_profile("ae8", by="profile_type"))
+#rsp_distance_profile(aa)
 
+#' @rdname rsp.cluster
+#' @export
 
-sp_profile_distance <- function(x, output = c("plot", "report")){
+rsp_distance_profile <- function(rsp, output = c("plot", "report")){
 
   #add .value if missing
-  x <- rsp_tidy_profile(x)
+  x <- .rsp_tidy_profile(rsp)
 
   # make by profile (rows) by species (columns) data.frame
   # move profile_code to row.names for heatmap
-  .x <- sp_dcast(x, widen = "species")
+  .x <- rsp_dcast(x, widen = "species")
   .tmp <- .x[-1:-2]
   row.names(.tmp) <- .x[,1]
 

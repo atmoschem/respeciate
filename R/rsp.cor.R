@@ -1,13 +1,13 @@
-#' @name sp.cor
+#' @name rsp.cor
 #' @title (re)SPECIATE Species Correlations
-#' @aliases sp_species_cor
+#' @aliases rsp_cor_species
 
-#' @description sp_species functions for studying relationships between
-#' species in multi-profile (re)SPECIATE data sets.
+#' @description (re)SPECIATE functions for studying relationships between
+#' species in (re)SPECIATE data sets.
 
-#' @description \code{\link{sp_species_cor}} generates a by-species correlation
+#' @description \code{\link{rsp_species_cor}} generates a by-species correlation
 #' matrix of the supplied (re)SPECIATE data sets.
-#' @param x \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param min.n \code{numeric} (default 3), the minimum number of species measurements
 #' needed in a profile for the function to use it in correlation calculations.
@@ -36,7 +36,7 @@
 #' output. Options include: \code{'silent'} (default), to return the
 #' correlation matrix invisibly; \code{TRUE} to return the matrix
 #' (visibly); and, \code{FALSE} to not return it.
-#' @return By default \code{sp_species_cor} invisibly returns the calculated
+#' @return By default \code{rsp_cor_species} invisibly returns the calculated
 #' correlation matrix a plots it as a heat map, but arguments including
 #' \code{heatmap} and \code{report} can be used to modify function outputs.
 
@@ -48,7 +48,7 @@
 #      PLUS when done maybe for make local function so same
 #          can be used in other similar functions
 
-#' @rdname sp.cor
+#' @rdname rsp.cor
 #' @export
 
 #  using data.table for dcast
@@ -64,6 +64,10 @@
 
 #to think about
 #########################
+
+#changed name from rsp_species_cor to rsp_cor_species
+#  rsp_species_cor
+#     then you could also have rsp_cor_profile
 
 #speed up the correlation calculation
 #   currently painful using for loop
@@ -108,15 +112,20 @@
 #    The list options are not yet done...
 
 
-#aa <- sp_profile(sp_find_profile("ae8", by="profile_type"))
-#sp_species_cor(aa)
+#aa <- rsp_profile(rsp_find_profile("ae8", by="profile_type"))
+#rsp_cor_species(aa)
 
-sp_species_cor <- function(x, min.n = 3,
+#rsp_cor_species(rsp_q_pm.ae8())
+
+rsp_cor_species <- function(rsp, min.n = 3,
                            cols = c("#80FFFF", "#FFFFFF", "#FF80FF"),
                            na.col = "#CFCFCF", heatmap.args = TRUE,
                            key.args = TRUE, report = "silent"){
+
+  x <- rsp #quick fix for now
+
   #if ref missing
-  .x <- sp_dcast(x, widen="species")
+  .x <- rsp_dcast(x, widen="species")
 
   #no point doing any have less than min.n values?
   .test <- apply(.x, 2, function(x) length(.x[!is.na(x)]))
@@ -210,7 +219,7 @@ sp_species_cor <- function(x, min.n = 3,
       if(is.list(key.args)){
         .k[names(key.args)] <- key.args
       }
-      do.call(rsp_col_key, .k)
+      do.call(.rsp_col_key, .k)
     }
   }
 

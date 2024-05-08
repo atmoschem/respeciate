@@ -480,7 +480,10 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #   or passing to another package/better home
 #       (not sure how that fits with package remit)
 
-
+##################################
+#used by:
+##################################
+#    rsp_cor_species
 
 .rsp_col_key <- function(key, cols, x, y = NULL,
                         ticks, nticks,
