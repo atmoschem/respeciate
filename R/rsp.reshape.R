@@ -68,8 +68,7 @@
 
 
 
-#' @rdname rsp.reshape
-#' @export
+
 
 ##   now imports from xxx.r
 ##   #' @import data.table
@@ -85,6 +84,9 @@
 #dcast
 #long_to_wide reshape
 ######################
+
+#' @rdname rsp.reshape
+#' @export
 
 rsp_dcast <- function(rsp, widen = "species"){
 
@@ -154,13 +156,16 @@ rsp_dcast <- function(rsp, widen = "species"){
   out
 }
 
+######################################
+# rsp_dcast(..., widen) shortcuts
+######################################
+
 #' @rdname rsp.reshape
 #' @export
 
 rsp_dcast_profile <- function(rsp, widen = "profile"){
   rsp_dcast(rsp=rsp, widen=widen)
 }
-
 
 
 #' @rdname rsp.reshape
@@ -173,8 +178,6 @@ rsp_dcast_species <- function(rsp=rsp, widen = "species"){
 
 
 
-#' @rdname rsp.reshape
-#' @export
 
 ##   now imports from xxx.r
 ##   #' @import data.table
@@ -194,6 +197,9 @@ rsp_dcast_species <- function(rsp=rsp, widen = "species"){
 #melt
 #wide_to_long reshape
 ######################
+
+#' @rdname rsp.reshape
+#' @export
 
 rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
 
@@ -301,8 +307,6 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
         #if so, in else here??
     }
   }
-
-
 
   #output
   #need to rationalise outputs!!!
