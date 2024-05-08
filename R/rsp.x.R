@@ -1,39 +1,40 @@
-#' @name spx
-#' @title spx_ functions for grouping and subsetting
-#' @aliases spx_ spx_copy spx_n_alkane spx_btex
+#' @name rsp.x
+#' @title rsp_x_ functions for grouping and subsetting re(SPECIATE) profiles
+#' @aliases rsp_x rsp_x_copy rsp_x_nalkane rsp_x_btex
 
+# still wondering if these should be rsp_cut_...
 
-#' @description \code{spx_} functions generate a vector of assignment
+#' @description \code{rsp_x_} functions generate a vector of assignment
 #' terms and can be used to subset or condition a supplied re(SPECIATE)
 #' \code{data.frame}.
 #'
-#' Most commonly, the \code{spx_} functions accept a single input, a
+#' Most commonly, the \code{rsp_x_} functions accept a single input, a
 #' re(SPECIATE) \code{data.frame} and return a logical vector of
 #' length \code{nrow(x)}, identifying species of interest as
 #' \code{TRUE}. So, for example, they can be used when
 #' \code{\link{subset}}ting in the form:
 #'
-#' \code{subset(x, spx_n_alkane(x))}
+#' \code{subset(rsp, rsp_x_nalkane(rsp))}
 #'
-#' ... to extract just n-alkane records from a \code{respeciate} object
-#' \code{x}.
+#' ... to extract just n-alkane records from a supplied \code{respeciate}
+#' object \code{rsp}.
 #'
-#' However, some accept additional arguments. For example, \code{spx_copy}
+#' However, some accept additional arguments. For example, \code{rsp_x_copy}
 #' also accepts a reference data set, \code{ref}, and a column identifier,
-#' \code{by}, and tests \code{x$by \%in\% unique(ref$by)}.
+#' \code{by}, and tests \code{rsp$by \%in\% unique(ref$by)}.
 #'
-#' @param x a \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp a \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
-#' @param ref (\code{spx_copy} only) a second \code{respeciate} object, to
-#' be used as reference when testing \code{x}.
-#' @param by (\code{spx_copy} only) character, the name of the column
-#' in \code{ref} to copy when testing \code{x}.
-#' @return \code{spx_copy} outputs can be modified but, by default, it
+#' @param ref (\code{rsp_x_copy} only) a second \code{respeciate} object, to
+#' be used as reference when subsetting (or conditioning) \code{rsp}.
+#' @param by (\code{rsp_x_copy} only) character, the name of the column
+#' in \code{ref} to copy when subsetting (or conditioning) \code{rsp}.
+#' @return \code{rsp_x_copy} outputs can be modified but, by default, it
 #' identifies all species in the supplied reference data set.
 #'
-#' \code{spx_n_alkane} identifies C1 to C40 n-alkanes.
+#' \code{rsp_x_nalkane} identifies (straight chain) C1 to C40 n-alkanes.
 #'
-#' \code{spx_btex} identifies the BTEX group of aromatic hydrocarbons
+#' \code{rsp_x_btex} identifies the BTEX group of aromatic hydrocarbons
 #' (benzene, toluene, ethyl benzene, and M-, O- and P-xylene).
 
 #############################
@@ -44,10 +45,9 @@
 #   but it did not seem to be slowing things down
 #   and other approaches seems likely to get messy
 #   really quick...
+#       tidyverse folks would argue against it...
 
 # others to do????
-
-# the BTEXs  - doing/testing
 
 # others to consider???
 
@@ -56,55 +56,70 @@
 #     elementals???
 #     monitoring network relevant subsets of species
 
+#do we need a strategy to rationalize multiple species names
+#     see rsp_x_nalkane where some species have two names in SPECIATE.
+
+#################################
+# rsp_x_copy
+#################################
+
+# identify species in rsp that are in ref(erence)
+
 # special cases???
-
-#     spx_ref(x, ref, by="")
-#           where x is respeciate object, ref is a reference
+#     rsp_x_ref(rsp, ref, by="")
+#           where rsp is respeciate object, ref is a reference
 #           by is column in ref; case is x$by %in% unique(ref$by)
+#              could ref also be a vector of terms???
 
-#           could ref also be a vector of terms???
-
-
-#' @rdname spx
+#' @rdname rsp.x
 #' @export
 
-spx_copy <- function(x, ref = NULL, by="species_id"){
+rsp_x_copy <- function(rsp, ref = NULL, by="species_id"){
 
   #maybe warn???
   if(is.null(ref)){
-    ref <- x
+    ref <- rsp
   }
-  names(x) <- tolower(names(x))
+
+  names(rsp) <- tolower(names(rsp))
   names(ref) <- tolower(names(ref))
   .tmp <- unique(ref[, by])
-  x[, by] %in% .tmp
 
+  rsp[, by] %in% .tmp
 }
 
+
 #####################
-#spx_n_alkanes
+#rsp_x_nalkanes
 #######################
 
+# identify only the n-alkanes in rsp...
 
 #source names
 # from https://en.wikipedia.org/wiki/List_of_straight-chain_alkanes
 # (might be duplicates)
-# (some not using standard names)
+
+# some in SPECIATE may not standard names...
+#     need to check because I am not sure if standard names are international..
+
+# some are just [alkane] rather than n-[alkane]
+#     but not sure if any are in as both [alkane] and n-[alkane]
 
 # could try smiles, molecular formula, cas numbers???
 # should be one entry/species if they are unique???
 
 #test
 ## a <- sysdata$SPECIES_PROPERTIES
-## b <- subset(a, spx_n_alkane(a))
+## b <- subset(a, rsp_x_nalkane(a))
 ## b[order(b$SPEC_MW),]
 
-#' @rdname spx
+#' @rdname rsp.x
 #' @export
 
-spx_n_alkane <- function(x){
+rsp_x_nalkane <- function(rsp){
+
   #group x by is/isn't n-alkane
-  tolower(x$SPECIES_NAME) %in% c("methane",            #C1
+  tolower(rsp$SPECIES_NAME) %in% c("methane",            #C1
                                  "ethane",
                                  "propane",
                                  "n-butane",
@@ -152,7 +167,7 @@ spx_n_alkane <- function(x){
 
 
 #####################
-#spx_n_btex
+#rsp_x_btex
 #######################
 
 #  Benzene, toluene, ethylbenzene, 3 xylenes isomers
@@ -180,22 +195,23 @@ spx_n_alkane <- function(x){
 #    if several names for btex, might need to think about how to
 #    sample (CAS? etc), merge and compare???
 
-
-
 #tests
 #########################
 ## a <- sysdata$SPECIES_PROPERTIES
-## b <- subset(a, spx_btex(a))
+## b <- subset(a, rsp_x_btex(a))
 ## b[order(b$SPEC_MW),]
 
 ## to do
 
-#' @rdname spx
+#' @rdname rsp.x
 #' @export
 
-spx_btex <- function(x){
-  #group x by is/isn't btex
-  tolower(x$SPECIES_NAME) %in% c(
+rsp_x_btex <- function(rsp){
+
+  #identify species that is a btex
+  #might need to think about mixtures...
+  #    for example all xylenes or all c2 benzenes, etc...
+  tolower(rsp$SPECIES_NAME) %in% c(
     #to test/check...
     "benzene",
     "toluene",

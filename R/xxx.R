@@ -1,11 +1,3 @@
-##############################
-#setup code, misc code,
-#testing code, etc
-##############################
-
-#currently no hooks, etc...
-
-
 #####################
 # to think about
 #####################
@@ -13,8 +5,7 @@
 # standardise error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
 
 # make respeciate object argument rsp rather than x
-#     that helps sp_plot..() but maybe not plot()
-
+#     that helps sp_plot..() but not plot.respeciate()
 
 
 #####################
@@ -25,26 +16,30 @@
 #     xxx_test and its depends...
 #        (not keeping unless we can get it to work better)
 
+##############################
+#setup code, misc code,
+#testing code, etc
+##############################
 
+#currently no hooks, etc...
+
+#globals
 utils::globalVariables(c("sysdata", ".SD", "ans", "control",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
 
-########################
 #to think about...
-#######################
 
 # all @import here
-#    in case we have to move to data.table::as.data.table, etc...
-#    moving to data.table::as.data.table...
+#    moved to data.table::as.data.table in code...
 # #' @import data.table
 
 #   data.table used by:
 #         rsp_test_profile,
-#         sp_dcast_profile, and those that use dcast?
-#               sp_species_cor
-#               sp_profile_distance
+#         rsp_dcast_profile, and those that use dcast?
+#         sp_species_cor
+#         sp_profile_distance
 #         and others???
 #               need to identify them
 
@@ -61,6 +56,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
 #' dev.flush dev.hold heat.colors rainbow
 
+# notes
 
 #might be able to drop legend?
 #   check plot.respeciate
@@ -70,26 +66,26 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #common unexported
 ##############################
 
+# suggesting standardizing naming .rsp_[function_description]
 
-#rsp_plot_fix
+#.rsp_plot_fix
 #########################
 # general tidy function for data before plotting
 #    merges duplicate species in profiles
 #    makes profile names unique if duplicated
 #    tidies species names for use in labelling
+#         warns about changes
 
 #used by
 ###################
 #plot.respeciate
 #sp_plot_profile
 
-#uses
+#used by
 ####################
-#rsp_tidy_profile
-#rsp_test_respeciate
-#rsp_test_profile
-
-
+#.rsp_tidy_profile
+#.rsp_test_respeciate
+#.rsp_test_profile
 
 .rsp_plot_fix <- function(x, silent = FALSE, ...){
 

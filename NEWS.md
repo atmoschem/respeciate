@@ -7,7 +7,8 @@
     * sp_profile, sp_build_rsp_x updates; both now use as.respeciate 
     * sp_profile to rsp_profile; sp_dcast/melt to rsp_dcast/melt; both as 
     part of object class rebuild 
-    * sp_pad to rsp_pad; sp_match_profile to rsp_match_profile;  
+    * sp_pad to rsp_pad; sp_rescale to rsp_rescale; class rebuild 
+    * sp_match_profile to rsp_match_profile; class rebuild   
 
 # Release Notes Version 0.2
 
