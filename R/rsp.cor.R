@@ -5,7 +5,7 @@
 #' @description (re)SPECIATE functions for studying relationships between
 #' species in (re)SPECIATE data sets.
 
-#' @description \code{\link{rsp_species_cor}} generates a by-species correlation
+#' @description \code{\link{rsp_cor_species}} generates a by-species correlation
 #' matrix of the supplied (re)SPECIATE data sets.
 #' @param rsp \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.

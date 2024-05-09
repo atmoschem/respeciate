@@ -181,68 +181,68 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
 #holding until testing on new code finished
 
-sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
-
-  #tidy x
-  x <- rsp_tidy_profile(x)
-  #save class
-  .cls <- class(x)
-  out <- data.table::as.data.table(x)
-
-  #set up padding for melts...
-  .long <- "nothing"
-  if(pad=="species"){
-    .long <- "SPECIES_NAME"
-  }
-  if(pad=="profile"){
-    .long <- "PROFILE_CODE"
-  }
-
-  PROFILES <- data.table::as.data.table(sysdata$PROFILES)
-  SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
-  if(.long=="PROFILE_CODE"){
-    #add in profile then species info
-    out <- merge(out, PROFILES, by = .long, all.y=FALSE,
-                 all.x=TRUE, allow.cartesian=TRUE)
-    .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
-    out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
-                all.x=TRUE, allow.cartesian=TRUE)
-  }
-  if(.long=="SPECIES_NAME"){
-    #add in species then profiles info
-    out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
-                 all.x=TRUE, allow.cartesian=TRUE)
-    .tmp <- intersect(names(out), names(PROFILES))
-    out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
-                 all.x=TRUE, allow.cartesian=TRUE)
-  }
-  #to get weight_percentage etc
-  if(pad %in% c("species", "profile", "weight")){
-    SPECIES <- data.table::as.data.table(sysdata$SPECIES)
-    .tmp <- intersect(names(out), names(SPECIES))
-    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
-                 all.x=TRUE, allow.cartesian=TRUE)
-    } else {
-    #not great but...
-    #if not padding WEIGHT_PERCENT has to be .value
-    out$WEIGHT_PERCENT <- out$.value
-  }
-  #drop.nas.
-  if(drop.nas){
-    out <- out[!is.na(out$WEIGHT_PERCENT),]
-  }
-  #############################
-  ##thinking about
-  ##  removing all columns of just NAs...
-  #   out[,which(unlist(lapply(out, function(x)!all(is.na(x))))), with=FALSE]
-  ##  works if data.table object...
-  ############################
-
-  #not sure how to handle output...
-  #see notes
-  out <- as.data.frame(out)
-  rsp_build_respeciate(out)
-}
+#sp_pad.old <- function(x, pad = "species", drop.nas = TRUE){
+#
+#  #tidy x
+#  x <- rsp_tidy_profile(x)
+#  #save class
+#  .cls <- class(x)
+#  out <- data.table::as.data.table(x)
+#
+#  #set up padding for melts...
+#  .long <- "nothing"
+#  if(pad=="species"){
+#    .long <- "SPECIES_NAME"
+#  }
+#  if(pad=="profile"){
+#    .long <- "PROFILE_CODE"
+#  }
+#
+#  PROFILES <- data.table::as.data.table(sysdata$PROFILES)
+#  SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
+#  if(.long=="PROFILE_CODE"){
+#    #add in profile then species info
+#    out <- merge(out, PROFILES, by = .long, all.y=FALSE,
+#                 all.x=TRUE, allow.cartesian=TRUE)
+#    .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
+#    out <- merge(out, SPECIES_PROPERTIES, by = .tmp, all.y=FALSE,
+#                all.x=TRUE, allow.cartesian=TRUE)
+#  }
+#  if(.long=="SPECIES_NAME"){
+#    #add in species then profiles info
+#    out <- merge(out, SPECIES_PROPERTIES, by = .long, all.y=FALSE,
+#                 all.x=TRUE, allow.cartesian=TRUE)
+#    .tmp <- intersect(names(out), names(PROFILES))
+#    out <- merge(out, PROFILES, by = .tmp, all.y=FALSE,
+#                 all.x=TRUE, allow.cartesian=TRUE)
+#  }
+#  #to get weight_percentage etc
+#  if(pad %in% c("species", "profile", "weight")){
+#    SPECIES <- data.table::as.data.table(sysdata$SPECIES)
+#    .tmp <- intersect(names(out), names(SPECIES))
+#    out <- merge(out, SPECIES, by = .tmp, all.y=FALSE,
+#                 all.x=TRUE, allow.cartesian=TRUE)
+#    } else {
+#    #not great but...
+#    #if not padding WEIGHT_PERCENT has to be .value
+#    out$WEIGHT_PERCENT <- out$.value
+#  }
+#  #drop.nas.
+#  if(drop.nas){
+#    out <- out[!is.na(out$WEIGHT_PERCENT),]
+#  }
+#  #############################
+#  ##thinking about
+#  ##  removing all columns of just NAs...
+#  #   out[,which(unlist(lapply(out, function(x)!all(is.na(x))))), with=FALSE]
+#  ##  works if data.table object...
+#  ############################
+#
+#  #not sure how to handle output...
+#  #see notes
+#  out <- as.data.frame(out)
+#  rsp_build_respeciate(out)
+#}
 
 
 

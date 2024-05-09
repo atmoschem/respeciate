@@ -34,7 +34,7 @@ comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
 
 \item{min.n}{\code{numeric} (default 8), the minimum number of paired
 species measurements in two profiles required for a match to be assessed.
-See also \code{\link{rsp_species_cor}}.}
+See also \code{\link{rsp_cor_species}}.}
 
 \item{method}{Character (default 'pd'), the similarity measure to use, current
 options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),

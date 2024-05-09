@@ -17,6 +17,9 @@ rsp_rescale_profile(rsp, method = 1, by = "profile")
 rsp_rescale_species(rsp, method = 2, by = "species")
 }
 \arguments{
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+profiles.}
+
 \item{method}{numeric, the rescaling method to apply:
   1 \code{x/total(x)};
   2 \code{x/mean(x)};
@@ -29,9 +32,6 @@ values.}
 \item{by}{character, when rescaling \code{x} with
 \code{\link{sp_rescale}}, the data type to group and rescale,
 currently \code{'species'} (default) or \code{'profile'}.}
-
-\item{x}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
-profiles.}
 }
 \value{
 \code{sp_rescale} and \code{sp_rescale} return the

@@ -88,18 +88,16 @@
 #    that is do-able but may need an object class
 #         (maybe like the openair code...)
 
-#thinking about an sp_plot_compare(x, y)
+#thinking about an rsp_plot_compare(x, y)
 #  to compare profile x and profile(s) y
 #  started project (in own-notes)
 
 
 ###################################
-#sp_plot_profile
+#rsp_plot_profile
 ###################################
 
-#' @rdname rsp.plot
-#' @export
-#   now done in xxx.r
+#   now any unexported code (.rsp...) should be in xxx.r
 
 ##########################
 #notes
@@ -126,6 +124,9 @@
 #               what is x, how is it formatted, etc
 #               then same for y, groups and cond...
 
+#' @rdname rsp.plot
+#' @export
+
 rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
                               order=TRUE, log=FALSE, ...,
                               silent=FALSE){
@@ -140,7 +141,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
       ######################
       #to do
       #document issues
-      stop("RSP> Sorry, currently not stacking logs.",
+      stop("RSP> Sorry, currently not stacking log plots.",
            call. = FALSE)
     }
   }

@@ -4,9 +4,9 @@
 
 # standardise error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
 
-# make respeciate object argument rsp rather than x
-#     that helps sp_plot..() but not plot.respeciate()
-
+# made main respeciate object argument name rsp rather than x
+#     that helps rsp_plot..() if it passed args to lattice
+#          but not sure it really help with plot() if respeciate not loaded...
 
 #####################
 #to check
@@ -37,9 +37,9 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 #   data.table used by:
 #         rsp_test_profile,
-#         rsp_dcast_profile, and those that use dcast?
-#         sp_species_cor
-#         sp_profile_distance
+#         rsp_dcast..., rsp_melt...
+#         rsp_cor_species
+#         rsp_distance_profile
 #         and others???
 #               need to identify them
 
@@ -61,12 +61,98 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #might be able to drop legend?
 #   check plot.respeciate
 
-
+################################
 ##############################
-#common unexported
+## common unexported
 ##############################
+################################
 
 # suggesting standardizing naming .rsp_[function_description]
+
+
+#.rsp_
+#################################
+#    tidy for rsp_x data setup
+
+#basic build needs
+#   profile_name and profile_code
+#   species_name and species_id
+#   weight_percent (and possibly .value)
+
+#notes
+#   think this can go because we now have rsp_build_x???
+#       plus I don't think anyone but me (kr) has used it...
+
+.rsp_ <- function(x){
+  .o <- rsp_profile(x)
+  .o$PROFILE_NAME <- paste("test", .o$PROFILE_NAME, sep=">")
+  .o$PROFILE_CODE <- "test"
+  .o
+}
+
+
+
+
+#.rsp_split_profile
+#######################################
+#split respeciate by profile
+
+#currently not exported
+#quick code assumed CODE is unique to profile
+
+#need to test this
+
+#not sure we are using this any more ???
+#    i think rsp_test, then rsp_test.2 replaced
+#    and code in plot.respeciate.old ???
+
+.rsp_split_profile <- function(x){
+  ref <- unique(x$PROFILE_CODE)
+  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
+}
+
+
+
+
+
+
+#.rsp_build_respeciate....
+#################################
+#   class builds
+
+# dropped
+#     rsp_build_respeciate.spcs
+#     rsp_build_respeciate.ref
+
+# hoping to drop last one...
+#     as.respeciate to supersede
+
+#rsp_build_respeciate.spcs <-
+#  function(x, ...){
+#build
+#add .value
+#    x <- rsp_tidy_profile(x)
+#    class(x) <- c("respeciate.spcs", "data.frame")
+#    x
+#  }
+
+#rsp_build_respeciate.ref <-
+#  function(x, ...){
+#build
+#    class(x) <- c("respeciate.ref", "data.frame")
+#    x
+#  }
+
+.rsp_build_respeciate <-
+  function(x, ...){
+    x <- as.data.frame(x)
+    if("WEIGHT_PERCENT" %in% names(x)) {
+      x$.value <- x$WEIGHT_PERCENT
+    }
+    class(x) <- c("respeciate", class(x))
+    x
+  }
+
 
 #.rsp_plot_fix
 #########################
@@ -79,9 +165,9 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #used by
 ###################
 #plot.respeciate
-#sp_plot_profile
+#rsp_plot_profile
 
-#used by
+#uses by
 ####################
 #.rsp_tidy_profile
 #.rsp_test_respeciate
@@ -163,6 +249,11 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 ## could also test for .value
 
+#used by
+###############################
+#.rsp_plot_fix
+
+
 .rsp_test_respeciate <- function(x, level = 1,
                                 silent = FALSE){
   test <- class(x)
@@ -205,6 +296,10 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 ##     enabled in plot.respeciate, sp_profile_rescale, sp_profile_dcast
 ##                rsp_test_profile
 
+#used by
+###############################
+#.rsp_plot_fix
+
 .rsp_tidy_profile <- function(x){
   #.value is local version of weight
   if(!".value" %in% names(x)){
@@ -224,7 +319,6 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #currently not exported
 #quick code to tidy species names
 
-#currently used in plot.respeciate
 
 #note: not fully tested
 
@@ -232,6 +326,10 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 #    option foreshorten any names longer than [n] characters???
 #    similar function to tidy profile names
+
+#used by
+###############################
+#plot.respeciate
 
 .rsp_tidy_species_name <- function(x){
 
@@ -262,6 +360,10 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 #file:///C:/Users/trakradmin/Downloads/datatable.pdf
 ##rsp_test_profile(aa)
+
+#used by
+###############################
+#.rsp_plot_fix
 
 .rsp_test_profile <- function(x){
 
@@ -368,41 +470,15 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #  as.data.frame(out)
 #}
 
+####################################
+#.rsp_col_key
+####################################
 
+#color key for correlation matrices
 
-
-
-
-
-
-
-#####################
-#testing
-#####################
-
-#playing
-
-#function(x, subset,...){
-#  ans <- match.call()
-#  ans <- as.character(ans)
-#  return(ans)
-#}
-
-#ggplot example
-#require(ggplot2)
-#ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
-
-
-############################
-#color key
-############################
-
-########################
-#using this in:
-########################
-
-#sp_species_cor
-
+#used by:
+##################################
+#    rsp_cor_species
 
 #started with:
 #https://stackoverflow.com/questions/9314658/colorbar-from-custom-colorramppalette
@@ -480,184 +556,209 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #   or passing to another package/better home
 #       (not sure how that fits with package remit)
 
-##################################
-#used by:
-##################################
-#    rsp_cor_species
 
 .rsp_col_key <- function(key, cols, x, y = NULL,
-                        ticks, nticks,
-                        na.col = "grey", na.cex = 0.25,
-                        title = "", axes, bg, border,
-                        type = 2,
-                        ...){
+                         ticks, nticks,
+                         na.col = "grey", na.cex = 0.25,
+                         title = "", axes, bg, border,
+                         type = 2,
+                         ...){
 
-    #setup
-    op <- par(no.readonly = TRUE)
+  #setup
+  op <- par(no.readonly = TRUE)
 
-    if(missing(x)){
-      #currently just doing this option
-      #like key.pos "top-left", key.style = 1 (horizontal, annotation below)
-      x <- 0.1
-    }
-    if(is.null(y)){
-      y <- 0.9
-    }
-    .min <- min(key, na.rm=TRUE)
-    .max <- max(key, na.rm=TRUE)
-    if(missing(ticks)){
-      ticks <- pretty(c(.min, .max), 3)
-    }
-    if(missing(nticks)){
-      nticks <- length(ticks)
-    }
-    .na.width <- na.cex * (.max-.min)
-    if(missing(bg)){
-      bg <- "white"
-    }
-    if(missing(border)){
-      border <- "black"
-    }
-    scale <- (length(cols)-1)/(.max-.min)
+  if(missing(x)){
+    #currently just doing this option
+    #like key.pos "top-left", key.style = 1 (horizontal, annotation below)
+    x <- 0.1
+  }
+  if(is.null(y)){
+    y <- 0.9
+  }
+  .min <- min(key, na.rm=TRUE)
+  .max <- max(key, na.rm=TRUE)
+  if(missing(ticks)){
+    ticks <- pretty(c(.min, .max), 3)
+  }
+  if(missing(nticks)){
+    nticks <- length(ticks)
+  }
+  .na.width <- na.cex * (.max-.min)
+  if(missing(bg)){
+    bg <- "white"
+  }
+  if(missing(border)){
+    border <- "black"
+  }
+  scale <- (length(cols)-1)/(.max-.min)
 
-#print(.max-.min)
-#print(.na.width)
-    #print(.min)
-    #print(.max)
+  #print(.max-.min)
+  #print(.na.width)
+  #print(.min)
+  #print(.max)
 
-    #key.style 1
-    if(type==1){
-      #horizontal, header before, annotation after
-      #margins
-      .mai <- c(0.1,0.1,0.1,0.1)
-      if(title ==""){
-        #no title
-        .fig <- c(x-0.1, x+0.1, y-0.04, y+0.1)
-        .wdt <- 12
-      } else {
-        #title
-        .fig <- c(x-0.1, x+0.1, y-0.12, y+0.1)
-        .wdt <- 15
-      }
-
-      if(is.na(na.col)){
-        .brd <- c(.na.width, .na.width)
-      } else {
-        .brd <- c(.na.width, .na.width*2)
-      }
-
-      #position col key
-      par(fig = .fig, mai = .mai, new=TRUE)
-
-      #plot col key
-
-      #region
-      plot(c(.min -.brd[2], .max+(.brd[1]*0.5)), c(-1, .wdt),
-           type='n', bty='n', xaxt='n', xlab='',
-           yaxt='n', ylab='', main="", font.main = 1)
-      #bg + border
-      rect(.min -.brd[2], -1, .max+(.brd[1]*0.5),  .wdt,
-           col=bg, border=border)
+  #key.style 1
+  if(type==1){
+    #horizontal, header before, annotation after
+    #margins
+    .mai <- c(0.1,0.1,0.1,0.1)
+    if(title ==""){
+      #no title
+      .fig <- c(x-0.1, x+0.1, y-0.04, y+0.1)
+      .wdt <- 12
+    } else {
       #title
-      if(title !=""){
-        text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title, col="black", cex=0.75)
-      }
-      #col scale
-      for (i in 1:(length(cols)-0)) {
-        x <- (i-1)/scale + .min
-        rect(x,5,x+1/scale,10,col=cols[i], border=NA)
-      }
-      #axes
-      lines(c(.min, .max), c(5,5), col="black")
-      for (i in ticks) {
-        lines(c(i,i), c(5,4),col="black")
-      }
-      #axes annotation
-      text(ticks, rep(2, length(ticks)), labels=ticks,
-           cex=0.75, adj=0.5)
-      #na block
-      if(!is.na(na.col)){
-        rect(.min-(.na.width*0.5), 5,.min-(.na.width*1.5), 10,  col=na.col, border="black")
-        text(.min-.na.width, 2, labels="NA", col="black", cex=0.75)
-      }
-
+      .fig <- c(x-0.1, x+0.1, y-0.12, y+0.1)
+      .wdt <- 15
     }
 
-    if(type==2){
-      #horizontal, header before, annotation after
-      #margins
-      .mai <- c(0.1,0.1,0.1,0.1)
-      if(title ==""){
-        #no title
-        .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
-        .wdt <- 12
-      } else {
-        #title
-        .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
-        .wdt <- 15
-      }
+    if(is.na(na.col)){
+      .brd <- c(.na.width, .na.width)
+    } else {
+      .brd <- c(.na.width, .na.width*2)
+    }
 
-      if(is.na(na.col)){
-        .brd <- c(.na.width, .na.width)
-      } else {
-        .brd <- c(.na.width, .na.width*2)
-      }
+    #position col key
+    par(fig = .fig, mai = .mai, new=TRUE)
 
-      #position col key
-      par(fig = .fig, mai = .mai, new=TRUE)
+    #plot col key
 
-      #plot col key
+    #region
+    plot(c(.min -.brd[2], .max+(.brd[1]*0.5)), c(-1, .wdt),
+         type='n', bty='n', xaxt='n', xlab='',
+         yaxt='n', ylab='', main="", font.main = 1)
+    #bg + border
+    rect(.min -.brd[2], -1, .max+(.brd[1]*0.5),  .wdt,
+         col=bg, border=border)
+    #title
+    if(title !=""){
+      text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title, col="black", cex=0.75)
+    }
+    #col scale
+    for (i in 1:(length(cols)-0)) {
+      x <- (i-1)/scale + .min
+      rect(x,5,x+1/scale,10,col=cols[i], border=NA)
+    }
+    #axes
+    lines(c(.min, .max), c(5,5), col="black")
+    for (i in ticks) {
+      lines(c(i,i), c(5,4),col="black")
+    }
+    #axes annotation
+    text(ticks, rep(2, length(ticks)), labels=ticks,
+         cex=0.75, adj=0.5)
+    #na block
+    if(!is.na(na.col)){
+      rect(.min-(.na.width*0.5), 5,.min-(.na.width*1.5), 10,  col=na.col, border="black")
+      text(.min-.na.width, 2, labels="NA", col="black", cex=0.75)
+    }
 
-      #region
-      plot(c(-1, .wdt), c(.min-.brd[2], .max+(.brd[1]*0.5)),
-           type='n', bty='n', xaxt='n', xlab='',
-           yaxt='n', ylab='', main="", font.main = 1)
-      #bg + border
-      rect(-1, .min-.brd[2], .wdt, .max+(.brd[1]*0.5),
-           col=bg, border=border)
+  }
+
+  if(type==2){
+    #horizontal, header before, annotation after
+    #margins
+    .mai <- c(0.1,0.1,0.1,0.1)
+    if(title ==""){
+      #no title
+      .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
+      .wdt <- 12
+    } else {
       #title
-      if(title !=""){
-        text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title,
-             col="black", cex=0.75)
-      }
-
-      #for (i in 1:(length(lut)-1)) {
-      #  y = (i-1)/scale + min
-      #  rect(0,y,10,y+1/scale, col=lut[i], border=NA)
-      #}
-
-      #col scale
-      ####################
-      #note
-      ####################
-      #this needs work because rect needs colored border
-      #which kills transparent ranges...
-      #does that matter
-      for (i in 1:(length(cols))) {
-        y <- (i-1)/scale + .min
-        rect(5,y-(1/scale),10,y,col=cols[i], border=cols[i])
-      }
-      #axes
-      lines(c(5,5), c(.min, .max), col="black")
-      for (i in ticks) {
-        lines(c(5,4), c(i,i), col="black")
-      }
-      #axes annotation
-      text(rep(2, length(ticks)), ticks, labels=ticks,
-           cex=0.75, adj=0.5)
-      #na block
-      if(!is.na(na.col)){
-        rect(5, .min-(.na.width*0.5), 10, .min-(.na.width*1.5), col=na.col, border="black")
-        text(2, .min-.na.width, labels="NA", col="black", cex=0.75)
-      }
-
+      .fig <- c(x-0.05, x+0.05, y-0.2, y+0.1)
+      .wdt <- 15
     }
+
+    if(is.na(na.col)){
+      .brd <- c(.na.width, .na.width)
+    } else {
+      .brd <- c(.na.width, .na.width*2)
+    }
+
+    #position col key
+    par(fig = .fig, mai = .mai, new=TRUE)
+
+    #plot col key
+
+    #region
+    plot(c(-1, .wdt), c(.min-.brd[2], .max+(.brd[1]*0.5)),
+         type='n', bty='n', xaxt='n', xlab='',
+         yaxt='n', ylab='', main="", font.main = 1)
+    #bg + border
+    rect(-1, .min-.brd[2], .wdt, .max+(.brd[1]*0.5),
+         col=bg, border=border)
+    #title
+    if(title !=""){
+      text(.min+((.max-.min)/2)+(.na.width*0.75), 13, labels=title,
+           col="black", cex=0.75)
+    }
+
+    #for (i in 1:(length(lut)-1)) {
+    #  y = (i-1)/scale + min
+    #  rect(0,y,10,y+1/scale, col=lut[i], border=NA)
+    #}
+
+    #col scale
+    ####################
+    #note
+    ####################
+    #this needs work because rect needs colored border
+    #which kills transparent ranges...
+    #does that matter
+    for (i in 1:(length(cols))) {
+      y <- (i-1)/scale + .min
+      rect(5,y-(1/scale),10,y,col=cols[i], border=cols[i])
+    }
+    #axes
+    lines(c(5,5), c(.min, .max), col="black")
+    for (i in ticks) {
+      lines(c(5,4), c(i,i), col="black")
+    }
+    #axes annotation
+    text(rep(2, length(ticks)), ticks, labels=ticks,
+         cex=0.75, adj=0.5)
+    #na block
+    if(!is.na(na.col)){
+      rect(5, .min-(.na.width*0.5), 10, .min-(.na.width*1.5), col=na.col, border="black")
+      text(2, .min-.na.width, labels="NA", col="black", cex=0.75)
+    }
+
+  }
 
   par(op)
 }
 
 #plot(iris$Sepal.Length, iris$Sepal.Width)
 #rsp_col_key(c(1,-1), colorRampPalette(c("light green", "yellow", "orange", "red"))(100), title="testing")
+
+
+
+
+
+
+
+
+
+
+
+
+#####################
+#testing
+#####################
+
+#playing
+
+#function(x, subset,...){
+#  ans <- match.call()
+#  ans <- as.character(ans)
+#  return(ans)
+#}
+
+#ggplot example
+#require(ggplot2)
+#ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
+
+
 
 
 

@@ -59,8 +59,6 @@
 
 ## local function to pad data using database???
 
-#' @rdname rsp
-#' @export
 ##     (now importing via xxx.r)
 ##     #' @import data.table
 
@@ -81,6 +79,9 @@
 #v 0.2
 #   based on previous sp_profile but using data.table
 #   (0.1 version currently unexported sp_profile.old)
+
+#' @rdname rsp
+#' @export
 
 rsp_profile <- function(..., include.refs=FALSE) {
 
@@ -166,6 +167,7 @@ rsp_profile <- function(..., include.refs=FALSE) {
 
 #' @rdname rsp
 #' @export
+
 rsp <- function(...) { rsp_profile(...) }
 
 

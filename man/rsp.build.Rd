@@ -30,9 +30,11 @@ in \code{x} containing species name and id records, respectively. If not
 already named according to SPECIATE conventions, at least one of these will
 need to be assigned.}
 
-\item{value}{(\code{character})  The name of the column in \code{x}
+\item{value}{(\code{character}) The name of the column in \code{x}
 containing measurement values. If not already named according to SPECIATE
 conventions, this will need to be assigned.}
+
+\item{...}{(any other arguments) currently ignored.}
 }
 \value{
 \code{rsp_build}s attempt to build and return a (re)SPECIATE-like

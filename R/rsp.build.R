@@ -17,9 +17,10 @@
 #' in \code{x} containing species name and id records, respectively. If not
 #' already named according to SPECIATE conventions, at least one of these will
 #' need to be assigned.
-#' @param value (\code{character})  The name of the column in \code{x}
+#' @param value (\code{character}) The name of the column in \code{x}
 #' containing measurement values. If not already named according to SPECIATE
 #' conventions, this will need to be assigned.
+#' @param ... (any other arguments) currently ignored.
 #' @return \code{rsp_build}s attempt to build and return a (re)SPECIATE-like
 #' object that can be compared with data from re(SPECIATE).
 #' @note If you want to compare your data with profiles in the SPECIATE archive,
@@ -43,7 +44,7 @@
 ##           weight_percent (and possibly .value)
 
 ##############################
-# sp_build_rsp_x
+# rsp_build_x
 ##############################
 
 # notes
@@ -51,11 +52,10 @@
 
 # 0.3. notes
 # went from sp_build_rsp_x to rsp_build_x
-# using as.respeciate and adding rsp_x
+# using as.respeciate and adding rsp_x subclass
 
-
-# rsp_build_x currently converts x as.data.frame(x)
-#     if tibble is loaded, any tibbles complicate things
+# rsp_build_x currently converts x to data.frame (as.data.frame(x))
+#     if tibble is loaded, this currently complicates things...
 
 #     BUT might want to revisit this because it looked like:
 #           the data structure was fine but
@@ -68,14 +68,13 @@
 #               and drop back to tibble rather than data.frame....
 
 
-#' @rdname sp.build
+#' @rdname rsp.build
 #' @export
 
 rsp_build_x <-
   function(x, profile_code, profile_name,
            species_name, species_id,
            value, ...){
-
 
     # light build for a rsp_x data object
     # might need spec_mwt
@@ -104,7 +103,7 @@ rsp_build_x <-
     # WEIGHT_PERCENT:if not there, if sent in call use
     #                              else if there use .value to look-up
 
-    # don't build/error if any of these missing and end of build
+    # should error if any of these missing at end of build
 
     # redundant?
     # currently not using ...
@@ -147,28 +146,28 @@ rsp_build_x <-
     #current making all BUT values, character class
     if(!"PROFILE_NAME" %in% names(x) & (!missing(profile_name))){
       if(!profile_name %in% names(x)){
-        stop("sp_build> '", as.character(profile_name)[1],
+        stop("rsp_build> '", as.character(profile_name)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
       x$PROFILE_NAME <- as.character(x[, profile_name])
     }
     if(!"PROFILE_CODE" %in% names(x) & (!missing(profile_code))){
       if(!profile_code %in% names(x)){
-        stop("sp_build> '", as.character(profile_code)[1],
+        stop("rsp_build> '", as.character(profile_code)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
       x$PROFILE_CODE <- as.character(x[, profile_code])
     }
     if(!"SPECIES_NAME" %in% names(x) & (!missing(species_name))){
       if(!species_name %in% names(x)){
-        stop("sp_build> '", as.character(species_name)[1],
+        stop("rsp_build> '", as.character(species_name)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
       x$SPECIES_NAME <- as.character(x[, species_name])
     }
     if(!"SPECIES_ID" %in% names(x) & (!missing(species_id))){
       if(!species_id %in% names(x)){
-        stop("sp_build> '", as.character(species_id)[1],
+        stop("rsp_build> '", as.character(species_id)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
       x$SPECIES_ID <- as.character(x[, species_id])
@@ -178,12 +177,12 @@ rsp_build_x <-
         if("WEIGHT_PERCENT" %in% names(x)){
           x$.value <- x[, "WEIGHT_PERCENT"]
         } else {
-          stop("sp_build> 'value' not found for 'x'...",
+          stop("rsp_build> 'value' not found for 'x'...",
                sep="", call. = FALSE)
         }
       } else {
         if(!value %in% names(x)){
-           stop("sp_build> '", as.character(value)[1],
+           stop("rsp_build> '", as.character(value)[1],
                 "' not in 'x'...", sep="", call. = FALSE)
         }
       }

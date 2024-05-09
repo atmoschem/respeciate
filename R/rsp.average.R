@@ -29,16 +29,13 @@
 
 #NOTE
 
-#' @rdname rsp.average
-#' @export
 
-## #' @import data.table (in xxx.r)
-# may need to set data.table specifically??
-#      data.table::as.data.table, etc??
+#####################
+#rsp_average_profile
+#####################
 
-######################
 #average data
-######################
+#    multiple profiles to one mean averaged profile...
 
 ## in development
 
@@ -69,6 +66,11 @@
 #aa <- rsp_profile(sp_find_profile("ae8", by="profile_type"))
 #rsp_average_profile(aa)
 
+#' @rdname rsp.average
+#' @export
+## #' @import data.table (in xxx.r)
+# may need to set data.table specifically??
+#      data.table::as.data.table, etc??
 
 rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
                                ...){
@@ -144,12 +146,20 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
 
 
 
+#################################
+###############################
+## unexported
+###############################
+##################################
+
 
 #####################################
-#sp_species_calc
+#rsp_species_calc
 #####################################
 
-sp_species_calc <- function(x, calc = NULL,
+# unfinished
+
+rsp_species_calc <- function(x, calc = NULL,
                             id = NULL, name = NULL,
                                ...){
   #x is an rsp object
@@ -158,7 +168,7 @@ sp_species_calc <- function(x, calc = NULL,
   .temp <- x
   #test we can use this..?
   print(calc)
-  .temp <- sp_dcast_species(.temp)
+  .temp <- rsp_dcast_species(.temp)
   if(length(grep("=", calc)) > 0){
     print("is equals")
   } else {

@@ -8,7 +8,7 @@
 #' a supplied (re)SPECIATE profile data set. This can be by profile or species
 #' subsets, and \code{rsp_rescale_profile} and \code{rsp_rescale_species} provide
 #' short-cuts to these options.
-#' @param x A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
 #' profiles.
 #' @param method numeric, the rescaling method to apply:
 #'   1 \code{x/total(x)};

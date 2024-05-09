@@ -20,7 +20,7 @@
 #' \code{\link{rsp_rescale}}.
 #' @param min.n \code{numeric} (default 8), the minimum number of paired
 #' species measurements in two profiles required for a match to be assessed.
-#' See also \code{\link{rsp_species_cor}}.
+#' See also \code{\link{rsp_cor_species}}.
 #' @param method Character (default 'pd'), the similarity measure to use, current
 #' options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
 #' or 'sid', the Standardized Identity Distance (See References).
@@ -251,7 +251,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #min n
   #########################
   #to do
-  #   compare this and code in sp_species_cor
+  #   compare this and code in rsp_cor_species
   #   if/when we deal with this stop message this code may need to be updated
 
   #########################
@@ -437,22 +437,6 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
 
 
 
-#need something to replace this that helps users build local profiles
-
-#basic build needs
-#   profile_name and profile_code
-#   species_name and species_id
-#   weight_percent (and possibly .value)
-
-###########################
-# think this can go because we now have rsp_build_x???
-
-rsp_ <- function(x){
-  .o <- sp_profile(x)
-  .o$PROFILE_NAME <- paste("test", .o$PROFILE_NAME, sep=">")
-  .o$PROFILE_CODE <- "test"
-  .o
-}
 
 
 

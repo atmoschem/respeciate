@@ -61,6 +61,6 @@ correlation matrix a plots it as a heat map, but arguments including
 (re)SPECIATE functions for studying relationships between
 species in (re)SPECIATE data sets.
 
-\code{\link{rsp_species_cor}} generates a by-species correlation
+\code{\link{rsp_cor_species}} generates a by-species correlation
 matrix of the supplied (re)SPECIATE data sets.
 }

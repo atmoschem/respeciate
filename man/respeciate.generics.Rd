@@ -27,7 +27,7 @@ as.respeciate(x, ...)
 object to be printed, plotted, etc.}
 
 \item{...}{any extra arguments, mostly ignored except by
-\code{plot} which passes them to \code{\link{sp_plot_profile}}.}
+\code{plot} which passes them to \code{\link{rsp_plot_profile}}.}
 
 \item{n}{when plotting or printing a multi-profile object, the
 maximum number of profiles to report.}
