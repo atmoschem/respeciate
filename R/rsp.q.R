@@ -1,19 +1,19 @@
 #' @name rsp.q
-#' @title rsp_q_ provide quick access to common re(SPECIATE) sub-samples
+#' @title Quick access to common (re)SPECIATE subsets.
 #' @aliases rsp_q rsp_q_gas rsp_q_other rsp_q_pm rsp_q_pm.ae6 rsp_q_pm.ae8
 #' rsp_q_pm.cr1 rsp_q_pm.simplified
 
 #' @description \code{rsp_q_} functions are quick access wrappers to commonly
-#' requested re(SPECIATE) sub-samples.
+#' requested (re)SPECIATE subsets.
 #' @return \code{rsp_q_} functions typically return a \code{respeciate}
 #' \code{data.frame} of the requested profiles.
 #'
 #' For example:
 #'
-#' \code{rsp_q_gas()} returns all gaseous profiles in re(SPECIATE)
+#' \code{rsp_q_gas()} returns all gaseous profiles in (re)SPECIATE
 #' (\code{PROFILE_TYPE == 'GAS'}).
 #'
-#' \code{rsp_q_pm} returns all particulate matter (PM) profiles in re(SPECIATE)
+#' \code{rsp_q_pm} returns all particulate matter (PM) profiles in (re)SPECIATE
 #' not classified as a special PM type (\code{PROFILE_TYPE == 'PM'}).
 #'
 #' The special PM types are subsets profiles intended for special
@@ -21,7 +21,7 @@
 #' \code{rsp_q_pm.ae8} (type \code{PM-AE8}), \code{rsp_q_pm.cr1} (type
 #' \code{PM-CR1}), and \code{rsp_q_pm.simplified} (type \code{PM-Simplified}).
 #'
-#' \code{rsp_q_other} returns all profiles classified as other in re(SPECIATE)
+#' \code{rsp_q_other} returns all profiles classified as other in (re)SPECIATE
 #' (\code{PROFILE_TYPE == 'OTHER'}).
 #'
 

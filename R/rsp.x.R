@@ -1,15 +1,15 @@
 #' @name rsp.x
-#' @title rsp_x_ functions for grouping and subsetting re(SPECIATE) profiles
+#' @title rsp_x_ functions for grouping and subsetting (re)SPECIATE profiles
 #' @aliases rsp_x rsp_x_copy rsp_x_nalkane rsp_x_btex
 
 # still wondering if these should be rsp_cut_...
 
 #' @description \code{rsp_x_} functions generate a vector of assignment
-#' terms and can be used to subset or condition a supplied re(SPECIATE)
+#' terms and can be used to subset or condition a supplied (re)SPECIATE
 #' \code{data.frame}.
 #'
 #' Most commonly, the \code{rsp_x_} functions accept a single input, a
-#' re(SPECIATE) \code{data.frame} and return a logical vector of
+#' (re)SPECIATE \code{data.frame} and return a logical vector of
 #' length \code{nrow(x)}, identifying species of interest as
 #' \code{TRUE}. So, for example, they can be used when
 #' \code{\link{subset}}ting in the form:
@@ -23,7 +23,7 @@
 #' also accepts a reference data set, \code{ref}, and a column identifier,
 #' \code{by}, and tests \code{rsp$by \%in\% unique(ref$by)}.
 #'
-#' @param rsp a \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp a \code{respeciate} object, a \code{data.frame} of (re)SPECIATE
 #' profiles.
 #' @param ref (\code{rsp_x_copy} only) a second \code{respeciate} object, to
 #' be used as reference when subsetting (or conditioning) \code{rsp}.
