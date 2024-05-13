@@ -1,7 +1,7 @@
 # Release Notes Version 0.3
 
 * [0.3.0] 
-    * released 2024-05-09 
+    * released 2024-05-13 
     * code and documentation refresh...  
     * added as.respeciate method; replacing related unexported code 
     * sp_profile, sp_build_rsp_x updates; both now use as.respeciate 
@@ -10,6 +10,7 @@
     * sp_pad to rsp_pad; sp_rescale to rsp_rescale; class rebuild 
     * sp_match_profile to rsp_match_profile; class rebuild   
     * sp_cor to rsp_cor; sp_distance to rsp_dist; class rebuild 
+    * rsp_plots now track factors
 
 # Release Notes Version 0.2
 

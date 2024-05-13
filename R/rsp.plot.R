@@ -141,13 +141,18 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
       ######################
       #to do
       #document issues
-      stop("RSP> Sorry, currently not stacking log plots.",
+      stop("RSP> Sorry, currently not stacking log plots",
            call. = FALSE)
     }
   }
   #others refs
-  #.sp.ord <- unique(x$SPECIES_ID)
-  .sp.pro <- unique(x$PROFILE_CODE)
+  #was profile_code; changed to profile_name
+  #    might be an issue; some names not unique...
+  .sp.pro <- if(is.factor(x$PROFILE_NAME)) {
+    levels(x$PROFILE_NAME)
+  } else {
+    unique(x$PROFILE_NAME)
+  }
   #n/profile handling
   profile <- if (missing(id)) {
     .sp.pro
@@ -175,7 +180,8 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     }
     profile <- profile[1:6]
   }
-  x <- x[x$PROFILE_CODE %in% profile,]
+  x <- x[x$PROFILE_NAME %in% profile,]
+
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -196,8 +202,9 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   #switching profile from profile_code to profile_name...
   #    for plot labeling
   ####################################
-  profile <- unique(x$PROFILE_NAME)
+  #profile <- unique(x$PROFILE_NAME)
   #should think about other naming options???
+  #(now using profile_name from start)
 
   #order largest to smallest
   #############################
@@ -225,7 +232,12 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
 
   x$SPECIES_NAME <- factor(x$SPECIES_NAME,
                            levels = xx)
+  if(!is.factor(x$PROFILE_NAME)){
+    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  }
 
+
+#print(as.data.frame(x))
   ##################
   #profile bar chart
   ##################
@@ -286,7 +298,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if("col" %in% names(p1.ls)){
     if(is.function(p1.ls$col)){
       p1.ls$col <- if("groups" %in% names(p1.ls)){
-        p1.ls$col(length(profile))
+        p1.ls$col(length(levels(x$PROFILE_NAME)))
       } else {
         p1.ls$col(1)
       }
@@ -294,7 +306,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
       rep(trellis.par.get("superpose.polygon")$col,
-          length.out=length(profile))
+          length.out=length(levels(x$PROFILE_NAME)))
     } else {
       trellis.par.get("superpose.polygon")$col[1]
     }
@@ -320,7 +332,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     .tmp <- list(space="top",
                  #title="Legends",
                  rectangles=list(col=rep(p1.ls$col,
-                                         length.out=length(profile))),
+                                         length.out=length(levels(x$PROFILE_NAME)))),
                  text = list(profile, cex=0.7))
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
@@ -354,7 +366,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   .x.args <- list(...)
 
   ######################################
-  #not sure we are using stack for this
+  #not sure we are using stack for this...
   ######################################
   #currently not even trying to stack logs...
   if("stack" %in% names(.x.args) && .x.args$stack){
@@ -373,9 +385,11 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #if already factor ???
   #   user could be forcing order
   ##############################
-  .sp.ord <- as.character(unique(x$SPECIES_ID))
-  #.sp.pro <- unique(x$PROFILE_CODE)
-  #n/profile handling
+  .sp.ord <- if(is.factor(x$SPECIES_NAME)){
+    levels(x$SPECIES_NAME)
+  } else {
+    as.character(unique(x$SPECIES_NAME))
+  }
   species <- if (missing(id)) {
     .sp.ord
   } else {
@@ -403,7 +417,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
     species <- species[1:20]
   }
-  x <- x[x$SPECIES_ID %in% species,]
+  x <- x[x$SPECIES_NAME %in% species,]
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -421,15 +435,16 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   }
 
   ####################################
-  #current species ordering by id arg...
+  #current species ordering by name arg...
   #(see below about reordering)
   ####################################
-  species <- species[species %in% unique(x$SPECIES_ID)]
-  x$SPECIES_ID <- factor(x$SPECIES_ID, levels=species)
-  x <- x[order(x$SPECIES_ID),]
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME, unique(x$SPECIES_NAME))
-  species<- levels(x$SPECIES_NAME)
-  sp.ord <- as.numeric(factor(species, levels=sort(species)))
+
+  species <- species[species %in% unique(x$SPECIES_NAME)]
+  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=species)
+  x <- x[order(x$SPECIES_NAME),]
+  #sp.ord <- as.numeric(factor(species, levels=sort(species)))
+  #sp.ord <- 1:length(levels(x$SPECIES_NAME))
+
 
   ##################################
   #should think about other naming options???
@@ -466,6 +481,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   }
   x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
 
+
   #print(xx)
 
   ##################
@@ -476,6 +492,13 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #(to force trend line gaps)
   #not padding, obviously not dropping nas...
   x <- rsp_melt_wide(rsp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
+
+  if(!is.factor(x$PROFILE_NAME)){
+    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  }
+  if(!is.factor(x$SPECIES_NAME)){
+    x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=unique(x$SPECIES_NAME))
+  }
 
   ###############################
   #species handling
@@ -574,7 +597,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
-      colorRampPalette(rainbow(12, s = 0.5, v = 1),
+      colorRampPalette(rainbow(12, s = 0.5, v = 1)[1:11],
                                interpolate = "spline")(length(species))
       #or:
       #colorRampPalette(rainbow(12, s = 0.5, v = 1),interpolate = "spline")(x)
