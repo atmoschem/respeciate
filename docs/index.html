@@ -18,9 +18,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Speciation profiles for gases and aerosols">
-<meta property="og:description" content="Acess to the US.EPA Speciate (v5.2) tool, to generate speciation
-         profiles for gases and particles. More details in Simon et al (2010)
-         &lt;doi:10.5094/APR.2010.026&gt;.">
+<meta property="og:description" content="Access to the US.EPA Speciate (v5.2) tool, to generate speciation profiles for
+          gases and particles. More details in Simon et al (2010) &lt;doi:10.5094/APR.2010.026&gt;.">
 <meta property="og:image" content="/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -42,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">respeciate</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -88,23 +87,23 @@
 <p>Find profiles based on search criteria</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/atmoschem/respeciate" class="external-link">respeciate</a></span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sp.info.html">sp_find_profile</a></span><span class="op">(</span><span class="st">"Ethanol"</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.info.html">rsp_find_profile</a></span><span class="op">(</span><span class="st">"Ethanol"</span><span class="op">)</span></span>
 <span><span class="va">x</span></span>
-<span><span class="co">#&gt; respeciate profile reference</span></span>
-<span><span class="co">#&gt; 0291 1070 1071 1132 1149 1301 1302 1303 1304 1314 5473 5474 5475 5477 5478 5479 </span></span>
-<span><span class="co">#&gt; 5481 5482 5483 5485 5486 5487 5489 5490 5491 5493 5494 5495 5496 5497 5498 5499 </span></span>
-<span><span class="co">#&gt; 5500 5501 5502 5503 5504 5505 5506 5507 5508 5509 5510 5511 5512 5513 5514 5515 </span></span>
-<span><span class="co">#&gt; 5516 5517 5518 5519 5520 5521 5522 5523 5524 5525 5526 5527 5528 5529 5530 5531 </span></span>
-<span><span class="co">#&gt; 5532 5533 5534 5535 5536 5537 5538 5539 5540 5541 5542 5543 5544 5545 5546 5547 </span></span>
-<span><span class="co">#&gt; 8200 8210 8215 8733 8736 8751 8751a 8752 8754 8755 8757 8758 8760 8761 8763 </span></span>
-<span><span class="co">#&gt; 8764 8765 8766 8767 8768 ...</span></span>
-<span><span class="co">#&gt;    &gt; 160 profiles [showing first 100]</span></span></code></pre></div>
+<span><span class="co">#&gt; respeciate profile list: 160</span></span>
+<span><span class="co">#&gt; [NO SPECIES]</span></span>
+<span><span class="co">#&gt;   (CODE 0291) Surface Coating Solvent - Methyl Alcohol</span></span>
+<span><span class="co">#&gt;   (CODE 1070) Alcohols Production - Methanol - Purge Gas Vent</span></span>
+<span><span class="co">#&gt;   (CODE 1071) Alcohols Production - Methanol - Distillation Vent</span></span>
+<span><span class="co">#&gt;   (CODE 1132) Ethanolamines</span></span>
+<span><span class="co">#&gt;   (CODE 1149) Methanol</span></span>
+<span><span class="co">#&gt;   (CODE 1301) 10% Ethanol Composite (Hot Soak + Diurnal) Evaporative</span></span>
+<span><span class="co">#&gt;     &gt; showing 6 of 160</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="speciate">speciate<a class="anchor" aria-label="anchor" href="#speciate"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sp.html">sp_profile</a></span><span class="op">(</span><span class="st">"8833"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.html">rsp_profile</a></span><span class="op">(</span><span class="st">"8833"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plot">plot<a class="anchor" aria-label="anchor" href="#plot"></a>
@@ -116,7 +115,7 @@
 <p><img src="reference/figures/unnamed-chunk-5-1.png" style="display: block; margin: auto;"></p>
 <p>… using lattice barchart syntax</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sp.html">sp_profile</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8833</span>, <span class="fl">8850</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.html">rsp_profile</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8833</span>, <span class="fl">8850</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p2</span>, key<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>space<span class="op">=</span><span class="st">"top"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/unnamed-chunk-6-1.png" style="display: block; margin: auto;"></p>
 </div>
