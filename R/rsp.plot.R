@@ -50,7 +50,7 @@
 
 #uses unexported code
 #  .rsp_plot_fix
-#  .rsp_yscale.component.log10 (currently in sp.pls.r)
+#  .rsp_yscale.component.log10 (currently in rsp.pls.r)
 
 
 
@@ -70,18 +70,17 @@
 
 #examples
 # maybe
-# sp_plot_profile(spq_pm.ae8())
+# rsp_plot_profile(spq_pm.ae8())
 #   (allows most lattice style plot control, etc key=list(...))
 #   (but includes some short cuts to common handling, e.g. log=T to
 #      log y scales and reformat y axes)
-# sp_plot_profile(spq_pm.ae8(), key=list(space="top", columns=2), log=T)
+# rsp_plot_profile(rsp_q_pm.ae8(), key=list(space="top", columns=2), log=T)
 
 #color defaults...
 #issue current default wraps if you exceed number of cols in default set.
 #from: https://stackoverflow.com/questions/26314701/r-reducing-colour-saturation-of-a-colour-palette
 #function(x) colorRampPalette(rainbow(12, s = 0.5, v = 1)[2:11],interpolate = "spline")(x)
 ##   ?? could extrapolate the default colors using something like above ???
-
 
 
 # dennis asked for data as part of return
@@ -245,7 +244,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
                 data=x, ylab="Profile Loading", xlab="",
                 #NB: prepanel seemed to break ylim when stacking
                 panel = function(x, y, origin, ...){
-                  rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
+                  .rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
                                panel.grid, ...)
                   if(missing(origin)){
                     ######################################
@@ -286,7 +285,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   #shortcut to scales(y(log)) and yscale.component
   if(log){
     p1.ls$scales$y$log <- 10
-    p1.ls$yscale.components <- rsp_yscale.component.log10
+    p1.ls$yscale.components <- .rsp_yscale.component.log10
   }
 
   #3. extra user settings
@@ -540,7 +539,6 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
 
   ##############################
   #species alignment
-
   p1.ls <- list(x= .value~.x,
                 data=x, ylab="Measurement", xlab=.xlab,
                 type="l",
@@ -548,7 +546,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
                 panel = function(x, y, ...){
                   at.x <- pretty(x)
                   at.y <- pretty(y)
-                  rsp_panelPal("grid", list(h=at.y,v=at.x, col="grey", lty=3),
+                  .rsp_panelPal("grid", list(h=at.y,v=at.x, col="grey", lty=3),
                                panel.abline, ...)
                   panel.xyplot(x=x, y=y, ...)
                 },
@@ -578,7 +576,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #shortcut to scales(y(log)) and yscale.component
   if(log){
     p1.ls$scales$y$log <- 10
-    p1.ls$yscale.components <- rsp_yscale.component.log10
+    p1.ls$yscale.components <- .rsp_yscale.component.log10
   }
 
   #3. extra user settings

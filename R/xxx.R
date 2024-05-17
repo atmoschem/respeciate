@@ -49,7 +49,7 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #' @importFrom latticeExtra doubleYScale panel.ablineq
 #' @importFrom data.table ":="
 #' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
-#' as.formula coefficients formula lm nls nls.control predict update
+#' as.formula coefficients formula lm nls nls.control predict update na.omit
 #' @importFrom utils modifyList head packageVersion
 #' @importFrom graphics axis barplot par legend lines rect text abline
 #' grid mtext plot.new plot.window points polygon title
@@ -89,6 +89,8 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
   .o$PROFILE_CODE <- "test"
   .o
 }
+
+
 
 
 
@@ -732,6 +734,605 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #rsp_col_key(c(1,-1), colorRampPalette(c("light green", "yellow", "orange", "red"))(100), title="testing")
 
 
+
+
+################
+################
+## unexported
+## from pls.plot...
+################
+################
+
+# profile code order
+# get profile order in case you need it latter...
+
+.rsp_profile_code_order <- function(data){
+  .tmp <-  data.table::as.data.table(data)[, .(ans=length(unique(PROFILE_CODE))),by="SPECIES_NAME"]
+  .tmp <- subset(.tmp, ans == max(.tmp$ans, na.rm=TRUE))$SPECIES_NAME
+  .tmp <- subset(data, SPECIES_NAME %in% .tmp)
+  sort(unique(.tmp$PROFILE_CODE))
+}
+
+
+#log axis hander
+#based on lattice text book method
+
+#issues??
+#   could be problem with y padding when log=T and .value range is wide...
+
+.rsp_yscale.component.log10 <- function(lim, ...) {
+  ans <- yscale.components.default(lim = lim, ...)
+  tick.at <- pretty(lim)
+  tick.at <- tick.at[tick.at == floor(tick.at)]
+  tick.at <- tick.at[tick.at < max(lim, na.rm=TRUE) & tick.at > min(lim, na.rm=TRUE)]
+  ans$left$ticks$at <- tick.at
+  ans$left$labels$at <- tick.at
+  ans$left$labels$labels <- c(format(10^(tick.at),
+                                     drop0trailing = TRUE,
+                                     scientific = FALSE))
+  #print(ans$left$labels$labels)
+  #######################
+  #need to sort of right labeling
+  #   dropped for now...
+  #ans$right <- ans$left
+  ans
+}
+
+
+#lattice panel pal
+#based on panel handler in loa
+
+.rsp_panelPal <- function(.name, .ls, .panel, ...){
+  .x.args <- list(...)
+  if(!.name %in% names(.x.args) || !is.logical(.x.args[[.name]]) ||
+     .x.args[[.name]]){
+    .name2 <- paste("^", .name, "[.]", sep="")
+    if(.name %in% names(.x.args) && is.list(.x.args[[.name]])){
+      .tmp <- .x.args[[.name]]
+      if(length(.tmp)>0){
+        names(.tmp) <- paste(.name, names(.tmp), sep=".")
+        .x.args <- modifyList(.tmp, .x.args)
+      }
+    }
+    .x.args <- .x.args[grepl(.name2, names(.x.args))]
+    if(length(.x.args)>0){
+      names(.x.args) <- gsub(.name2, "", names(.x.args))
+      .ls <- modifyList(.ls, .x.args)
+    }
+    do.call(.panel, .ls)
+  }
+}
+
+
+
+# could move this into the function...
+
+.rsp_panel.pie <-
+  function (x, y=NULL, groups=NULL, subscripts, totals=NULL,
+            labels = names(x), edges = 200, radius = 0.8, clockwise = FALSE,
+            init.angle = if (clockwise) 90 else 0, density = NULL, angle = 45,
+            col = NULL, border = 1, lty = NULL, main = NULL, ...)
+  {
+
+    #this is graphics::pie with a couple of modifications...
+    #many thanks to...
+    #R Core Team (2023). _R: A Language and Environment for Statistical Computing_. R Foundation
+    #for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
+
+    #if (!is.numeric(x) || any(is.na(x) | x < 0))
+    #    stop("'x' values must be positive.")
+
+    #########################
+    #measurement totals
+    .y <- totals[subscripts]
+    ref <- sapply(unique(groups), function(g){
+      sum(.y[groups==g], na.rm=TRUE)
+    })
+    .total <- mean(ref, na.rm=TRUE)
+
+    ##########################
+    #profile contributions to model
+    # as percentage of measurements
+    ans <- sapply(unique(groups), function(g){
+      sum(y[groups==g], na.rm=TRUE)
+    })
+    ans <- (ans / .total) * 100
+
+    #####################
+    #cheat because following comes from
+    #pie function in base r...
+    x <- ans
+
+    if (is.null(labels))
+      labels <- as.character(unique(groups))
+    else labels <- as.graphicsAnnot(labels)
+    labels = paste(labels, " (",
+                   round(ans, digits=1), "%)", sep = "")
+
+    if (any(x == 0)) {
+      labels <- labels[x != 0]
+      col <- col[x != 0]
+      x <- x[x != 0]
+    }
+    my.tot <- sum(x, na.rm=TRUE)
+    ########################
+    #this adds extra void area
+    #  if does not account for
+    #  99 percent of the
+    #  measurements
+    if (my.tot < 99) {
+      x <- c(x, 100 - my.tot)
+      labels <- c(labels, "[hide]")
+      col <- c(col, NA)
+      init.angle <- init.angle + (((100 - my.tot)/200) * 360)
+    }
+    x <- c(0, cumsum(x)/sum(x))
+    dx <- diff(x)
+    nx <- length(dx)
+
+    ######################
+    #????
+    pin <- par("pin")
+    xlim <- ylim <- c(-1, 1)
+    if (pin[1L] > pin[2L])
+      xlim <- (pin[1L]/pin[2L]) * xlim
+    else ylim <- (pin[2L]/pin[1L]) * ylim
+
+    ########################
+    #col setting
+    #   this needs generalising like
+    #   other pls_plot
+    if (is.null(col))
+      col <- if (is.null(density))
+        c("white", "lightblue", "mistyrose", "lightcyan",
+          "lavender", "cornsilk")
+    else par("fg")
+
+    ########################
+    #border setting
+    #   needs generalising...
+    if (!is.null(border))
+      border <- rep_len(border, nx)
+
+    ##############
+    #lty
+    #   needs generalising...
+    if (!is.null(lty))
+      lty <- rep_len(lty, nx)
+
+    ##############
+    #angle of segment
+    angle <- rep(angle, nx)
+    if (!is.null(density))
+      density <- rep_len(density, nx)
+    twopi <- if (clockwise)
+      -2 * pi
+    else 2 * pi
+    t2xy <- function(t) {
+      t2p <- twopi * t + init.angle * pi/180
+      list(x = radius * cos(t2p), y = radius * sin(t2p))
+    }
+    ###########################
+    #like to nudge these if percent before and
+    #  this one are both small
+    #  (making labels close)
+
+    for (i in 1L:nx) {
+      if (!as.character(labels[i]) == "[hide]") {
+        n <- max(2, floor(edges * dx[i]))
+        P <- t2xy(seq.int(x[i], x[i + 1], length.out = n))
+        lattice::lpolygon(c(P$x, rev(P$x * 0.5)), c(P$y, rev(P$y *
+                                                               0.5)), density = density[i], angle = angle[i],
+                          border = border[1], col = col[i], lty = lty[i])
+        P <- t2xy(mean(x[i + 0:1]))
+        lab <- as.character(labels[i])
+        if (!is.na(lab) && nzchar(lab)) {
+          lattice::llines(c(1, 1.2) * P$x, c(1, 1.2) * P$y)
+          lattice::ltext(1.3 * P$x, 1.3 * P$y, labels[i], xpd = TRUE,
+                         cex=0.7, adj = ifelse(P$x < 0, 1, 0), ...)
+        }
+      }
+    }
+    lattice::ltext(0, 0, label = paste("sum\n", signif(my.tot, 3), "%",
+                                       sep = ""), cex=0.7)
+  }
+
+
+
+
+
+#think about
+#######################################
+# printing amount missing as a segment
+# adding plot arg control like in plot.respeciate
+# adding args to change the displacement of labels
+
+.rsp_profile_pie <- function (x, labels = names(x), edges = 200, radius = 0.8,
+                              clockwise = FALSE,
+                              init.angle = if (clockwise) 90 else 0,
+                              density = NULL, angle = 45, col = NULL,
+                              border = NULL, lty = NULL, main = NULL, ...)
+{
+  #this is graphics::pie with a couple of modifications...
+  #many thanks to...
+  #R Core Team (2023). _R: A Language and Environment for Statistical Computing_. R Foundation
+  #for Statistical Computing, Vienna, Austria. <https://www.R-project.org/>.
+
+  #print(labels)
+  #print(col)
+
+  if (!is.numeric(x) || any(is.na(x) | x < 0))
+    stop("'x' values must be positive.")
+  if (is.null(labels))
+    labels <- as.character(seq_along(x))
+  else labels <- as.graphicsAnnot(labels)
+
+  #added to remove any source with a zero contribution
+  #but hold labels and col alignment
+  if(any(x==0)){
+    labels <- labels[x!=0]
+    col <- col[x!=0]
+    x <- x[x!=0]
+  }
+  my.tot <- sum(x)
+  if(my.tot < 99){
+    x <- c(x, 100-my.tot)
+    labels <- c(labels, "[hide]")
+    col <- c(col, NA)
+    init.angle <- init.angle + (((100-my.tot)/200)*360)
+  }
+
+  x <- c(0, cumsum(x)/sum(x))
+  dx <- diff(x)
+  nx <- length(dx)
+  plot.new()
+  pin <- par("pin")
+  xlim <- ylim <- c(-1, 1)
+  if (pin[1L] > pin[2L])
+    xlim <- (pin[1L]/pin[2L]) * xlim
+  else ylim <- (pin[2L]/pin[1L]) * ylim
+  dev.hold()
+  on.exit(dev.flush())
+  plot.window(xlim, ylim, "", asp = 1)
+  if (is.null(col))
+    col <- if (is.null(density))
+      c("white", "lightblue", "mistyrose", "lightcyan",
+        "lavender", "cornsilk")
+  else par("fg")
+  #  if (!is.null(col))
+  #    col <- rep_len(col, nx)
+  if (!is.null(border))
+    border <- rep_len(border, nx)
+  if (!is.null(lty))
+    lty <- rep_len(lty, nx)
+  angle <- rep(angle, nx)
+  if (!is.null(density))
+    density <- rep_len(density, nx)
+  twopi <- if (clockwise)
+    -2 * pi
+  else 2 * pi
+  t2xy <- function(t) {
+    t2p <- twopi * t + init.angle * pi/180
+    list(x = radius * cos(t2p), y = radius * sin(t2p))
+  }
+
+  for (i in 1L:nx) {
+
+    if(!as.character(labels[i]) == "[hide]"){
+      n <- max(2, floor(edges * dx[i]))
+      P <- t2xy(seq.int(x[i], x[i + 1], length.out = n))
+      #changed shape to include hole
+      polygon(c(P$x, rev(P$x*0.5)), c(P$y, rev(P$y*0.5)),
+              density = density[i], angle = angle[i],
+              border = border[i], col = col[i], lty = lty[i])
+      P <- t2xy(mean(x[i + 0:1]))
+      lab <- as.character(labels[i])
+      if (!is.na(lab) && nzchar(lab)) {
+        # 1.2 and 1.3 are the extenders when moving labels way from
+        # the pie plot itself
+        lines(c(1, 1.2) * P$x, c(1, 1.2) * P$y)
+        text(1.3 * P$x, 1.3 * P$y, labels[i], xpd = TRUE,
+             adj = ifelse(P$x < 0, 1, 0), ...)
+      }
+    }
+  }
+
+  text(0,0, label=paste("sum\n",signif(my.tot, 3), "%", sep=""))
+  title(main = main, ...)
+  invisible(NULL)
+}
+
+
+
+###########################
+###########################
+## pls_refit_species
+###########################
+###########################
+
+
+# superseded by pls_fit_species
+# not not exported
+
+# need to update the model handling so it is like sp_pls_profile
+#     this would sort power issue above
+#          also means the user can change setting themselves
+#          THINK ABOUT THIS
+#               they could make a pls that was not positively constrained
+
+
+.rsp_pls_refit_species <- function(pls, name, power=1,
+                                   ...){
+  .xx <- pls_report(pls)
+  #name might want to be case-non-sensitive at some point
+  #think about how to do this one...
+  .data <- .xx[.xx$SPECIES_NAME==name,]
+  #get and hold all the m_ values
+  #update profile contributions for named species
+  .ms <- names(.data)[grepl("^m_", names(.xx))]
+  .xs <- gsub("^m_", "", .ms)
+  .for <- paste("(`", .ms, "`*`", .xs, "`)",
+                sep="", collapse = "+")
+  .for <- as.formula(paste("test~", .for))
+  .da <- .data[!names(.data) %in% .xs]
+
+
+  .ls <- lapply(.xs, function(x){0})
+  names(.ls) <- .xs
+
+  #################
+  #user might want to set this???
+
+  .ls2 <- lapply(.xs, function(x){.data[1, x]})
+  names(.ls2) <- .xs
+
+  mod <- nls(.for, data=.da,
+             #weights = 1/(.out$test^push), # think about weighting
+             start=.ls2, lower=.ls,
+             algorithm="port",
+             control=nls.control(tol=1e-5) #think about tolerance
+  )
+
+  .data[.xs] <- data.frame(t(coefficients(mod)))
+
+  #lazy
+  .ans <- .data
+
+  for(i in .ans$PROFILE_CODE){
+    .ii <- subset(.ans, PROFILE_CODE==i)
+    .ii <- .ii[names(.ii) %in% names(pls[[i]]$args$data)]
+    .sp.ord <- unique(pls[[i]]$args$data$SPECIES_ID)
+    pls[[i]]$args$data <- subset(pls[[i]]$args$data, SPECIES_NAME!=name)
+    pls[[i]]$args$data <- rbind(pls[[i]]$args$data, .ii)
+    #put back in right order
+    pls[[i]]$args$data <-
+      pls[[i]]$args$data[order(ordered(pls[[i]]$args$data$SPECIES_ID,
+                                       levels=.sp.ord)),]
+    #rebuild model
+    .for <- as.character(formula(pls[[i]]$mod))
+    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+    .ms <- names(pls[[i]]$args$data)
+    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ls <- lapply(.ms, function(x){0})
+    names(.ls) <- paste("m_", .ms, sep="")
+    .da <- pls[[i]]$args$data
+
+    pls[[i]]$mod <- nls(.for, data=.da,
+                        weights = (1/.da$test)^power, # think about weighting
+                        start=.ls, lower=.ls,
+                        algorithm="port",
+                        control=nls.control(tol=1e-5,
+                                            warnOnly = TRUE) #think about tolerance
+    )
+  }
+
+  invisible(pls)
+
+}
+
+
+
+####################################
+####################################
+## pls_fit_parent
+####################################
+####################################
+
+# superseded by pls_fit_species
+# not now exported
+
+# (like pls_refit_species)
+# like to drop power from formals
+#   maybe ignore or pass overwrites via ...?
+
+# need to update the model handling so it is like sp_pls_profile
+#     this would sort power issue above
+#          also means the user can change setting themselves
+#          THINK ABOUT THIS
+#               they could make a pls that was not positively constrained
+#      this would also remove the start, lower and upper options
+#           from the formals...
+
+# parent could already be in x
+#    then parent could just be the name of parent???
+
+# also a case for using this to add a non-parent to x
+#    e.g. pls_fit_unknown_species...
+#    to fit a species to the existing model as a source apportion of
+#        that unknown...
+#    in which case maybe this should just be a wrapper for that
+#        with the start, lower and upper like below
+
+# if we are setting start and lower
+#     start = lower if start is missing might be safer...
+
+
+.rsp_pls_fit_parent <- function(pls, parent, power=1,
+                                start=100,
+                                lower=50, upper=200, ...){
+
+  .out <- pls_report(pls)
+  #parent should only have one species
+  #and have same profiles as pls model data
+  #and its contribution to all sources is set by .value
+
+  .out <- subset(.out, SPECIES_ID == unique(.out$SPECIES_ID)[1])
+  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+  .test <- names(parent)[names(parent) %in% .test]
+  .data <- parent[.test]
+  names(.data)[2] <- "parent"
+  .data <- merge(.out, .data[c(1:2)])
+
+  #formula
+  .ms <- names(.data)[grepl("^m_", names(.out))]
+  .for <- paste("(`", .ms, "`*`", gsub("^m_", "n_", .ms), "`)",
+                sep="", collapse = "+")
+  .for <- as.formula(paste("parent~", .for))
+
+  .ns <- .ms
+  names(.ns) <- gsub("^m_", "n_", .ms)
+  .ls <- lapply(.ns, function(x){start})
+  .ls2 <- lapply(.ns, function(x){lower})
+  .ls3 <- lapply(.ns, function(x){upper})
+
+  mod <- nls(.for, data=.data,
+             #weights = (1/.out$test)^power, # think about weighting
+             start=.ls,
+             lower=.ls2,
+             upper=.ls3,
+             algorithm="port",
+             control=nls.control(tol=1e-5) #think about tolerance
+  )
+  .ans <- data.frame(
+    PROFILE_CODE = .data$PROFILE_CODE,
+    SPECIES_ID = parent$SPECIES_ID[1],
+    SPECIES_NAME = parent$SPECIES_NAME[1],
+    t(coefficients(mod)),
+    test = .data$parent
+  )
+  names(.ans) <- gsub("^n_", "", names(.ans))
+  for(i in .ans$PROFILE_CODE){
+    .ii <- subset(.ans, PROFILE_CODE==i)
+    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+    pls[[i]]$args$data <-
+      rbind(pls[[i]]$args$data, .ii)
+    #rebuild model
+    .for <- as.character(formula(pls[[i]]$mod))
+    .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
+    .ms <- names(pls[[i]]$args$data)
+    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ls <- lapply(.ms, function(x){0})
+    names(.ls) <- paste("m_", .ms, sep="")
+    .da <- pls[[i]]$args$data
+
+    pls[[i]]$mod <- nls(.for, data=.da,
+                        weights = (1/.da$test)^power, # think about weighting
+                        start=.ls, lower=.ls,
+                        algorithm="port",
+                        control=nls.control(tol=1e-5) #think about tolerance
+    )
+  }
+
+  pls
+
+}
+
+
+
+
+
+#######################################
+########################################
+## .rsp_get_[something]_from_pls
+#####################################
+#######################################
+
+#for use with pls outputs
+
+#note: these current expect pls_report([rsp_pls]) as ONLY input dat
+
+.rsp_get_m_from_pls <- function(dat){
+
+  #get m profiles from a pls model
+  #############################################
+
+  #currently assumes you are giving it pls_report output...
+  #
+
+  #get m data
+  ###########################
+  .refs <- names(dat)[grepl("^[.]m_", names(dat))]
+  .tmp <- dat[c("SPECIES_NAME", .refs)]
+  .tmp <- .tmp[!duplicated(.tmp$SPECIES_NAME),]
+
+  #restructure
+  #########################
+  #renaming columns
+  .tmp <- data.table::melt.data.table(data.table::as.data.table(.tmp),
+                                      id.var="SPECIES_NAME")
+  .tmp <- as.data.frame(.tmp)
+  names(.tmp)[names(.tmp)=="variable"] <- "PROFILE_CODE"
+  .tmp$PROFILE_CODE <- as.character(.tmp$PROFILE_CODE)
+  .tmp$PROFILE_CODE <- gsub("^.m_", "", .tmp$PROFILE_CODE)
+  names(.tmp)[names(.tmp)=="value"] <- ".value"
+  #addition cheats so it is respeciate-like
+  .tmp$PROFILE_NAME <- .tmp$PROFILE_CODE
+  .tmp$SPECIES_ID <- .tmp$SPECIES_NAME
+  .tmp$WEIGHT_PERCENT <- .tmp$.value
+  ##similay using rsp_build_x
+  ##makes rsp_x but some codes may not be assigned...
+  #.p1.prof <- unique(.tmp$PROFILE_CODE)
+  #.ans <- rsp_build_x(.tmp, test.rsp=FALSE)
+  #.cheat <- .ans$SPECIES_ID[is.na(.ans$SPECIES_ID)]
+  #if(length(.cheat)>0){
+  #  .ans$SPECIES_ID[is.na(.ans$SPECIES_ID)] <- .ans$SPECIES_NAME[is.na(.ans$SPECIES_ID)]
+  #}
+
+  #output
+  #want to be rsp_x at some point...
+  .tmp
+}
+
+.rsp_get_prop_from_pls <- function(dat){
+
+  #get x/.value table from pls model...
+  #########################################
+
+  #currently assumes you are giving it pls_report output...
+
+  #get x data, etc
+  .tmp <- names(dat)
+  .tmp <- .tmp[grep("^.x_", .tmp)]
+  .refs <- c(.tmp, "pred")
+  .sp.ref <- unique(dat$SPECIES_NAME)
+  #make summary pls. prop.table
+  .ans2 <- lapply(.sp.ref, function(x){
+    .tmp <- subset(dat, SPECIES_NAME==x)
+    .d2 <- .tmp[1, c("SPECIES_NAME", .refs)]
+    for(.ref in .refs){
+      #use only paired cases to calculate skew...
+      .tmp2 <- .tmp[c(.ref, ".value")]
+      .tmp2[.tmp2==0] <- NA
+      .tmp2 <- na.omit(.tmp2)
+      .d2[, .ref] <- sum(.tmp2[,.ref], na.rm=TRUE) / sum(.tmp2[,".value"], na.rm=TRUE)
+    }
+    .d2
+  })
+  .ans2 <- do.call(rbind, .ans2)
+
+  #restructure to output
+  .ans2 <- .ans2[names(.ans2)!="pred"]
+  .ans2 <- data.table::melt(data.table::as.data.table(.ans2),
+                            id.var="SPECIES_NAME")
+  .ans2 <- as.data.frame(.ans2)
+  names(.ans2)[names(.ans2)=="variable"] <- "PROFILE_CODE"
+  .ans2$PROFILE_CODE <- gsub("^[.]x_", "", as.character(.ans2$PROFILE_CODE))
+  names(.ans2)[names(.ans2)=="value"] <- ".prop"
+
+  #output
+  .ans2
+
+}
 
 
 

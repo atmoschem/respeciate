@@ -302,7 +302,7 @@ print.rsp_pls <- function(x, n = NULL, ...){
     temp <- unlist(lapply(x, function(x) !is.null(x)))
     temp <- length(temp[temp])
     report <- paste(report, "\n   list of ", length(x), " profile models",
-                    "\n   (", temp, " good)\n", sep="")
+                    "\n   (", temp, " fitted)\n", sep="")
   }
   cat(report)
 }

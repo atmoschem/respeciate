@@ -8,9 +8,6 @@
 \alias{pls_fit_species}
 \alias{pls_refit_species}
 \alias{pls_rebuild}
-\alias{pls_plot}
-\alias{pls_plot_species}
-\alias{pls_plot_profile}
 \title{(re)SPECIATE profile Positive Least Squares models}
 \usage{
 rsp_pls_profile(rsp, ref, power = 1, ...)
@@ -48,12 +45,6 @@ pls_rebuild(
   drop.missing = FALSE,
   ...
 )
-
-pls_plot(pls, n, type = 1, ...)
-
-pls_plot_species(pls, n, type = 1, ...)
-
-pls_plot_profile(pls, n, log = FALSE, ...)
 }
 \arguments{
 \item{rsp}{A \code{respeciate} object, a \code{data.frame} of
@@ -72,8 +63,8 @@ range \code{1 - 2.5} are sometimes helpful.}
 \item{...}{additional arguments, typically ignored or passed on to
 \code{\link{nls}}.}
 
-\item{pls}{A \code{sp_pls_profile} output, only used by \code{pls_}
-functions.}
+\item{pls}{A \code{rsp_pls_profile} output, intended for use with
+\code{pls_} functions.}
 
 \item{species}{for \code{pls_fit_species}, a data.frame of
 measurements of an additional species to be fitted to an existing
@@ -101,20 +92,6 @@ fitting (or refitting) a species, treat it as source marker.}
 \code{pls_refit_species}, \code{logical}, default \code{FALSE}, when
 building or rebuilding a PLS model, discard cases where \code{species}
 is missing.}
-
-\item{n}{(for \code{pls_plot}s only) numeric or character
-identifying the species or profile to plot. If numeric, these are treated
-as indices of the species or profile, respectively, in the PLS model; if
-character, species is treated as the name of species and profile is treated
-as the profile code. Both can be concatenated to produce multiple plots and
-the special case \code{n = -1} is a short cut to all species or profiles,
-respectively.}
-
-\item{type}{(for \code{pls_plot}s only) numeric, the plot type if
-multiple options are available.}
-
-\item{log}{(for \code{pls_plot_profile} only) logical, if \code{TRUE} this
-applies 'log' scaling to the primary Y axes of the plot.}
 }
 \value{
 \code{rsp_pls_profile} returns a list of nls models, one per
@@ -122,10 +99,10 @@ profile/measurement set in \code{rsp}. The \code{pls_} functions work with
 these outputs. \code{pls_report} generates a \code{data.frame} of
 model outputs, and is used of several of the other \code{pls_}
 functions. \code{pls_fit_species}, \code{pls_refit_species} and
-\code{pls_fit_parent} return the supplied \code{sp_pls_profile} output,
+\code{pls_fit_parent} return the supplied \code{rsp_pls_profile} output,
 updated on the basis of the \code{pls_} function action.
-\code{pls_plot}s produce various plots commonly used in source
-apportionment studies.
+\code{pls_plot}s (documented separately) produce various plots
+commonly used in source apportionment studies.
 }
 \description{
 Functions for Positive Least Squares (PSL) fitting of
@@ -141,7 +118,7 @@ source apportionment based on the assumption that the profiles in the
 reference set are representative of the mix that make up the modeled
 sample. The \code{pls_} functions work with \code{rsp_pls_profile}
 outputs, and are intended to be used when refining and analyzing
-these PLS models.
+these PLS models. See also \code{pls_plot}s for PLS model plots.
 }
 \note{
 This implementation of PLS applies the following modeling constraints:
@@ -152,6 +129,14 @@ zero or more.  Although the model is generated using \code{\link{nls}},
 which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 in this case is linear.
 
-2. The number of species in \code{rsp} must be more that the number of
+2. The model is fit in the form:
+
+ \eqn{X_{i,j} = \sum\limits_{k=1}^{K}{N_{i,k} * M_{k,j}  + e_{i,j}}}
+
+ Where X is the data set of measurements, \code{rsp}, M is data set of
+ reference profiles, \code{ref}, N is the data set of source contributions,
+ the source apportion solution, to be solved by minimising e, the error terms.
+
+3. The number of species in \code{rsp} must be more that the number of
 profiles in \code{ref} to reduce the likelihood of over-fitting.
 }

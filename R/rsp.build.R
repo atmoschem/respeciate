@@ -106,7 +106,7 @@ rsp_build_x <-
     # should error if any of these missing at end of build
 
     # redundant?
-    # currently not using ...
+    # currently only using to turn warning off...
     .x.args <- list(...)
 
     #adding the as.data.frame because
@@ -227,7 +227,12 @@ rsp_build_x <-
 
     #pass via as.speciate to build rsp_x
     #   note: this replaces previous local testing
-    x <- as.respeciate(x, test.rsp=TRUE)
+    test.rsp <- if("test.rsp" %in% names(.x.args)){
+      .x.args$test.rsp
+    } else {
+      TRUE
+    }
+    x <- as.respeciate(x, test.rsp=test.rsp)
     #slip in rsp_x tag
     class(x) <- unique(c("rsp_x", class(x)))
     x
