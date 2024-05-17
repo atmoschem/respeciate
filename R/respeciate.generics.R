@@ -341,6 +341,23 @@ plot.respeciate <- function(x, ...){
 
 
 
+#' @rdname respeciate.generics
+#' @method plot rsp_pls
+#' @export
+
+##########################
+#notes
+##########################
+#all pls_plots are currently being redrafted
+#   (finish that then rethink this)
+
+plot.rsp_pls <- function(x, ...){
+  pls_plot(x, ...)
+}
+
+
+
+
 #########################
 #to do
 #########################
