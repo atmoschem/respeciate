@@ -1,11 +1,26 @@
-# Version 0.0 - Release Notes
+# Release Notes Version 0.3
+
+* [0.3.0] 
+    * released 2024-05-17 
+    * code and documentation refresh...  
+    * added as.respeciate method; replacing related unexported code 
+    * sp_profile, sp_build_rsp_x updates; both now use as.respeciate 
+    * sp_profile to rsp_profile; sp_dcast/melt to rsp_dcast/melt; both as 
+    part of object class rebuild 
+    * sp_pad to rsp_pad; sp_rescale to rsp_rescale; class rebuild 
+    * sp_match_profile to rsp_match_profile; class rebuild   
+    * sp_cor to rsp_cor; sp_distance to rsp_dist; class rebuild 
+    * rsp_plots now track factors 
+    * pls_plots updated for object class
+
+# Release Notes Version 0.2
 
 * [0.2.7] 
     * released 2024-02-17
     * sp_plot_species update; species order forced, added reset.x 
     * sp_match_profile update; fit methods for pd and sid (Belis) 
     * sp_match_profile update; added sid variations 
-    * pls_plot patch; forcing profile order   
+    * pls_plot patch; forcing profile order 1  
 
 * [0.2.6] 
     * released 2023-12-01
@@ -67,6 +82,8 @@
     * added crude print and plot methods for object classes
     * updated date and version
     * The new code is in R:speciate.0.2.r
+
+# Release Notes Version 0.1
 
 * [0.1.0] 
     * released 2020-12-20  

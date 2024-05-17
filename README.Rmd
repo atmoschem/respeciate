@@ -31,7 +31,7 @@ Find profiles based on search criteria
 
 ```{r }
 library(respeciate)
-x <- sp_find_profile("Ethanol")
+x <- rsp_find_profile("Ethanol")
 x
 ```
 
@@ -39,7 +39,7 @@ x
 ## speciate
 
 ```{r }
-p <- sp_profile("8833")
+p <- rsp_profile("8833")
 ```
 
 ## plot
@@ -54,7 +54,7 @@ plot(p)
 ... using lattice barchart syntax
 
 ```{r fig.width=12, fig.height=5, fig.align="center", dpi=400}
-p2 <- sp_profile(c(8833, 8850))
+p2 <- rsp_profile(c(8833, 8850))
 plot(p2, key=list(space="top"))
 ```
 
