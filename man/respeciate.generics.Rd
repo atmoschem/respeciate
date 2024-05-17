@@ -7,6 +7,7 @@
 \alias{print.respeciate}
 \alias{print.rsp_pls}
 \alias{plot.respeciate}
+\alias{plot.rsp_pls}
 \alias{summary.respeciate}
 \title{respeciate.generics}
 \usage{
@@ -19,6 +20,8 @@ as.respeciate(x, ...)
 \method{print}{rsp_pls}(x, n = NULL, ...)
 
 \method{plot}{respeciate}(x, ...)
+
+\method{plot}{rsp_pls}(x, ...)
 
 \method{summary}{respeciate}(object, ...)
 }

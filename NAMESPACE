@@ -2,6 +2,7 @@
 
 S3method(as.respeciate,default)
 S3method(plot,respeciate)
+S3method(plot,rsp_pls)
 S3method(print,respeciate)
 S3method(print,rsp_pls)
 S3method(summary,respeciate)
