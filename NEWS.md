@@ -1,5 +1,10 @@
 # Release Notes Version 0.3
 
+* [0.3.1] 
+    * released 2024-05-21 
+    * minor typo correction
+
+
 * [0.3.0] 
     * released 2024-05-17 
     * code and documentation refresh...  

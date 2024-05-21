@@ -1,5 +1,5 @@
 #' @name rsp.info
-#' @title re(SPECIATE) information
+#' @title (re)SPECIATE information
 #' @aliases rsp_info rsp_profile_info rsp_species_info rsp_find_profile
 #' rsp_find_species
 

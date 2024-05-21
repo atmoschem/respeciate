@@ -2,11 +2,15 @@
 # to think about
 #####################
 
-# standardise error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
+# standardise
 
-# made main respeciate object argument name rsp rather than x
-#     that helps rsp_plot..() if it passed args to lattice
-#          but not sure it really help with plot() if respeciate not loaded...
+#     error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
+
+#     shorthand for r package and SPECIATE together: (re)SPECIATE not re(SPECIATE)
+
+#     made main respeciate object argument name rsp rather than x
+#         that helps rsp_plot..() if it passed args to lattice
+#              but not sure it really help with plot() if respeciate not loaded...
 
 #####################
 #to check
