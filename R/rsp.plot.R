@@ -1,6 +1,6 @@
 #' @name rsp.plot
 #' @title plotting (re)SPECIATE profiles
-#' @aliases rsp_plot_profile rsp_plot_species
+#' @aliases rsp_plot rsp_plot_profile rsp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
 
@@ -22,6 +22,9 @@
 #' plotting functions.
 #' @param silent logical, hide warnings when generating plots (default
 #' \code{FALSE})
+#' @param output character, output method, one of: 'plot' to return just the
+#' requested plot; 'data' to return just the data; and, c('plot', 'data') to
+#' plot then return the data invisibly (default).
 #' @param multi.species, character, like \code{multi.profile} in
 #' \code{sp_plot_profile} but for species in \code{sp_plot_species}.
 #' @return \code{sp_plot} graph, plot, etc usually as a trellis object.
@@ -140,7 +143,7 @@
 
 rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
                               order=TRUE, log=FALSE, ...,
-                              silent=FALSE){
+                              silent=FALSE, output="default"){
 
   #setup
   x <- rsp ## this needs sorting...
@@ -351,7 +354,11 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
       .tmp
     }
   }
-  do.call(barchart, p1.ls)
+
+  #output
+  ##################
+  p <- do.call(barchart, p1.ls)
+  .rsp_plot_output(as.data.frame(p1.ls$data), p1.ls, p, output)
 }
 
 
@@ -370,7 +377,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
 
 rsp_plot_species <- function(rsp, id, multi.species = "group",
                             order = FALSE, log = FALSE,
-                            ..., silent = FALSE){
+                            ..., silent = FALSE, output = "default"){
 
   #setup
   x <- rsp ## this needs sorting...
@@ -646,5 +653,10 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
       .tmp
     }
   }
-  do.call(xyplot, p1.ls)
+
+  #output
+  ##################
+  p <- do.call(xyplot, p1.ls)
+  .rsp_plot_output(as.data.frame(p1.ls$data), p1.ls, p, output)
+
 }

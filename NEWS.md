@@ -1,8 +1,9 @@
 # Release Notes Version 0.3
 
 * [0.3.1] 
-    * released 2024-05-21 
-    * minor typo correction
+    * released 2024-05-22 
+    * some typos fixed
+    * added standard plot output handler for rsp_plot... plots
 
 
 * [0.3.0] 

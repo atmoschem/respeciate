@@ -309,8 +309,9 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...)
       #maybe need better handling
       p1.ls$col <- trellis.par.get("superpose.symbol")$col[1]
     }
-    #issue with species_code not being known made this...
+    #issue with species_code not being known made this tricky...
     p1.ls <- modifyList(p1.ls, .x.args)
+    p1.ls$output <- "plot"
     p1 <- do.call(rsp_plot_profile, p1.ls)
 
     #make second plot and .ans2

@@ -7,7 +7,7 @@
 \alias{rsp_species_info}
 \alias{rsp_find_profile}
 \alias{rsp_find_species}
-\title{re(SPECIATE) information}
+\title{(re)SPECIATE information}
 \usage{
 rsp_info()
 

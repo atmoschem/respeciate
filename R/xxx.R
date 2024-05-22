@@ -20,6 +20,52 @@
 #     xxx_test and its depends...
 #        (not keeping unless we can get it to work better)
 
+###############################
+# possible future projects ???
+###############################
+
+# boxplot output option for rsp_plot_species
+#     maybe x = species, y = .value, no group default...
+#     maybe make this plot.type=1/default...
+#           logic: current plot gives xyplot(type="l") is messy if there are
+#           lots of species...
+
+# better handling for the rsp ->(dcast)-> rsp_p/sw ->(melt)-> rsp (and rsp_x)
+#     1. look at general handling for rsp and rsp_x
+#     2. look at melt padding for rsp_x or when rsp meta data is missing...
+#            not sure how common the last case is ???
+#     3. look at melt padding when some or all of .value or WEIGHT_PERCENT missing...
+#            might need to be different for rsp and rsp_x ???
+#            might also need a repair function
+#     4. should we include rsp_pad_profile and rsp_pad_species as shortcuts ??
+
+
+# speed up rsp_match_profile
+#     I think this could be faster...
+#            maybe there is a better approach in data.table ???
+
+#  new function rsp_build_sim_x
+#     make a simulation data set for example pls models
+#     fun(rsp, n = 1, err=0, ...)
+#          rsp is profile to build sim with
+#          n is the n matrix (profile contributions) [check PLS docs]
+#                default 1 would be rep'ed by the n.profile in rsp
+#                but could be a data.frame or matrix, etc
+#                     so maybe allow arguments like matrix by.row [check]
+#                               so a vector of numbers coudl be turned into
+#                               a meaningful n data from...
+#          err is proportion err to add (default n = none)
+#                could this be like n, so a matrix of errs could be added
+#                also should err be an absolute to a multiplier for a
+#                random error term...
+#          would use with rsp_pls_profile as a quick example for documentation ???
+
+#  new function rsp_mmpls_profile
+#       like rsp_pls_profile but for molecular marker
+#                before starting this have a think because there might be a
+#                shortcut via
+
+
 ##############################
 #setup code, misc code,
 #testing code, etc
@@ -96,6 +142,33 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 
 
 
+# .rsp_plot_output(p, p1.ls)
+###################################
+# standard output from plot
+
+# this is messy
+#   maybe rethink...
+#     notes:
+#     need default plot, then send data invisibly
+#     other options just data, just plot, list...
+#
+
+.rsp_plot_output <- function(da, li, plt, output){
+  output <- tolower(paste(output, sep=",", collapse=","))
+  if(output=="default" | output =="plot,data"){
+    plot(plt)
+    return(invisible(as.data.frame(da)))
+  }
+  if(output=="plot"){
+    return(plt)
+  }
+  if(output=="data"){
+    return(as.data.frame(da))
+  }
+  if(output=="list"){
+    return(li)
+  }
+}
 
 
 

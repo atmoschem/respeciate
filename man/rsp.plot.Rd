@@ -3,6 +3,7 @@
 \name{rsp.plot}
 \alias{rsp.plot}
 \alias{rsp_plot_profile}
+\alias{rsp_plot}
 \alias{rsp_plot_species}
 \title{plotting (re)SPECIATE profiles}
 \usage{
@@ -13,7 +14,8 @@ rsp_plot_profile(
   order = TRUE,
   log = FALSE,
   ...,
-  silent = FALSE
+  silent = FALSE,
+  output = "default"
 )
 
 rsp_plot_species(
@@ -23,7 +25,8 @@ rsp_plot_species(
   order = FALSE,
   log = FALSE,
   ...,
-  silent = FALSE
+  silent = FALSE,
+  output = "default"
 )
 }
 \arguments{
@@ -49,6 +52,10 @@ plotting functions.}
 
 \item{silent}{logical, hide warnings when generating plots (default
 \code{FALSE})}
+
+\item{output}{character, output method, one of: 'plot' to return just the
+requested plot; 'data' to return just the data; and, c('plot', 'data') to
+plot then return the data invisibly (default).}
 
 \item{multi.species, }{character, like \code{multi.profile} in
 \code{sp_plot_profile} but for species in \code{sp_plot_species}.}
