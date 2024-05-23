@@ -24,6 +24,10 @@
 # possible future projects ???
 ###############################
 
+# add specieurope data to package
+# rename sysdata SPECIATE and add new as SPECIEUROPE
+
+
 # boxplot output option for rsp_plot_species
 #     maybe x = species, y = .value, no group default...
 #     maybe make this plot.type=1/default...
@@ -152,6 +156,12 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
 #     need default plot, then send data invisibly
 #     other options just data, just plot, list...
 #
+
+# this is used by all rsp_plot... and pls_plot... functions
+#   for output standardisation
+#      so all will need updating and checking if this is changed
+#      also pls_plot_profile uses rsp_plot_profile to make first layer
+#            p1. handling should also be checked...
 
 .rsp_plot_output <- function(da, li, plt, output){
   output <- tolower(paste(output, sep=",", collapse=","))

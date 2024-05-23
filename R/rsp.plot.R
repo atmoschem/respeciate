@@ -196,7 +196,6 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   }
   x <- x[x$PROFILE_NAME %in% profile,]
 
-
   #check for duplicates, etc...
   #tidy naming etc...
   x <- .rsp_plot_fix(x, silent=silent, ...)
@@ -249,6 +248,8 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if(!is.factor(x$PROFILE_NAME)){
     x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
   }
+  #should profile handling be like species_name?
+  #    maybe following profile above??
 
 
 #print(as.data.frame(x))
@@ -397,7 +398,6 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
   }
 
-
   #need to get species as character
   ##############################
   #if already factor ???
@@ -489,13 +489,13 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      xx <- unique(as.character(test$SPECIES_NAME))
     } else {
       test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      xx <- unique(as.character(test$SPECIES_NAME))
     }
   } else {
-    xx <- unique(x$SPECIES_NAME)
+    xx <- unique(as.character(x$SPECIES_NAME))
   }
   x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
 
@@ -514,9 +514,14 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if(!is.factor(x$PROFILE_NAME)){
     x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
   }
-  if(!is.factor(x$SPECIES_NAME)){
-    x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=unique(x$SPECIES_NAME))
-  }
+  ################
+  #testing tracking
+  ##if(!is.factor(x$SPECIES_NAME)){
+  ##  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=unique(x$SPECIES_NAME))
+  ##}
+  x$SPECIES_NAME <- factor(as.character(x$SPECIES_NAME),
+                           levels=xx)
+  #################
 
   ###############################
   #species handling
@@ -554,7 +559,6 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     x$.x <- as.numeric(factor(x$PROFILE_CODE))
     .xlab <- "Sample [index]"
   }
-
 
   ##############################
   #species alignment
@@ -607,7 +611,9 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if("col" %in% names(p1.ls)){
     if(is.function(p1.ls$col)){
       p1.ls$col <- if("groups" %in% names(p1.ls)){
-        p1.ls$col(length(species))
+        ##testing tracking
+        ##p1.ls$col(length(species))
+        p1.ls$col(length(xx))
       } else {
         p1.ls$col(1)
       }
@@ -615,7 +621,9 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
       colorRampPalette(rainbow(12, s = 0.5, v = 1)[1:11],
-                               interpolate = "spline")(length(species))
+                               ##testing tracking
+                               ##interpolate = "spline")(length(species))
+                               interpolate = "spline")(length(xx))
       #or:
       #colorRampPalette(rainbow(12, s = 0.5, v = 1),interpolate = "spline")(x)
       #was:
@@ -642,10 +650,13 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     .tmp <- list(space="right",
                  #title="Legends",
                  lines=list(col=rep(p1.ls$col,
-                                    length.out=length(species))),
+                                    ##testing tracking
+                                    ##length.out=length(species))),
+                                    length.out=length(xx))),
                  ##########################
                  #text = list(levels(x$SPECIES_NAME), cex=0.7))
-                 text = list(species, cex=0.7))
+                 ##text = list(species, cex=0.7))
+                 text = list(xx, cex=0.7))
                  #changed from above because x$SPECIES_NAME
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
@@ -653,10 +664,10 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
       .tmp
     }
   }
+  p <- do.call(xyplot, p1.ls)
 
   #output
   ##################
-  p <- do.call(xyplot, p1.ls)
   .rsp_plot_output(as.data.frame(p1.ls$data), p1.ls, p, output)
 
 }

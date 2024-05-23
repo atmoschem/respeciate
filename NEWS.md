@@ -2,8 +2,9 @@
 
 * [0.3.1] 
     * released 2024-05-23 
-    * some typos fixed
     * added standard plot output handler for rsp... and pls... plots 
+    * various fixes; some typos in docs; rsp_plot_species id 
+    tracking species is factor 
 
 
 * [0.3.0] 
