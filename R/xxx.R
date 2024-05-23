@@ -157,13 +157,13 @@ utils::globalVariables(c("sysdata", ".SD", "ans", "control",
   output <- tolower(paste(output, sep=",", collapse=","))
   if(output=="default" | output =="plot,data"){
     plot(plt)
-    return(invisible(as.data.frame(da)))
+    return(invisible(da))
   }
   if(output=="plot"){
     return(plt)
   }
   if(output=="data"){
-    return(as.data.frame(da))
+    return(da)
   }
   if(output=="list"){
     return(li)

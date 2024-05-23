@@ -48,13 +48,13 @@
 #functions
 # rsp_plot_profile
 # rsp_plot_species
-
 # plot.respeciate is wrapper for rsp_plot_profile
 
 #uses unexported code
 #  .rsp_plot_fix
 #  .rsp_yscale.component.log10 (currently in rsp.pls.r)
-
+#  .rsp_plot_output
+#     (so need to update them all if .rsp function formals change)
 
 
 

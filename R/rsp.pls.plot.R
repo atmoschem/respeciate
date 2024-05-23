@@ -20,6 +20,9 @@
 #' multiple options are available.
 #' @param ... other arguments, typically passed on to the associated
 #' \code{lattice} plot.
+#' @param output character, output method, one of: 'plot' to return just the
+#' requested plot; 'data' to return just the data; and, c('plot', 'data') to
+#' plot then return the data invisibly (default).
 #' @param log (for \code{pls_plot_profile} only) logical, if \code{TRUE} this
 #' applies 'log' scaling to the primary Y axes of the plot.
 
@@ -28,6 +31,15 @@
 #      The zero handling is a based on offset in plot(..., log="y", off.set)
 #      but automatically estimated...
 # shifted type to plot.type because it conflicts with type in lattice::xyplot....
+
+# all plots use .rsp_plot_output
+#     so need to update them all if .rsp function formals change
+#     also pls_plot_profile uses rsp_plot_profile with output forced...
+#          for first plot layer
+
+# all plots have old versions
+#     pls_plot... old
+#         can hopefully loose these at some point.
 
 #' @return \code{pls_plot}s produce various plots commonly used in source
 #' apportionment studies.
@@ -75,7 +87,8 @@
 #pls_plot(mod)
 
 
-pls_plot <- function (pls, plot.type = 1, ...){
+pls_plot <- function (pls, plot.type = 1, ...,
+                      output="default"){
 
   #current using lattice/latticeExtra for the panelling/layers...
 
@@ -221,9 +234,7 @@ pls_plot <- function (pls, plot.type = 1, ...){
 
   #output
   ############################
-  #this needs working up based on input from Dennis...
-  plot(p)
-  return(invisible(.ans))
+  .rsp_plot_output(as.data.frame(.ans), pl.ls, p, output)
 }
 
 
@@ -263,7 +274,8 @@ pls_plot <- function (pls, plot.type = 1, ...){
 # log scale may need work
 #    but that is in rsp_plot_profile/unexported functions...
 
-pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...)
+pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...,
+                              output="default")
 {
   #new version of pls_plot
 
@@ -343,10 +355,8 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...)
 
   #output
   ############################
-  #this needs working up based on input from Dennis...
-  plot(p1)
-  return(invisible(list(profile = .ans, tc = .ans2)))
-
+  #list is void here...
+  .rsp_plot_output(list(profile = .ans, tc = .ans2), list(), p1, output)
 }
 
 
@@ -397,7 +407,8 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...)
 #        (do this in plots and data ???)
 #    decide how to modify .index
 
-pls_plot_species <- function (pls, id, plot.type=1, ...)
+pls_plot_species <- function (pls, id, plot.type=1, ...,
+                              output = "default")
 {
   #new version of pls_plot
 
@@ -567,15 +578,16 @@ pls_plot_species <- function (pls, id, plot.type=1, ...)
                   par.settings = simpleTheme(col=.x.args$col))
     p2.ls <- modifyList(p2.ls, .x.args)
     p <- do.call(xyplot, p2.ls)
-    plot(p)
+    ##plot(p)
 
   }
 
   #output
   ############################
   #this needs working up based on input from Dennis...
-  plot(p)
-  return(invisible(.tmp))
+  ## plot(p)
+  ## return(invisible(.tmp))
+  .rsp_plot_output(as.data.frame(.tmp), list(p2.ls=plt, p2.ls=p2.ls), p, output)
 
 }
 
