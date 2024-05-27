@@ -212,7 +212,7 @@ rsp_build_x <-
     if(length(test)==1){
       #one there, other as look-up
       .tmp <- data.table::as.data.table(
-        sysdata$SPECIES_PROPERTIES[c("SPECIES_NAME", "SPECIES_ID")]
+        SPECIATE$SPECIES_PROPERTIES[c("SPECIES_NAME", "SPECIES_ID")]
       )
       .tmp$SPECIES_NAME <- as.character(.tmp$SPECIES_NAME)
       .tmp$SPECIES_ID <- as.character(.tmp$SPECIES_ID)

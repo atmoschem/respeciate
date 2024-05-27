@@ -5,19 +5,20 @@
 \alias{rsp_profile}
 \title{rsp_profile}
 \usage{
-rsp_profile(..., include.refs = FALSE)
+rsp(..., include.refs = FALSE)
 
-rsp(...)
+rsp_profile(...)
 }
 \arguments{
 \item{...}{The function assumes all inputs (except \code{include.refs})
 are \code{SPECIES_CODE}s (the unique descriptor the EPA assigns to all
 profiles in SPECIATE) or sources of profile information and requests these
-form the local (re)SPECIATE archive. Typically, simple
+form the local respeciate archive. Typically, simple
 objects like character and numeric vectors, as assumed to profile codes and
-composite data-types like \code{respeciate} objects or \code{data.frame},
+composite data-types like \code{respeciate} or \code{data.frame} objects
 are assumed to contain a named \code{PROFILE_CODE} column. All potential
-profile codes are requested and unrecognized codes are ignored.}
+profile codes are requested and unrecognized codes (and code duplicates)
+are ignored.}
 
 \item{include.refs}{logical, if profile reference information should be
 included when extracting the requested profile(s) from the archive, default
@@ -26,10 +27,10 @@ included when extracting the requested profile(s) from the archive, default
 \value{
 \code{rsp_profile} or the short-hand \code{rsp} return an object of
 \code{respeciate} class, a \code{data.frame} containing one or more profile
-from the local (re)SPECIATE archive.
+from the local respeciate archive.
 }
 \description{
-Getting profile(s) from the R (re)SPECIATE archive
+Getting profile(s) from the R respeciate archive
 }
 \note{
 The option \code{include.refs} adds profile source reference
@@ -51,4 +52,7 @@ Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
 The development and uses of EPA SPECIATE database.
 Atmospheric Pollution Research, 1(4), pp.196-206.
+}
+\seealso{
+\code{\link{SPECIATE}}
 }

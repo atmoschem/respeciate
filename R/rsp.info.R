@@ -1,5 +1,5 @@
 #' @name rsp.info
-#' @title (re)SPECIATE information
+#' @title Information about data sets currently in respeciate
 #' @aliases rsp_info rsp_profile_info rsp_species_info rsp_find_profile
 #' rsp_find_species
 
@@ -16,17 +16,17 @@
 #
 
 
-#' @description Functions that provide (re)SPECIATE
+#' @description Functions that provide respeciate
 #' source information.
 #' \code{rsp_info} generates a brief version report for the currently installed
-#' (re)SPECIATE data sets.
-#' \code{rsp_profile_info} searches the currently installed (re)SPECIATE
+#' respeciate data sets.
+#' \code{rsp_profile_info} searches the currently installed respeciate
 #' data sets for profile records.
-#' \code{rsp_species_info} searches the currently installed (re)SPECIATE
+#' \code{rsp_species_info} searches the currently installed respeciate
 #' data sets for species records.
 
 #' @param ... character(s), any search term(s) to use when searching
-#' the local (re)SPECIATE archive for relevant records using
+#' the local respeciate archive for relevant records using
 #' \code{rsp_profile_info} or \code{rsp_species_info}.
 #' @param by character, the section of the archive to
 #' search, by default \code{'keywords'} for \code{rsp_profile_info} and
@@ -35,7 +35,7 @@
 #' \code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.
 
 #' @return \code{rsp_info} provides a brief version information report on the
-#' currently installed (re)SPECIATE archive.
+#' currently installed respeciate archive.
 #' @return \code{rsp_profile_info} returns a \code{data.frame} of
 #' profile information, as a \code{respeciate} object.
 #' \code{rsp_species_info} returns a \code{data.frame} of
@@ -62,7 +62,7 @@
 # tidy output???
 #    little messy???
 
-#like to include summary(factor(sysdata$PROFILES$PROFILE_TYPE))
+#like to include summary(factor(SPECIATE$PROFILES$PROFILE_TYPE))
 #  or something like that
 
 # this is not currently catchable!!!!
@@ -73,11 +73,17 @@
 
 rsp_info <- function() {
   #extract profile info from archive
-  .ver <- "source: SPECIATE 5.2\n\t[in (re)SPECIATE since 0.2.0]"
-  .ver <- paste(.ver, "\n\t[now (re)SPECIATE ", packageVersion("respeciate"), "]", sep="")
-  .pro <- length(unique(sysdata$PROFILES$PROFILE_CODE))
-  .spc <- length(unique(sysdata$SPECIES_PROPERTIES$SPECIES_ID))
-  cat(.ver, "\n\tProfiles: ", .pro, "\n\tSpecies: ", .spc, "\n", sep = "")
+
+  .epa <- paste("source: SPECIATE 5.2\n\t[in respeciate since 0.2.0]",
+                "\n\tProfiles: ", length(unique(SPECIATE$PROFILES$PROFILE_CODE)),
+                "; species: ", length(unique(SPECIATE$SPECIES_PROPERTIES$SPECIES_ID)),
+                sep="")
+  .eu <- paste("source: SPECIEUROPE \n\t[in respeciate since 0.3.1]",
+               "\n\tProfiles: ", length(unique(SPECIEUROPE$source$Id)),
+               "; species: ", length(unique(SPECIEUROPE$source$Specie.Id)),
+               sep="")
+  .sts <- paste("respeciate: ", packageVersion("respeciate"), "", sep="")
+  cat(.sts, "\n", .epa, "\n", .eu, "\n", sep = "")
 }
 
 
@@ -86,7 +92,7 @@ rsp_info <- function() {
 
 rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
   #extract profile info from archive
-  out <- sysdata$PROFILES
+  out <- SPECIATE$PROFILES
   terms <- c(...)
   ###################################
   #ignoring case because missing loads...
@@ -98,7 +104,7 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
   #how to handle searching a profile
   #that contains a specific species
   #    this is all the profiles that have an entry for species_id 529
-  #    sysdata$SPECIES$PROFILE_CODE[sysdata$SPECIES$SPECIES_ID==529]
+  #    SPECIATE$SPECIES$PROFILE_CODE[SPECIATE$SPECIES$SPECIES_ID==529]
   #    could use sp_find_species to get species info, then
   ###################################
   if(tolower(by) %in% c("species_name")){
@@ -107,7 +113,7 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
     #search by species_name
     #    could add species_id, cas, etc?
     ###############################
-    species <- sysdata$SPECIES
+    species <- SPECIATE$SPECIES
     ref <- out$PROFILE_CODE
     for(ti in terms){
       ans <- rsp_species_info(ti, by=by, partial=partial)
@@ -146,7 +152,7 @@ rsp_find_profile <- function(...){
 
 rsp_species_info <- function(..., by = "species_name", partial = TRUE) {
   #extract species info from archive
-  out <- sysdata$SPECIES_PROPERTIES
+  out <- SPECIATE$SPECIES_PROPERTIES
   terms <- c(...)
   for(ti in terms){
     ref <- out[,tolower(names(out))==by]

@@ -3,22 +3,23 @@
 #' @aliases rsp rsp_profile
 
 
-#' @description  Getting profile(s) from the R (re)SPECIATE archive
+#' @description  Getting profile(s) from the R respeciate archive
 
 #' @param ... The function assumes all inputs (except \code{include.refs})
 #' are \code{SPECIES_CODE}s (the unique descriptor the EPA assigns to all
 #' profiles in SPECIATE) or sources of profile information and requests these
-#' form the local (re)SPECIATE archive. Typically, simple
+#' form the local respeciate archive. Typically, simple
 #' objects like character and numeric vectors, as assumed to profile codes and
-#' composite data-types like \code{respeciate} objects or \code{data.frame},
+#' composite data-types like \code{respeciate} or \code{data.frame} objects
 #' are assumed to contain a named \code{PROFILE_CODE} column. All potential
-#' profile codes are requested and unrecognized codes are ignored.
+#' profile codes are requested and unrecognized codes (and code duplicates)
+#' are ignored.
 #' @param include.refs logical, if profile reference information should be
 #' included when extracting the requested profile(s) from the archive, default
 #' \code{FALSE}.
 #' @return \code{rsp_profile} or the short-hand \code{rsp} return an object of
 #' \code{respeciate} class, a \code{data.frame} containing one or more profile
-#' from the local (re)SPECIATE archive.
+#' from the local respeciate archive.
 #' @note The option \code{include.refs} adds profile source reference
 #' information to the returned \code{respeciate} data set. The default option
 #' is to not include these because some profiles have several associated
@@ -27,6 +28,7 @@
 #' own methods or code and include references in any profile build you may be
 #' biasing some analyses in favor of those multiple-reference profile unless
 #' you check and account such cases.
+#' @seealso \code{\link{SPECIATE}}
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
@@ -43,6 +45,11 @@
 # went from sp_profile to rsp_profile (and rsp)
 # dropped code argument
 # using as.respeciate in generics to build rsp object
+# went to rsp as main (rsp_profile as wrapper)
+# went from sysdata to SPECIATE as SPECIATE source
+#      (when adding SPECIEUROPE)
+
+
 
 
 #to think about
@@ -83,7 +90,7 @@
 #' @rdname rsp
 #' @export
 
-rsp_profile <- function(..., include.refs=FALSE) {
+rsp <- function(..., include.refs=FALSE) {
 
   # code currently handles:
   # respeciate.ref, data.frames containing profile_code,
@@ -122,11 +129,11 @@ rsp_profile <- function(..., include.refs=FALSE) {
   #       call.=FALSE)
   #}
 
-  PROFILES <- data.table::as.data.table(sysdata$PROFILES)
-  SPECIES <- data.table::as.data.table(sysdata$SPECIES)
-  SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
-  PROFILE_REFERENCE <- data.table::as.data.table(sysdata$PROFILE_REFERENCE)
-  REFERENCES <- data.table::as.data.table(sysdata$REFERENCES)
+  PROFILES <- data.table::as.data.table(SPECIATE$PROFILES)
+  SPECIES <- data.table::as.data.table(SPECIATE$SPECIES)
+  SPECIES_PROPERTIES <- data.table::as.data.table(SPECIATE$SPECIES_PROPERTIES)
+  PROFILE_REFERENCE <- data.table::as.data.table(SPECIATE$PROFILE_REFERENCE)
+  REFERENCES <- data.table::as.data.table(SPECIATE$REFERENCES)
 
   ##########################
   #testing tolower below
@@ -168,7 +175,9 @@ rsp_profile <- function(..., include.refs=FALSE) {
 #' @rdname rsp
 #' @export
 
-rsp <- function(...) { rsp_profile(...) }
+#might be dropping this...
+
+rsp_profile <- function(...) { rsp(...) }
 
 
 

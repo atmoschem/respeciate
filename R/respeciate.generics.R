@@ -39,6 +39,7 @@
 
 # TO DO...
 
+# check what tidying jobs were at the think about stage...
 
 #################################
 # as.respeciate
@@ -533,13 +534,18 @@ plot.rsp_pls <- function(x, ...){
 #' @method summary respeciate
 #' @export
 
-
 # see below about alternative summary output
 #   including check sum?
+
+################################
+# think about
+################################
 
 #   maybe table
 #   profile (code); (name); type; n.species (count); checksum; comments
 #   just show some but send all
+
+#   maybe shorten table in visual output ???
 
 # replacing previous
 

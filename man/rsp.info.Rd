@@ -7,7 +7,7 @@
 \alias{rsp_species_info}
 \alias{rsp_find_profile}
 \alias{rsp_find_species}
-\title{(re)SPECIATE information}
+\title{Information about data sets currently in respeciate}
 \usage{
 rsp_info()
 
@@ -21,7 +21,7 @@ rsp_find_species(...)
 }
 \arguments{
 \item{...}{character(s), any search term(s) to use when searching
-the local (re)SPECIATE archive for relevant records using
+the local respeciate archive for relevant records using
 \code{rsp_profile_info} or \code{rsp_species_info}.}
 
 \item{by}{character, the section of the archive to
@@ -33,7 +33,7 @@ search, by default \code{'keywords'} for \code{rsp_profile_info} and
 }
 \value{
 \code{rsp_info} provides a brief version information report on the
-currently installed (re)SPECIATE archive.
+currently installed respeciate archive.
 
 \code{rsp_profile_info} returns a \code{data.frame} of
 profile information, as a \code{respeciate} object.
@@ -41,13 +41,13 @@ profile information, as a \code{respeciate} object.
 species information as a \code{respeciate} object.
 }
 \description{
-Functions that provide (re)SPECIATE
+Functions that provide respeciate
 source information.
 \code{rsp_info} generates a brief version report for the currently installed
-(re)SPECIATE data sets.
-\code{rsp_profile_info} searches the currently installed (re)SPECIATE
+respeciate data sets.
+\code{rsp_profile_info} searches the currently installed respeciate
 data sets for profile records.
-\code{rsp_species_info} searches the currently installed (re)SPECIATE
+\code{rsp_species_info} searches the currently installed respeciate
 data sets for species records.
 }
 \examples{

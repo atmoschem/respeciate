@@ -78,7 +78,7 @@
 #currently no hooks, etc...
 
 #globals
-utils::globalVariables(c("sysdata", ".SD", "ans", "control",
+utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
                          "SPECIES_ID", "SPECIES_NAME",
                          "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))

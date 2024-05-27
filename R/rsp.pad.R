@@ -35,6 +35,8 @@
 
 ## think about
 
+# renamed speciate data sysdata -> SPECIATE
+
 # improving the respeciate class handling
 # in -> dcast -> melt -> out
 
@@ -73,7 +75,6 @@
 #        standard (long), wide by profile, wide by species,
 #        profile info, species info...
 
-
 #test
 #b <- sp_dcast_species(spq_pm.ae8())
 #c <- b[c("PROFILE_CODE", "SPECIES_NAME", "WEIGHT_PERCENT")]
@@ -94,7 +95,7 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #profile
   if(any(c("profile", "profiles", "standard", "all") %in% tolower(pad))){
-    PROFILES <- data.table::as.data.table(sysdata$PROFILES)
+    PROFILES <- data.table::as.data.table(SPECIATE$PROFILES)
     .tmp <- intersect(names(out), names(PROFILES))
     if(length(.tmp)>0){
       out <- data.table::merge.data.table(out, PROFILES, by = .tmp, all.y=FALSE,
@@ -104,7 +105,7 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #species
   if(any(c("species", "standard", "all") %in% tolower(pad))){
-    SPECIES_PROPERTIES <- data.table::as.data.table(sysdata$SPECIES_PROPERTIES)
+    SPECIES_PROPERTIES <- data.table::as.data.table(SPECIATE$SPECIES_PROPERTIES)
     SPECIES_PROPERTIES$SPECIES_ID <- as.character(SPECIES_PROPERTIES$SPECIES_ID)
     .tmp <- intersect(names(out), names(SPECIES_PROPERTIES))
     if(length(.tmp) >0){
@@ -116,7 +117,7 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
   #species weights
   #    might not want to add weights if rsp_x???
   if(any(c("weight", "weights", "standard", "all") %in% tolower(pad))){
-    SPECIES <- data.table::as.data.table(sysdata$SPECIES)
+    SPECIES <- data.table::as.data.table(SPECIATE$SPECIES)
     SPECIES$SPECIES_ID <- as.character(SPECIES$SPECIES_ID)
     .tmp <- intersect(names(out), names(SPECIES))
     if(length(.tmp) >0){
@@ -130,8 +131,8 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #references
   if(any(c("reference", "references", "all") %in% tolower(pad))){
-    PROFILE_REFERENCE <- data.table::as.data.table(sysdata$PROFILE_REFERENCE)
-    REFERENCES <- data.table::as.data.table(sysdata$REFERENCES)
+    PROFILE_REFERENCE <- data.table::as.data.table(SPECIATE$PROFILE_REFERENCE)
+    REFERENCES <- data.table::as.data.table(SPECIATE$REFERENCES)
     .tmp <- intersect(names(out), names(PROFILE_REFERENCE))
     if(length(.tmp) >0){
       out <- data.table::merge.data.table(out, PROFILE_REFERENCE, by = .tmp, all.y=FALSE,
