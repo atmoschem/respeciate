@@ -80,8 +80,8 @@
 #globals
 utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
                          "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
-                         "SPECIES_ID", "SPECIES_NAME",
-                         "SPEC_MW", "WEIGHT_PERCENT", ".", ".value"))
+                         "SPECIES_ID", "SPECIES_NAME", "SPEC_MW",
+                         "WEIGHT_PERCENT", ".", ".value", "Id"))
 
 #to think about...
 

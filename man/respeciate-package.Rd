@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Access to the US.EPA Speciate (v5.2) tool, to generate speciation profiles for gases and particles. More details in Simon et al (2010) \doi{10.5094/APR.2010.026}.
+Access to the US EPA Speciate (v5.2) and EU JRC SPECIEUROPE, gases and and particle profiles. More details in Simon et al (2010) \doi{10.5094/APR.2010.026} and Pernigotti et al (2016) \doi{10.1016/j.apr.2015.10.007}, respectively.
 }
 \seealso{
 Useful links:

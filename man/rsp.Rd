@@ -5,15 +5,16 @@
 \alias{rsp_profile}
 \title{rsp_profile}
 \usage{
-rsp(..., include.refs = FALSE)
+rsp(..., include.refs = FALSE, source = "us")
 
 rsp_profile(...)
 }
 \arguments{
-\item{...}{The function assumes all inputs (except \code{include.refs})
-are \code{SPECIES_CODE}s (the unique descriptor the EPA assigns to all
-profiles in SPECIATE) or sources of profile information and requests these
-form the local respeciate archive. Typically, simple
+\item{...}{The function assumes all inputs (except \code{include.refs}
+and \code{source}) are profile identifiers: namely, \code{PROFILE_CODE}
+and \code{Species.id} in SPECIATE and SPECIEUROPE, respectively, or
+potential sources of profile information and requests these
+form the local respeciate archives. Typically, simple
 objects like character and numeric vectors, as assumed to profile codes and
 composite data-types like \code{respeciate} or \code{data.frame} objects
 are assumed to contain a named \code{PROFILE_CODE} column. All potential
@@ -23,6 +24,9 @@ are ignored.}
 \item{include.refs}{logical, if profile reference information should be
 included when extracting the requested profile(s) from the archive, default
 \code{FALSE}.}
+
+\item{source}{character, the local archive to request a profile from:
+\code{'us'} US EPA SPECIATE, or \code{'eu'} EU JRC SPECIEUROPE.}
 }
 \value{
 \code{rsp_profile} or the short-hand \code{rsp} return an object of
@@ -35,8 +39,9 @@ Getting profile(s) from the R respeciate archive
 \note{
 The option \code{include.refs} adds profile source reference
 information to the returned \code{respeciate} data set. The default option
-is to not include these because some profiles have several associated
-references and including these replicates records, once per reference.
+is to not include these because some SPECIATE profiles have several
+associated references and including these replicates records, once per
+reference.
 \code{respeciate} code is written to handle this but if you are developing
 own methods or code and include references in any profile build you may be
 biasing some analyses in favor of those multiple-reference profile unless
