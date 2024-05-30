@@ -2,7 +2,7 @@
 #' @title rsp_profile
 #' @aliases rsp rsp_profile
 
-#' @description  Getting profile(s) from the R respeciate archive
+#' @description  Getting profile(s) from the local respeciate archive
 
 #' @param ... The function assumes all inputs (except \code{include.refs}
 #' and \code{source}) are profile identifiers: namely, \code{PROFILE_CODE}
@@ -31,12 +31,21 @@
 #' own methods or code and include references in any profile build you may be
 #' biasing some analyses in favor of those multiple-reference profile unless
 #' you check and account such cases.
-#' @seealso \code{\link{SPECIATE}}
+#' @seealso \code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
 #' @references
+#' For SPECIATE:
+#'
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
 #' The development and uses of EPA SPECIATE database.
 #' Atmospheric Pollution Research, 1(4), pp.196-206.
+#'
+#' For SPECIEUROPE:
+#'
+#' Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+#' European data base for PM source profiles. Atmospheric Pollution Research,
+#' 7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
+#'
 #' @examples \dontrun{
 #' x <- rsp_profile(8833, 8850)
 #' plot(x)}
@@ -59,13 +68,14 @@
 # went from sp_profile to rsp_profile (and rsp)
 # dropped code argument
 # using as.respeciate in generics to build rsp object
+# dropping generic unexported rsp_build_respeciate(x)
+#    replaced with as.respeciate
 
 # 0.3.1 notes
 # went to rsp as main (rsp_profile as wrapper)
 # went from sysdata to SPECIATE as SPECIATE source
 #      (when adding SPECIEUROPE)
-# added source agrument, default 'us'
-
+# added source argument, default 'us' (get from SPECIATE)
 
 #to think about
 #######################
@@ -74,23 +84,25 @@
 ##     extension of rsp_build_x ???
 ##           might be very code intensive..?
 
-## local function to pad data using database(s)???
-
+## local function to pad data using database(s) meta info???
 
 #####################
 #to think about
 #####################
-# not sure but I think main build is:
+
+# not sure but I think main SPECIATE build is:
 #    (default; include.refs = FALSE) [source="us"]
-#    PROFILES>>SPECIES>>SPECIES_PROPERTIES
+#    PROFILES[subset.requested.codes]>>SPECIES>>SPECIES_PROPERTIES
 #    (full build; include.refs = TRUE) [source="us"]
-#    PROFILES>>SPECIES>>SPECIES_PROPERTIES>>PROFILE_REFERENCE>>REFERENCES
+#    PROFILES[subset.requested.codes]>>SPECIES>>SPECIES_PROPERTIES>>PROFILE_REFERENCE>>REFERENCES
 #    (BUT this is replicating profiles with more than 1 reference...)
 
-#v 0.3
-#   renamed rsp() with rsp_profile() as werapper
-#   0.2 was based on previous sp_profile but used data.table
-#   0.1 version was sp_profile.old for a while...
+# SPECIEUROPE build is simpler because it is just one data frame
+#    [saved as list(source=[data.frame]), in case we need to add any supporting meta-data]
+#    (default; include.refs = FALSE) [source="eu"]
+#    source[subset.requested.codes];remove(REFRENCES)
+#    (full build; include.refs = TRUE) [source="em"]
+#    source[subset.requested.codes]
 
 #' @rdname rsp
 #' @export
@@ -166,53 +178,22 @@ rsp <- function(..., include.refs=FALSE, source="us") {
     if("WEIGHT_PERCENT" %in% names(x) & !".value" %in% names(x)) {
       x$.value <- x$WEIGHT_PERCENT
     }
+    rsp <- as.respeciate(x, test.rsp=FALSE)
   }
   if(source=="eu"){
+    ######################################
     #currently not data.table-ing this...
+    ######################################
     x <- SPECIEUROPE$source
     x <- subset(x, as.character(Id) %in% code)
     if(!include.refs){
       x <- x[names(x) != "Reference"]
     }
-    ########################################
-    # think about next step
-    #    should this be a rsp_build... function ???
-    #    should there be option to not build...
-    ########################################
-    #make it respeciate-like
-    names(x)[names(x)=="Id"] <- "PROFILE_CODE"
-    names(x)[names(x)=="Name"] <- "PROFILE_NAME"
-    names(x)[names(x)=="Specie"] <- "SPECIES_NAME"
-    names(x)[names(x)=="Specie.Id"] <- "SPECIES_ID"
-    names(x)[names(x)=="Relative.Mass"] <- "WEIGHT_PERCENT"
-    ##########################
-    # note
-    ##########################
-    # this might generate a warning
-    #      some SPECIEUROPE$source$Relative.Mass is a character vector and
-    #      some are something like 'not detected'...
-    if(nrow(x)>0){
-      ############################################
-      # to think about
-      ############################################
-      # do we want a 'US:' prefix for profiles from SPECIATE ???
-      #      like this ???
-      #      (might need to think about handling...)
-      #      [user could go rsp("eu:1") instead of rsp(1, source="us")]
-      x$PROFILE_CODE <- paste("EU:", x$PROFILE_CODE, sep="")
-      x$WEIGHT_PERCENT <- as.numeric(x$WEIGHT_PERCENT) * 100
-      x$.value <- x$WEIGHT_PERCENT
-    }
+    rsp <- as.respeciate(x, test.rsp=FALSE)
+    class(rsp) <- unique(c("rsp_eu", class(rsp)))
   }
 
-  # note
-  ######################################
-  #dropping generic unexported rsp_build_respeciate(x)
-  #    replacing with as.respeciate
-  #    could do similar elsewhere if not used widely elsewhere ???
-
   #output
-  rsp <- as.respeciate(x, test.rsp=FALSE)
   return(rsp)
 }
 

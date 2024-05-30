@@ -6,7 +6,8 @@
 
 #     error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
 
-#     shorthand for r package and SPECIATE together: (re)SPECIATE not re(SPECIATE)
+#     dropping the (re)SPECIATE shorthand for r package and SPECIATE together
+#          adding SPECIEUROPE makes this complicated
 
 #     made main respeciate object argument name rsp rather than x
 #         that helps rsp_plot..() if it passed args to lattice
@@ -17,16 +18,32 @@
 #####################
 
 # I think all build/check issues associate with
-#     xxx_test and its depends...
+#     [whatever]_test and its depends...
 #        (not keeping unless we can get it to work better)
+
+
+##############################
+#current projects
+##############################
+
+# add specieurope data to package
+#     DONE
+# rename sysdata SPECIATE and add new as SPECIEUROPE
+#     DONE
+#     ...BUT
+#         think about how these will impact other packages???
+#                  ATMOSCHEM, EMBRS, etc
+#         need to check/update other functions,
+#                  so they can use eu as well as us data...
+
+#  also like to be able to pull and use profiles in both databases
+#         at same time...
+#         OR at least merge them...
+
 
 ###############################
 # possible future projects ???
 ###############################
-
-# add specieurope data to package
-# rename sysdata SPECIATE and add new as SPECIEUROPE
-
 
 # boxplot output option for rsp_plot_species
 #     maybe x = species, y = .value, no group default...
@@ -137,12 +154,78 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #   think this can go because we now have rsp_build_x???
 #       plus I don't think anyone but me (kr) has used it...
 
-.rsp_ <- function(x){
-  .o <- rsp_profile(x)
-  .o$PROFILE_NAME <- paste("test", .o$PROFILE_NAME, sep=">")
-  .o$PROFILE_CODE <- "test"
-  .o
+##.rsp_ <- function(x){
+##  .o <- rsp_profile(x)
+##  .o$PROFILE_NAME <- paste("test", .o$PROFILE_NAME, sep=">")
+##  .o$PROFILE_CODE <- "test"
+##  .o
+##}
+
+
+###############################
+# think about ????
+###############################
+
+# combining some of these .rsp_ functions
+#      as a new .rsp_tidy or .rsp_barebones
+#          to simplify the data sent and work with in functions
+#      then use a rsp_pad or rsp_meta/repair to add meta data when wanted???
+
+
+#.rsp_eu2us(rsp)
+##############################
+# convert specieurope data to (re)speciate
+
+.rsp_eu2us <- function(x){
+
+  #note:
+  #only meant for SPECIEUROPE and subsets of it...
+
+  #make it respeciate-like
+  #note:
+  #   the if... names is redundant if x is from SPECIEUROPE
+  if("Id" %in% names(x)){
+    names(x)[names(x)=="Id"] <- "PROFILE_CODE"
+  }
+  if("Name" %in% names(x)){
+      names(x)[names(x)=="Name"] <- "PROFILE_NAME"
+  }
+  if("Specie" %in% names(x)){
+    names(x)[names(x)=="Specie"] <- "SPECIES_NAME"
+  }
+  if("Specie.Id" %in% names(x)){
+    names(x)[names(x)=="Specie.Id"] <- "SPECIES_ID"
+    x$SPECIES_ID <- as.character(x$SPECIES_ID)
+  }
+  if("Relative.Mass" %in% names(x)){
+    names(x)[names(x)=="Relative.Mass"] <- "WEIGHT_PERCENT"
+  }
+  ##########################
+  # note
+  ##########################
+  # this might generate a warning
+  #      some SPECIEUROPE$source$Relative.Mass is a character vector and
+  #      some are something like 'not detected'...
+  # also wondering if these should in above if's
+  #      if someone passed a us rsp to this it could corrupt structure...
+  if(nrow(x)>0){
+    ############################################
+    # to think about
+    ############################################
+    # do we want a 'US:' prefix for profiles from SPECIATE ???
+    #      like this ???
+    #      (might need to think about handling...)
+    #      [user could go rsp("eu:1") instead of rsp(1, source="us")]
+    x$PROFILE_CODE <- paste("EU:", x$PROFILE_CODE, sep="")
+    x$WEIGHT_PERCENT[x$WEIGHT_PERCENT=="not detected"] <- NA
+    x$WEIGHT_PERCENT <- as.numeric(x$WEIGHT_PERCENT) * 100
+    x$.value <- x$WEIGHT_PERCENT
+  }
+  class(x) <- class(x)[class(x)!="rsp_eu"]
+  x
 }
+
+
 
 
 

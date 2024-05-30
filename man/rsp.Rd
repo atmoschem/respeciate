@@ -34,7 +34,7 @@ included when extracting the requested profile(s) from the archive, default
 from the local respeciate archive.
 }
 \description{
-Getting profile(s) from the R respeciate archive
+Getting profile(s) from the local respeciate archive
 }
 \note{
 The option \code{include.refs} adds profile source reference
@@ -53,11 +53,19 @@ x <- rsp_profile(8833, 8850)
 plot(x)}
 }
 \references{
+For SPECIATE:
+
 Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
 The development and uses of EPA SPECIATE database.
 Atmospheric Pollution Research, 1(4), pp.196-206.
+
+For SPECIEUROPE:
+
+Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+European data base for PM source profiles. Atmospheric Pollution Research,
+7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
 }
 \seealso{
-\code{\link{SPECIATE}}
+\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
 }

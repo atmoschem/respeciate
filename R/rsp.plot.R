@@ -147,6 +147,12 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
 
   #setup
   x <- rsp ## this needs sorting...
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
   .x.args <- list(...)
 
   #currently not even trying to stack logs...
@@ -382,6 +388,12 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
 
   #setup
   x <- rsp ## this needs sorting...
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
   .x.args <- list(...)
 
   ######################################

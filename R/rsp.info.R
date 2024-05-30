@@ -141,7 +141,7 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
 #' @rdname rsp.info
 #' @export
 
-#wrapper for above
+#wrapper for abovers
 
 rsp_find_profile <- function(...){
   rsp_profile_info(...)

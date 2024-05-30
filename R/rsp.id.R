@@ -1,45 +1,47 @@
-#' @name rsp.x
-#' @title rsp_x_ functions for grouping and subsetting (re)SPECIATE profiles
-#' @aliases rsp_x rsp_x_copy rsp_x_nalkane rsp_x_btex
-
-# still wondering if these should be rsp_cut_...
-
-#' @description \code{rsp_x_} functions generate a vector of assignment
+#' @name rsp.id
+#' @title rsp_id_ functions to identify common species groups for grouping and
+#' subsetting respeciate profiles
+#' @aliases rsp_id rsp_id_copy rsp_id_nalkane rsp_id_btex
+#' @description \code{rsp_id_} functions generate a vector of assignment
 #' terms and can be used to subset or condition a supplied (re)SPECIATE
 #' \code{data.frame}.
 #'
-#' Most commonly, the \code{rsp_x_} functions accept a single input, a
-#' (re)SPECIATE \code{data.frame} and return a logical vector of
+#' Most commonly, the \code{rsp_id_} functions accept a single input, a
+#' respeciate \code{data.frame} and return a logical vector of
 #' length \code{nrow(x)}, identifying species of interest as
 #' \code{TRUE}. So, for example, they can be used when
 #' \code{\link{subset}}ting in the form:
 #'
-#' \code{subset(rsp, rsp_x_nalkane(rsp))}
+#' \code{subset(rsp, rsp_id_nalkane(rsp))}
 #'
 #' ... to extract just n-alkane records from a supplied \code{respeciate}
 #' object \code{rsp}.
 #'
-#' However, some accept additional arguments. For example, \code{rsp_x_copy}
+#' However, some accept additional arguments. For example, \code{rsp_id_copy}
 #' also accepts a reference data set, \code{ref}, and a column identifier,
 #' \code{by}, and tests \code{rsp$by \%in\% unique(ref$by)}.
 #'
-#' @param rsp a \code{respeciate} object, a \code{data.frame} of (re)SPECIATE
+#' @param rsp a \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
-#' @param ref (\code{rsp_x_copy} only) a second \code{respeciate} object, to
+#' @param ref (\code{rsp_id_copy} only) a second \code{respeciate} object, to
 #' be used as reference when subsetting (or conditioning) \code{rsp}.
-#' @param by (\code{rsp_x_copy} only) character, the name of the column
+#' @param by (\code{rsp_id_copy} only) character, the name of the column
 #' in \code{ref} to copy when subsetting (or conditioning) \code{rsp}.
-#' @return \code{rsp_x_copy} outputs can be modified but, by default, it
+#' @return \code{rsp_id_copy} outputs can be modified but, by default, it
 #' identifies all species in the supplied reference data set.
 #'
-#' \code{rsp_x_nalkane} identifies (straight chain) C1 to C40 n-alkanes.
+#' \code{rsp_id_nalkane} identifies (straight chain) C1 to C40 n-alkanes.
 #'
-#' \code{rsp_x_btex} identifies the BTEX group of aromatic hydrocarbons
+#' \code{rsp_id_btex} identifies the BTEX group of aromatic hydrocarbons
 #' (benzene, toluene, ethyl benzene, and M-, O- and P-xylene).
 
 #############################
 #NOTE
 ############################
+
+# v 0.3.1
+# changed these from rsp_x_[whatever] to rsp_id_[whatever]
+#      because overlap with rsp_x object class could complicate things...
 
 #still not sure this is best way of doing this
 #   but it did not seem to be slowing things down
@@ -57,16 +59,16 @@
 #     monitoring network relevant subsets of species
 
 #do we need a strategy to rationalize multiple species names
-#     see rsp_x_nalkane where some species have two names in SPECIATE.
+#     see rsp_id_nalkane where some species have two names in SPECIATE.
 
 #################################
-# rsp_x_copy
+# rsp_id_copy
 #################################
 
 # identify species in rsp that are in ref(erence)
 
 # special cases???
-#     rsp_x_ref(rsp, ref, by="")
+#     rsp_id_ref(rsp, ref, by="")
 #           where rsp is respeciate object, ref is a reference
 #           by is column in ref; case is x$by %in% unique(ref$by)
 #              could ref also be a vector of terms???
@@ -74,7 +76,7 @@
 #' @rdname rsp.x
 #' @export
 
-rsp_x_copy <- function(rsp, ref = NULL, by="species_id"){
+rsp_id_copy <- function(rsp, ref = NULL, by="species_id"){
 
   #maybe warn???
   if(is.null(ref)){
@@ -90,7 +92,7 @@ rsp_x_copy <- function(rsp, ref = NULL, by="species_id"){
 
 
 #####################
-#rsp_x_nalkanes
+#rsp_id_nalkanes
 #######################
 
 # identify only the n-alkanes in rsp...
@@ -110,13 +112,13 @@ rsp_x_copy <- function(rsp, ref = NULL, by="species_id"){
 
 #test
 ## a <- sysdata$SPECIES_PROPERTIES
-## b <- subset(a, rsp_x_nalkane(a))
+## b <- subset(a, rsp_id_nalkane(a))
 ## b[order(b$SPEC_MW),]
 
 #' @rdname rsp.x
 #' @export
 
-rsp_x_nalkane <- function(rsp){
+rsp_id_nalkane <- function(rsp){
 
   #group x by is/isn't n-alkane
   tolower(rsp$SPECIES_NAME) %in% c("methane",            #C1
@@ -167,7 +169,7 @@ rsp_x_nalkane <- function(rsp){
 
 
 #####################
-#rsp_x_btex
+#rsp_id_btex
 #######################
 
 #  Benzene, toluene, ethylbenzene, 3 xylenes isomers
@@ -198,7 +200,7 @@ rsp_x_nalkane <- function(rsp){
 #tests
 #########################
 ## a <- sysdata$SPECIES_PROPERTIES
-## b <- subset(a, rsp_x_btex(a))
+## b <- subset(a, rsp_id_btex(a))
 ## b[order(b$SPEC_MW),]
 
 ## to do
@@ -206,7 +208,7 @@ rsp_x_nalkane <- function(rsp){
 #' @rdname rsp.x
 #' @export
 
-rsp_x_btex <- function(rsp){
+rsp_id_btex <- function(rsp){
 
   #identify species that is a btex
   #might need to think about mixtures...

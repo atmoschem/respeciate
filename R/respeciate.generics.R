@@ -125,6 +125,12 @@ print.respeciate <-
     #new general respeciate print method
     .tmp <- getOption("width")
     .x <- x
+    ######################
+    #for specieurope
+    #######################
+    if("rsp_eu" %in% class(.x)){
+      .x <- .rsp_eu2us(.x)
+    }
 
     #species info
     if(class(.x)[1] == "rsp_si"){
@@ -312,6 +318,8 @@ print.rsp_pls <- function(x, n = NULL, ...){
 
 
 
+
+
 #' @rdname respeciate.generics
 #' @method plot respeciate
 #' @export
@@ -337,6 +345,12 @@ print.rsp_pls <- function(x, n = NULL, ...){
 #this is now rsp_plot_profile
 
 plot.respeciate <- function(x, ...){
+  ######################
+  #for specieurope
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
   rsp_plot_profile(x, ...)
 }
 
@@ -557,7 +571,12 @@ summary.respeciate <-
     #summary(factor(n))
 
     #v0.3 summary
-
+    ######################
+    #for specieurope
+    #######################
+    if("rsp_eu" %in% class(object)){
+      object <- .rsp_eu2us(object)
+    }
     xx <- data.table::as.data.table(object)
 
 

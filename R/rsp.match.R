@@ -68,6 +68,7 @@
 #########################
 #  rsp_dcast (which uses data.table)
 #  rbindlist from data.table
+#  .rsp_eu2us
 
 #in development
 
@@ -80,6 +81,10 @@
 
 ##NOTE rsp code is case sensitive
 ##   not sure if we can fix this??
+
+
+## compare SPECIEUROPE and SPECIATE
+##a <- rsp(3, source="eu"); rsp_match_profile(a, rsp_q_pm(), method="sid", min.n=2)
 
 
 #to think about
@@ -126,7 +131,7 @@
 #                  could also do this earlier if min.bin set in formals
 #                     but might need to rethink n, min.bin, etc???
 
-# often have what looks like repliactes in SPECAITE, e.g.
+# often have what looks like replicates in SPECAITE, e.g.
 ## a <- rsp(80, source="eu"); rsp_match_profile(a, rsp_q_pm(), method="pd", matches=20);a
 ## PROFILE_CODE                                      PROFILE_NAME          fit
 ## 1       3400410                            Brake Lining, Asbestos 0.0003941924
@@ -161,6 +166,13 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
 
   #add .value if not there
   x <- .rsp_tidy_profile(rsp)
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  if("rsp_eu" %in% class(ref)){
+    ref <- .rsp_eu2us(ref)
+  }
+
 
   #tidy x for testing
   #.x.pr.cd <- as.character(x$PROFILE_CODE)
@@ -249,7 +261,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #get x back as a test case...
   #need a better way to handle test
   #     could as.vector(unlist(.test)) be done here
-  #         (just don't do .test[.ref] here...)
+  #         (just can't do .test[.ref] here...)
   .test <- .tmp[, "test"]
 
   ###########################
@@ -346,6 +358,11 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #  }
   #}
 
+  ###########################
+  # other methods
+  ###########################
+  # not documented/ need work
+  ############################
   if(tolower(method)=="log.pd"){
     # method log pd
     # to think about
@@ -445,9 +462,19 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #      maybe look at plotting two, e.g. sid vs pd as an output...
   .out <- .tmp[, (.cols) := lapply(.SD, f), .SDcols = .cols]
 
+
   # suspect above is non-ideal??
   #    rows are replicates
   #    might be a better way of doing this???
+  ################################
+  # when time
+  ####################################
+  #   try of these
+  #https://stackoverflow.com/questions/29620783/apply-multiple-functions-to-multiple-columns-in-data-table
+  ####################################
+  #   like to track overlap???
+  #        more overlap should be better
+  #   like to think about zero values
 
 
   ##########################
@@ -469,11 +496,13 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #this is a pain because some profile names are replicated
   #    (several profile codes seem to have same profile name)
 
+
   if(length(.out)<1){
     #see notes....
     #sometimes this is because there are less than min.n species in the x profile
     stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
   }
+
 
   .tmp <- names(.out)
   for(i in 1:length(.tmp)){
@@ -489,7 +518,8 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
                      fit=.out,
                      row.names = 1:length(.out))
 
-  #conflicted!!!
+  #think about this
+  #   when time should be a better way...?
   if(!test.rsp){
     matches <- matches - 1
     if("test" %in% x$PROFILE_CODE){
@@ -498,6 +528,11 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
     if(nrow(.out) > (matches)){
       .out <- .out[1:matches,]
     }
+  }
+  if(nrow(.out)<1){
+    #anything left if test is dropped and not wanted ???
+    #   (was reporting empty df if test was only result and test not reported...)
+    stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
   }
 
   #######################
