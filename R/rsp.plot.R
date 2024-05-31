@@ -1,12 +1,12 @@
 #' @name rsp.plot
-#' @title plotting (re)SPECIATE profiles
+#' @title plotting respeciate source profiles
 #' @aliases rsp_plot rsp_plot_profile rsp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
 
 #' @description \code{rsp_plot} functions generate plots for supplied
-#' (re)SPECIATE data sets.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' respeciate data sets.
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param id numeric, the indices of profiles or species to use when
 #' plotting with \code{rsp_plot_profile} or \code{rsp_plot_species},
@@ -153,6 +153,8 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if("rsp_eu" %in% class(x)){
     x <- .rsp_eu2us(x)
   }
+  #######################
+  x <- .rsp_plot_fix(x, silent=silent, ...)
   .x.args <- list(...)
 
   #currently not even trying to stack logs...
@@ -173,6 +175,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   } else {
     unique(x$PROFILE_NAME)
   }
+
   #n/profile handling
   profile <- if (missing(id)) {
     .sp.pro
@@ -394,6 +397,8 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if("rsp_eu" %in% class(x)){
     x <- .rsp_eu2us(x)
   }
+
+  x <- .rsp_plot_fix(x, silent=silent, ...)
   .x.args <- list(...)
 
   ######################################

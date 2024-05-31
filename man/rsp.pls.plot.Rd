@@ -6,7 +6,7 @@
 \alias{pls.plot}
 \alias{pls_plot_species}
 \alias{pls_plot_profile}
-\title{Plots for use with (re)SPECIATE profile Positive Least Squares models}
+\title{Plots for use with respeciate profile Positive Least Squares models}
 \usage{
 pls_plot(pls, plot.type = 1, ..., output = "default")
 
@@ -15,7 +15,7 @@ pls_plot_profile(pls, plot.type = 1, log = FALSE, ..., output = "default")
 pls_plot_species(pls, id, plot.type = 1, ..., output = "default")
 }
 \arguments{
-\item{pls}{A \code{sp_pls_profile} output, intended for use with
+\item{pls}{A \code{rsp_pls_profile} output, intended for use with
 \code{pls_} functions.}
 
 \item{plot.type}{numeric, the plot type if

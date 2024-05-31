@@ -4,16 +4,23 @@
 #' rsp_find_species
 
 ###########################
-#keep think about the names
+# keep thinking about the names
 ###########################
 #  rsp_profile_info/ rsp_find_profile
 #  rsp_species_info/ rsp_find_species
+
+# currently thinking about making
+#    a page for rsp_info
+#    and a page for rsp_find_... functions
+#        (and dropping the rsp_profile_info, etc, )
 
 #########################
 #to think about
 #########################
 
-#
+# like to remove the need to set the source...
+#    following seems messy
+#    rsp(rsp_find_profile("diesel", source="eu"), source="eu")
 
 
 #' @description Functions that provide respeciate
@@ -33,6 +40,8 @@
 #' \code{'species_names'} for \code{sp_species_info}.
 #' @param partial logical, if \code{TRUE} (default)
 #' \code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.
+#' @param source character, the data set to search: \code{'us'} (default)
+#' US EPA SPECIATE or \code{'eu'} JRC SPECIEUROPE.
 
 #' @return \code{rsp_info} provides a brief version information report on the
 #' currently installed respeciate archive.
@@ -40,6 +49,22 @@
 #' profile information, as a \code{respeciate} object.
 #' \code{rsp_species_info} returns a \code{data.frame} of
 #' species information as a \code{respeciate} object.
+#' @seealso \code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
+#' @references
+#' For SPECIATE:
+#'
+#' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
+#' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
+#' The development and uses of EPA SPECIATE database.
+#' Atmospheric Pollution Research, 1(4), pp.196-206.
+#'
+#' For SPECIEUROPE:
+#'
+#' Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+#' European data base for PM source profiles. Atmospheric Pollution Research,
+#' 7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
+#'
+
 
 #' @examples \dontrun{
 #' profile <- "Ethanol"
@@ -90,9 +115,27 @@ rsp_info <- function() {
 #' @rdname rsp.info
 #' @export
 
-rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
+rsp_profile_info <- function(..., by = "keywords", partial = TRUE,
+                             source = "us") {
   #extract profile info from archive
-  out <- SPECIATE$PROFILES
+
+  if(!source %in% c("us", "eu")){
+    stop("RSP> unknown source...",
+         call.=FALSE)
+  }
+  if(source=="us"){
+    out <- SPECIATE$PROFILES
+    species <- SPECIATE$SPECIES
+  }
+  if(source=="eu"){
+    temp <- .rsp_eu2us(SPECIEUROPE$source)
+    out <- temp[c("PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE", "Original.Name", "Country",
+                 "Place", "Test.Year", "Profile.Type", "Latitude", "Longitude")]
+    out$Keywords <- out$PROFILE_NAME
+    species <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
+                      "Sampling.Method", "Cas", "Symbol")]
+  }
+
   terms <- c(...)
   ###################################
   #ignoring case because missing loads...
@@ -113,7 +156,6 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
     #search by species_name
     #    could add species_id, cas, etc?
     ###############################
-    species <- SPECIATE$SPECIES
     ref <- out$PROFILE_CODE
     for(ti in terms){
       ans <- rsp_species_info(ti, by=by, partial=partial)
@@ -133,6 +175,11 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
       }
     }
   }
+
+  ##########################
+  # to check
+  ##########################
+  #    should this now be .respeciate ???
   out <- .rsp_build_respeciate(out)
   class(out) <- unique(c("rsp_pi", class(out)))
   return(out)
@@ -141,7 +188,7 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE) {
 #' @rdname rsp.info
 #' @export
 
-#wrapper for abovers
+#wrapper for above
 
 rsp_find_profile <- function(...){
   rsp_profile_info(...)
@@ -150,9 +197,21 @@ rsp_find_profile <- function(...){
 #' @rdname rsp.info
 #' @export
 
-rsp_species_info <- function(..., by = "species_name", partial = TRUE) {
+rsp_species_info <- function(..., by = "species_name", partial = TRUE,
+                             source = "us") {
   #extract species info from archive
-  out <- SPECIATE$SPECIES_PROPERTIES
+  if(!source %in% c("us", "eu")){
+    stop("RSP> unknown source...",
+         call.=FALSE)
+  }
+  if(source=="us"){
+    out <- SPECIATE$SPECIES_PROPERTIES
+  }
+  if(source=="eu"){
+    temp <- .rsp_eu2us(SPECIEUROPE$source)
+    out <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
+                  "Sampling.Method", "Cas", "Symbol")]
+  }
   terms <- c(...)
   for(ti in terms){
     ref <- out[,tolower(names(out))==by]
@@ -164,7 +223,12 @@ rsp_species_info <- function(..., by = "species_name", partial = TRUE) {
       }
     }
   }
+
   #out <- PROFILES[grep(term, PROFILES[[by]], ignore.case = TRUE), ]
+  ##########################
+  # to check
+  ##########################
+  #    should this now be .respeciate ???
   out <- .rsp_build_respeciate(out)
   class(out) <- unique(c("rsp_si", class(out)))
   return(out)

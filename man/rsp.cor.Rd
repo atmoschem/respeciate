@@ -3,7 +3,7 @@
 \name{rsp.cor}
 \alias{rsp.cor}
 \alias{rsp_cor_species}
-\title{(re)SPECIATE Species Correlations}
+\title{Species correlations}
 \usage{
 rsp_cor_species(
   rsp,
@@ -16,7 +16,7 @@ rsp_cor_species(
 )
 }
 \arguments{
-\item{rsp}{\code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{\code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{min.n}{\code{numeric} (default 3), the minimum number of species measurements
@@ -58,9 +58,9 @@ correlation matrix a plots it as a heat map, but arguments including
 \code{heatmap} and \code{report} can be used to modify function outputs.
 }
 \description{
-(re)SPECIATE functions for studying relationships between
-species in (re)SPECIATE data sets.
+Functions for studying relationships between
+species in respeciate data sets.
 
 \code{\link{rsp_cor_species}} generates a by-species correlation
-matrix of the supplied (re)SPECIATE data sets.
+matrix of the supplied respeciate data sets.
 }

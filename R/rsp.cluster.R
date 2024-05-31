@@ -1,13 +1,13 @@
 #' @name rsp.cluster
-#' @title (re)SPECIATE profile cluster analysis methods
+#' @title Profile cluster analysis methods
 #' @aliases rsp_distance_profile
 
-#' @description (re)SPECIATE functions for studying similarities (or
-#' dissimilarities) within (re)SPECIATE data sets
+#' @description Functions for studying similarities (or
+#' dissimilarities) within respeciate data sets
 
 #' @description \code{\link{rsp_distance_profile}} calculates the statistical distance
-#' between re(SPECIATE) profiles, and clusters profiles according to nearness.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' between respeciate profiles, and clusters profiles according to nearness.
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param output Character vector, required function output: \code{'report'} the
 #' calculated distance matrix; \code{'plot'} a heat map of that distance
@@ -65,6 +65,13 @@
 rsp_distance_profile <- function(rsp, output = c("plot", "report")){
 
   #add .value if missing
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(rsp)){
+    rsp <- .rsp_eu2us(rsp)
+  }
+  #######################
   x <- .rsp_tidy_profile(rsp)
 
   # make by profile (rows) by species (columns) data.frame

@@ -200,6 +200,9 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   if("Relative.Mass" %in% names(x)){
     names(x)[names(x)=="Relative.Mass"] <- "WEIGHT_PERCENT"
   }
+  if("Particle.Size" %in% names(x)){
+    names(x)[names(x)=="Particle.Size"] <- "PROFILE_TYPE"
+  }
   ##########################
   # note
   ##########################

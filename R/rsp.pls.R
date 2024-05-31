@@ -1,10 +1,10 @@
 #' @name rsp.pls
-#' @title (re)SPECIATE profile Positive Least Squares models
+#' @title Positive Least Squares models
 #' @aliases rsp_pls_profile pls_report pls_test pls_fit_species
 #' pls_refit_species pls_rebuild
 
 #' @description Functions for Positive Least Squares (PSL) fitting of
-#' (re)SPECIATE profiles
+#' respeciate profiles
 
 #' @description
 #' \code{rsp_pls_profile} builds PSL models for supplied profile(s) using
@@ -12,7 +12,7 @@
 #' limit of zero for all model outputs to enforce the positive fits. The
 #' modeled profiles are typically from an external source, e.g. a
 #' measurement campaign, and are fit as a linear additive series of reference
-#' profiles, here typically from (re)SPECIATE, to provide a measure of
+#' profiles, here typically from respeciate, to provide a measure of
 #' source apportionment based on the assumption that the profiles in the
 #' reference set are representative of the mix that make up the modeled
 #' sample. The \code{pls_} functions work with \code{rsp_pls_profile}
@@ -148,6 +148,13 @@ rsp_pls_profile <- function(rsp, ref,
   #quick tidy for now
   ##################
   x <- rsp
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  #######################
 
   ##################
   #from rough code

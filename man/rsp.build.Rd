@@ -37,12 +37,12 @@ conventions, this will need to be assigned.}
 \item{...}{(any other arguments) currently ignored.}
 }
 \value{
-\code{rsp_build}s attempt to build and return a (re)SPECIATE-like
-object that can be compared with data from re(SPECIATE).
+\code{rsp_build}s attempt to build and return a respeciate-like
+object that can be compared with data from respeciate.
 }
 \description{
 rsp function(s) to reconfigure data.frames (and similar
-object classes) for use with data and functions in re(SPECIATE).
+object classes) for use with data and functions in respeciate.
 }
 \note{
 If you want to compare your data with profiles in the SPECIATE archive,

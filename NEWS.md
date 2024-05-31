@@ -1,7 +1,7 @@
 # Release Notes Version 0.3
 
 * [0.3.1] 
-    * released 2024-05-30 
+    * released 2024-05-31 
     * added standard plot output handler for rsp_ and pls_ plots 
     * added SPECIEUROPE data set; and renamed sysdata SPECIATE for 
     consistency

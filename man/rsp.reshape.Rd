@@ -6,7 +6,7 @@
 \alias{rsp_dcast_profile}
 \alias{rsp_dcast_species}
 \alias{rsp_melt_wide}
-\title{(re)SPECIATE profile reshaping functions}
+\title{Reshaping respeciate data sets}
 \usage{
 rsp_dcast(rsp, widen = "species")
 
@@ -17,7 +17,7 @@ rsp_dcast_species(rsp = rsp, widen = "species")
 rsp_melt_wide(rsp, pad = TRUE, drop.nas = TRUE)
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles in standard long form or widened form using
 \code{\link{rsp_dcast}} and \code{\link{rsp_melt_wide}}, respectively.}
 
@@ -46,10 +46,10 @@ building profiles yourself.}
 returns the (standard) long form of a previously widened profile.
 }
 \description{
-Functions for reshaping (re)SPECIATE profiles
+Functions for reshaping respeciate profiles
 
 \code{rsp_dcast} and \code{rsp_melt_wide} reshape supplied
-(re)SPECIATE profile(s). \code{rsp_dcast} converts these from their supplied
+respeciate profile(s). \code{rsp_dcast} converts these from their supplied
 long form to a widened form, \code{dcast}ing the data set by either species
 or profiles depending on the \code{widen} setting applied.
 \code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
@@ -71,7 +71,7 @@ And, the alternative \code{widen='profile'}:
 
 Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
 \code{.value}, so the EPA source information can easily be recovered. See also
-\code{\link{sp_rescale_profile}}.
+\code{\link{rsp_rescale_profile}}.
 }
 \references{
 Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.

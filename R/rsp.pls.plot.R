@@ -1,5 +1,5 @@
 #' @name rsp.pls.plot
-#' @title Plots for use with (re)SPECIATE profile Positive Least Squares models
+#' @title Plots for use with respeciate profile Positive Least Squares models
 #' @aliases pls.plot pls_plot pls_plot_species pls_plot_profile
 
 #' @description
@@ -7,7 +7,7 @@
 #' using \code{rsp_pls_profile} (documented separately). They generate some
 #' plots commonly used with source apportionment model outputs.
 
-#' @param pls A \code{sp_pls_profile} output, intended for use with
+#' @param pls A \code{rsp_pls_profile} output, intended for use with
 #' \code{pls_} functions.
 #' @param id numeric or character
 #' identifying the species or profile to plot. If numeric, these are treated

@@ -1,17 +1,17 @@
 #' @name rsp.reshape
-#' @title (re)SPECIATE profile reshaping functions
+#' @title Reshaping respeciate data sets
 #' @aliases rsp_dcast rsp_dcast_profile rsp_dcast_species rsp_melt_wide
 
-#' @description Functions for reshaping (re)SPECIATE profiles
+#' @description Functions for reshaping respeciate profiles
 
 #' @description \code{rsp_dcast} and \code{rsp_melt_wide} reshape supplied
-#' (re)SPECIATE profile(s). \code{rsp_dcast} converts these from their supplied
+#' respeciate profile(s). \code{rsp_dcast} converts these from their supplied
 #' long form to a widened form, \code{dcast}ing the data set by either species
 #' or profiles depending on the \code{widen} setting applied.
 #' \code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
 #' options. \code{rsp_melt_wide} attempts to return a previously widened data
 #' set to the original long form.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles in standard long form or widened form using
 #' \code{\link{rsp_dcast}} and \code{\link{rsp_melt_wide}}, respectively.
 #' @param widen character, when widening \code{rsp} with
@@ -48,7 +48,7 @@
 #'
 #' Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
 #' \code{.value}, so the EPA source information can easily be recovered. See also
-#' \code{\link{sp_rescale_profile}}.
+#' \code{\link{rsp_rescale_profile}}.
 #'
 #' @references
 #'   Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.
@@ -104,9 +104,18 @@ rsp_dcast <- function(rsp, widen = "species"){
   #      so user can set the dcast term, e.g. ~ species or profile
   #      name key? wide? variable.name?
 
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(rsp)){
+    rsp <- .rsp_eu2us(rsp)
+  }
+  #######################
+
   #adds .value if missing
   ## using .value rather the WEIGHT_PERCENT in case rescaled
   x <- .rsp_tidy_profile(rsp)
+
 
   #save class
   cls <- class(x)

@@ -185,7 +185,7 @@ rsp <- function(..., include.refs=FALSE, source="us") {
     #currently not data.table-ing this...
     ######################################
     x <- SPECIEUROPE$source
-    x <- subset(x, as.character(Id) %in% code)
+    x <- subset(x, as.character(Id) %in% gsub("^EU:", "", code))
     if(!include.refs){
       x <- x[names(x) != "Reference"]
     }

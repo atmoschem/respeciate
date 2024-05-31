@@ -1,14 +1,14 @@
 #' @name rsp.average
-#' @title (re)SPECIATE data averaging functions
+#' @title Data averaging multiple profile data sets
 #' @aliases rsp_average_profile
 
 
-#' @description Functions to build composite (re)SPECIATE profiles
+#' @description Functions to build composite respeciate profiles
 
 
 #' @description \code{rsp_average_profile} generates an average composite
 #' of a supplied multi-profile \code{respeciate} object.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param code required character, the unique profile code to assign to the
 #' average profile.
@@ -79,6 +79,15 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
   #check x is a respeciate object??
 
   #check it has .value
+
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(rsp)){
+    rsp <- .rsp_eu2us(rsp)
+  }
+  #######################
+
   x <- .rsp_tidy_profile(rsp)
 
   #save class to return as is..

@@ -3,12 +3,12 @@
 \name{rsp.cluster}
 \alias{rsp.cluster}
 \alias{rsp_distance_profile}
-\title{(re)SPECIATE profile cluster analysis methods}
+\title{Profile cluster analysis methods}
 \usage{
 rsp_distance_profile(rsp, output = c("plot", "report"))
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{output}{Character vector, required function output: \code{'report'} the
@@ -21,11 +21,11 @@ one or more of the following: the correlation matrix, a heat map of the
 correlation matrix.
 }
 \description{
-(re)SPECIATE functions for studying similarities (or
-dissimilarities) within (re)SPECIATE data sets
+Functions for studying similarities (or
+dissimilarities) within respeciate data sets
 
 \code{\link{rsp_distance_profile}} calculates the statistical distance
-between re(SPECIATE) profiles, and clusters profiles according to nearness.
+between respeciate profiles, and clusters profiles according to nearness.
 }
 \note{
 Please note: function in development; structure and arguments may be

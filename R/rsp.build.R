@@ -4,7 +4,7 @@
 
 
 #' @description rsp function(s) to reconfigure data.frames (and similar
-#' object classes) for use with data and functions in re(SPECIATE).
+#' object classes) for use with data and functions in respeciate.
 
 #' @param x \code{data.frame} or similar (i.e.
 #' something that can be coerced into a \code{data.frame} using
@@ -21,8 +21,8 @@
 #' containing measurement values. If not already named according to SPECIATE
 #' conventions, this will need to be assigned.
 #' @param ... (any other arguments) currently ignored.
-#' @return \code{rsp_build}s attempt to build and return a (re)SPECIATE-like
-#' object that can be compared with data from re(SPECIATE).
+#' @return \code{rsp_build}s attempt to build and return a respeciate-like
+#' object that can be compared with data from respeciate.
 #' @note If you want to compare your data with profiles in the SPECIATE archive,
 #' you need to use EPA SPECIATE conventions when assigning species names and
 #' identifiers. Currently, we are working on options to improve on this (and

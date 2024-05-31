@@ -5,7 +5,7 @@
 \alias{rsp_plot_profile}
 \alias{rsp_plot}
 \alias{rsp_plot_species}
-\title{plotting (re)SPECIATE profiles}
+\title{plotting respeciate source profiles}
 \usage{
 rsp_plot_profile(
   rsp,
@@ -30,7 +30,7 @@ rsp_plot_species(
 )
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{id}{numeric, the indices of profiles or species to use when
@@ -67,7 +67,7 @@ plot then return the data invisibly (default).}
 General plots for \code{respeciate} objects.
 
 \code{rsp_plot} functions generate plots for supplied
-(re)SPECIATE data sets.
+respeciate data sets.
 }
 \note{
 These functions are currently in development, so may change.

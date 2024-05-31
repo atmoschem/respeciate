@@ -1,13 +1,13 @@
 #' @name rsp.cor
-#' @title (re)SPECIATE Species Correlations
+#' @title Species correlations
 #' @aliases rsp_cor_species
 
-#' @description (re)SPECIATE functions for studying relationships between
-#' species in (re)SPECIATE data sets.
+#' @description Functions for studying relationships between
+#' species in respeciate data sets.
 
 #' @description \code{\link{rsp_cor_species}} generates a by-species correlation
-#' matrix of the supplied (re)SPECIATE data sets.
-#' @param rsp \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' matrix of the supplied respeciate data sets.
+#' @param rsp \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param min.n \code{numeric} (default 3), the minimum number of species measurements
 #' needed in a profile for the function to use it in correlation calculations.
@@ -123,6 +123,13 @@ rsp_cor_species <- function(rsp, min.n = 3,
                            key.args = TRUE, report = "silent"){
 
   x <- rsp #quick fix for now
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  #######################
 
   #if ref missing
   .x <- rsp_dcast(x, widen="species")

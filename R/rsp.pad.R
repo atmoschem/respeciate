@@ -1,12 +1,12 @@
 #' @name rsp.pad
-#' @title (re)SPECIATE profile padding functions
+#' @title Meta-data padding respeciate data sets
 #' @aliases rsp_pad
 
 #' @description Functions for padding \code{respeciate} objects.
 
-#' @description \code{rsp_pad} pads a supplied (re)SPECIATE profile data set
+#' @description \code{rsp_pad} pads a supplied respeciate profile data set
 #' with profile and species meta-data.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param pad character, type of meta data padding, current options
 #' \code{'profile'}, \code{'species'}, \code{'weight'}, \code{'reference'},
@@ -17,7 +17,7 @@
 #' @return \code{rsp_pad} returns supplied \code{respeciate} data set, with
 #' requested additional profile and species meta-data added as additional
 #' \code{data.frame} columns. See Note.
-#' @note Some data handling can remove (re)SPECIATE meta-data,
+#' @note Some data handling can remove respeciate meta-data,
 #' and \code{rsp_pad}s provide a quick rebuild/repair. For example,
 #' \code{\link{rsp_dcast}}ing to a (by-species or by-profile) widened
 #' form strips some meta-data, and padding is used as part of the
@@ -33,9 +33,14 @@
 
 #in development
 
+# renamed speciate data sysdata -> SPECIATE
+# added SPECIEUROPE
+#     this currently only pad from SPECIATE...
+#         think about how it can handle both...
+#         also think about default handling for rsp_x at same time...
+
 ## think about
 
-# renamed speciate data sysdata -> SPECIATE
 
 # improving the respeciate class handling
 # in -> dcast -> melt -> out
@@ -44,8 +49,8 @@
 #    or we add an 'all' default???
 #        I think it just needs to check with common columns
 #            and merge by those
-#   testing this with current version of sp_pad
-#        true default is sp_pad(x, pad="standard")
+#   testing this with current version of rsp_pad
+#        true default is rsp_pad(x, pad="standard")
 #            SO refs would be lost with dcast then melt
 #        could allow pad as logical or character
 
@@ -54,7 +59,8 @@
 
 # might want to specify data.frame::as.data.table???
 
-#think about a sp_repair_weight function
+# think about a rsp_repair_weight function
+#    (or rsp_reset ???)
 
 #not sure we need drop.nas here...
 #    think melt is making them...
@@ -79,6 +85,7 @@
 #b <- sp_dcast_species(spq_pm.ae8())
 #c <- b[c("PROFILE_CODE", "SPECIES_NAME", "WEIGHT_PERCENT")]
 #x <- sp_pad(c)
+
 
 
 rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){

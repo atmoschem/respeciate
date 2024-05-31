@@ -11,11 +11,11 @@
 \usage{
 rsp_info()
 
-rsp_profile_info(..., by = "keywords", partial = TRUE)
+rsp_profile_info(..., by = "keywords", partial = TRUE, source = "us")
 
 rsp_find_profile(...)
 
-rsp_species_info(..., by = "species_name", partial = TRUE)
+rsp_species_info(..., by = "species_name", partial = TRUE, source = "us")
 
 rsp_find_species(...)
 }
@@ -30,6 +30,9 @@ search, by default \code{'keywords'} for \code{rsp_profile_info} and
 
 \item{partial}{logical, if \code{TRUE} (default)
 \code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.}
+
+\item{source}{character, the data set to search: \code{'us'} (default)
+US EPA SPECIATE or \code{'eu'} JRC SPECIEUROPE.}
 }
 \value{
 \code{rsp_info} provides a brief version information report on the
@@ -60,4 +63,21 @@ species <- "Ethanol"
 sp <- rsp_find_species(species)
 sp}
 
+}
+\references{
+For SPECIATE:
+
+Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
+Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
+The development and uses of EPA SPECIATE database.
+Atmospheric Pollution Research, 1(4), pp.196-206.
+
+For SPECIEUROPE:
+
+Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+European data base for PM source profiles. Atmospheric Pollution Research,
+7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
+}
+\seealso{
+\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
 }
