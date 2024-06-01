@@ -1,8 +1,8 @@
 #' @name rsp
-#' @title rsp_profile
+#' @title Getting archived profiles
 #' @aliases rsp rsp_profile
 
-#' @description  Getting profile(s) from the local respeciate archive
+#' @description  Getting source profile(s) from the local respeciate archives.
 
 #' @param ... The function assumes all inputs (except \code{include.refs}
 #' and \code{source}) are profile identifiers: namely, \code{PROFILE_CODE}
@@ -18,7 +18,8 @@
 #' included when extracting the requested profile(s) from the archive, default
 #' \code{FALSE}.
 #' @param source character, the local archive to request a profile from:
-#' \code{'us'} US EPA SPECIATE, or \code{'eu'} EU JRC SPECIEUROPE.
+#' \code{'us'} US EPA SPECIATE, \code{'eu'} EU JRC SPECIEUROPE, or \code{'all'}
+#' (the default) both.
 #' @return \code{rsp_profile} or the short-hand \code{rsp} return an object of
 #' \code{respeciate} class, a \code{data.frame} containing one or more profile
 #' from the local respeciate archive.
@@ -107,7 +108,7 @@
 #' @rdname rsp
 #' @export
 
-rsp <- function(..., include.refs=FALSE, source="us") {
+rsp <- function(..., include.refs=FALSE, source="all") {
 
   # ... currently handles:
   # respeciate, profile references files, and data.frames containing
@@ -141,12 +142,12 @@ rsp <- function(..., include.refs=FALSE, source="us") {
   #       call.=FALSE)
   #}
 
-  if(!source %in% c("us", "eu")){
+  if(!source %in% c("all", "us", "eu")){
     stop("RSP> unknown 'source' requested...",
          call.=FALSE)
   }
 
-  if(source=="us"){
+  if(tolower(source) %in% c("us", "all")){
     #################################
     #get SPECIATE profile using code
     #################################
@@ -159,9 +160,9 @@ rsp <- function(..., include.refs=FALSE, source="us") {
     #testing tolower below
     #   as a fix for code arg case sensitivity
     ##########################
-    #  could test replacing some of this with sp_pad???
-    #      IF sp_pad stays
-    dt <- PROFILES[tolower(PROFILES$PROFILE_CODE) %in% tolower(code),]
+    #  could test replacing some of this with rsp_pad???
+
+    dt <- PROFILES[tolower(PROFILES$PROFILE_CODE) %in% gsub("^us:", "", tolower(code)),]
     dt <- merge(dt, SPECIES, by = "PROFILE_CODE", all.y=FALSE, all.x=TRUE,
                 allow.cartesian=TRUE)
     dt <- merge(dt, SPECIES_PROPERTIES, by = "SPECIES_ID", all.y=FALSE,
@@ -174,26 +175,39 @@ rsp <- function(..., include.refs=FALSE, source="us") {
     }
     dt <- dt[order(dt$PROFILE_CODE, decreasing = FALSE),]
     #add .value if weight_percent to copy...
-    x <- as.data.frame(dt)
-    if("WEIGHT_PERCENT" %in% names(x) & !".value" %in% names(x)) {
-      x$.value <- x$WEIGHT_PERCENT
+    dt$WEIGHT_PERCENT <- as.numeric(dt$WEIGHT_PERCENT)
+    if("WEIGHT_PERCENT" %in% names(dt) & !".value" %in% names(dt)) {
+      dt$.value <- dt$WEIGHT_PERCENT
     }
-    rsp <- as.respeciate(x, test.rsp=FALSE)
+    #print(head(dt$WEIGHT_PERCENT))
+    dt$PROFILE_CODE <- paste("US:", dt$PROFILE_CODE, sep="")
+    dt.us <- dt
+  } else {
+    dt.us <- NULL
   }
-  if(source=="eu"){
+  if(tolower(source) %in% c("eu", "all")){
     ######################################
     #currently not data.table-ing this...
     ######################################
     x <- SPECIEUROPE$source
-    x <- subset(x, as.character(Id) %in% gsub("^EU:", "", code))
+    x <- subset(x, tolower(as.character(Id)) %in% gsub("^eu:", "", tolower(code)))
     if(!include.refs){
       x <- x[names(x) != "Reference"]
     }
-    rsp <- as.respeciate(x, test.rsp=FALSE)
-    class(rsp) <- unique(c("rsp_eu", class(rsp)))
+    dt.eu <- data.table::as.data.table(.rsp_eu2us(x))
+  } else {
+    dt.eu <- NULL
   }
 
   #output
+  x <- data.table::rbindlist(list(dt.us, dt.eu), fill=TRUE)
+  ###################################
+  #note
+  ####################################
+  #data.table::rbindlist seems to be forcing
+  #    SPECIATE WEIGHT_PERCENT to character
+  x$WEIGHT_PERCENT <- as.numeric(x$WEIGHT_PERCENT)
+  rsp <- as.respeciate(x, test.rsp=FALSE)
   return(rsp)
 }
 

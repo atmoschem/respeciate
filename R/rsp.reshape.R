@@ -331,7 +331,7 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
 #######################
 
 #test data 219 records
-#aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
+#aa <- rsp_profile(rsp_find_profile("ae6", by="profile_type"))
 
 #idiot-test reference.
 

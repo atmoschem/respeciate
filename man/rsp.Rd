@@ -3,9 +3,9 @@
 \name{rsp}
 \alias{rsp}
 \alias{rsp_profile}
-\title{rsp_profile}
+\title{Getting archived profiles}
 \usage{
-rsp(..., include.refs = FALSE, source = "us")
+rsp(..., include.refs = FALSE, source = "all")
 
 rsp_profile(...)
 }
@@ -26,7 +26,8 @@ included when extracting the requested profile(s) from the archive, default
 \code{FALSE}.}
 
 \item{source}{character, the local archive to request a profile from:
-\code{'us'} US EPA SPECIATE, or \code{'eu'} EU JRC SPECIEUROPE.}
+\code{'us'} US EPA SPECIATE, \code{'eu'} EU JRC SPECIEUROPE, or \code{'all'}
+(the default) both.}
 }
 \value{
 \code{rsp_profile} or the short-hand \code{rsp} return an object of
@@ -34,7 +35,7 @@ included when extracting the requested profile(s) from the archive, default
 from the local respeciate archive.
 }
 \description{
-Getting profile(s) from the local respeciate archive
+Getting source profile(s) from the local respeciate archives.
 }
 \note{
 The option \code{include.refs} adds profile source reference

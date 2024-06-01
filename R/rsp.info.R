@@ -18,10 +18,18 @@
 #to think about
 #########################
 
-# like to remove the need to set the source...
+# testing idea to remove need to set source...
 #    following seems messy
-#    rsp(rsp_find_profile("diesel", source="eu"), source="eu")
-
+#        rsp(rsp_find_profile("diesel", source="eu"), source="eu")
+#    using profile_code = US:... and EU:... for source used
+#        now need to set source when you want to be specific...
+#    notes:
+#        seems to be working BUT...
+#    rsp_find_species might have issue
+#        because species info can be coming from either
+#        SPECIATE or SPECIEUROPE...
+#    data.table::rbindlist seems to be forcing WEIGHT_PERCENT to character
+#        when bind is list(us, NULL)...
 
 #' @description Functions that provide respeciate
 #' source information.
@@ -40,9 +48,9 @@
 #' \code{'species_names'} for \code{sp_species_info}.
 #' @param partial logical, if \code{TRUE} (default)
 #' \code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.
-#' @param source character, the data set to search: \code{'us'} (default)
-#' US EPA SPECIATE or \code{'eu'} JRC SPECIEUROPE.
-
+#' @param source character, the data set to search: \code{'us'}
+#' US EPA SPECIATE; \code{'eu'} JRC SPECIEUROPE; or, \code{'all'} (default)
+#' both archives.
 #' @return \code{rsp_info} provides a brief version information report on the
 #' currently installed respeciate archive.
 #' @return \code{rsp_profile_info} returns a \code{data.frame} of
@@ -116,25 +124,39 @@ rsp_info <- function() {
 #' @export
 
 rsp_profile_info <- function(..., by = "keywords", partial = TRUE,
-                             source = "us") {
-  #extract profile info from archive
+                             source = "all") {
 
-  if(!source %in% c("us", "eu")){
+  #extract profile info from archive
+  if(!source %in% c("us", "eu", "all")){
     stop("RSP> unknown source...",
          call.=FALSE)
   }
-  if(source=="us"){
-    out <- SPECIATE$PROFILES
-    species <- SPECIATE$SPECIES
+  if(source %in% c("us", "all")){
+    out.us <- SPECIATE$PROFILES
+    out.us$PROFILE_CODE <- paste("US:", out.us$PROFILE_CODE, sep="")
+    species.us <- SPECIATE$SPECIES
+    species.us$PROFILE_CODE <- paste("US:", species.us$PROFILE_CODE, sep="")
+  } else {
+    out.us <- NULL
+    species.us <- NULL
   }
-  if(source=="eu"){
+  if(source %in% c("eu", "all")){
     temp <- .rsp_eu2us(SPECIEUROPE$source)
-    out <- temp[c("PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE", "Original.Name", "Country",
+    #.rsp_eu2us does next line...
+    #out.eu$PROFILE_CODE <- paste("EU:", out.eu$PROFILES$PROFILE_CODE, sep="")
+    out.eu <- temp[c("PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE", "Original.Name", "Country",
                  "Place", "Test.Year", "Profile.Type", "Latitude", "Longitude")]
-    out$Keywords <- out$PROFILE_NAME
-    species <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
-                      "Sampling.Method", "Cas", "Symbol")]
+    out.eu$Keywords <- out.eu$PROFILE_NAME
+    out.eu <- out.eu[!duplicated(out.eu$PROFILE_CODE),]
+    species.eu <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
+                      "Sampling.Method", "Cas", "Symbol", "PROFILE_CODE")]
+    #species.eu <- species.eu[!duplicated(species.eu$SPECIES_ID),]
+  } else {
+    out.eu <- NULL
+    species.eu <- NULL
   }
+  out <- as.data.frame(data.table::rbindlist(list(out.us, out.eu), fill=TRUE))
+  species <- as.data.frame(data.table::rbindlist(list(species.us, species.eu), fill=TRUE))
 
   terms <- c(...)
   ###################################
@@ -179,7 +201,7 @@ rsp_profile_info <- function(..., by = "keywords", partial = TRUE,
   ##########################
   # to check
   ##########################
-  #    should this now be .respeciate ???
+  #    should this now be as.respeciate ???
   out <- .rsp_build_respeciate(out)
   class(out) <- unique(c("rsp_pi", class(out)))
   return(out)
@@ -198,21 +220,30 @@ rsp_find_profile <- function(...){
 #' @export
 
 rsp_species_info <- function(..., by = "species_name", partial = TRUE,
-                             source = "us") {
+                             source = "all") {
   #extract species info from archive
-  if(!source %in% c("us", "eu")){
+  if(!source %in% c("us", "eu", "all")){
     stop("RSP> unknown source...",
          call.=FALSE)
   }
-  if(source=="us"){
-    out <- SPECIATE$SPECIES_PROPERTIES
+  if(source %in% c("us", "all")){
+    out.us <- SPECIATE$SPECIES_PROPERTIES
+    out.us <- data.table::as.data.table(out.us)
+  } else {
+    out.us <- NULL
   }
-  if(source=="eu"){
+  if(source %in% c("eu", "all")){
     temp <- .rsp_eu2us(SPECIEUROPE$source)
-    out <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
+    out.eu <- temp[c("SPECIES_ID", "SPECIES_NAME", "Analythical.Method", "Uncertainty.Method",
                   "Sampling.Method", "Cas", "Symbol")]
+    out.eu <- out.eu[!duplicated(out.eu$SPECIES_ID),]
+    out.eu <- data.table::as.data.table(out.eu)
+  } else {
+    out.eu <- NULL
   }
   terms <- c(...)
+  out <- as.data.frame(data.table::rbindlist(list(out.us, out.eu), fill=TRUE))
+
   for(ti in terms){
     ref <- out[,tolower(names(out))==by]
     if(nrow(out)>0){

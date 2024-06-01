@@ -11,11 +11,11 @@
 \usage{
 rsp_info()
 
-rsp_profile_info(..., by = "keywords", partial = TRUE, source = "us")
+rsp_profile_info(..., by = "keywords", partial = TRUE, source = "all")
 
 rsp_find_profile(...)
 
-rsp_species_info(..., by = "species_name", partial = TRUE, source = "us")
+rsp_species_info(..., by = "species_name", partial = TRUE, source = "all")
 
 rsp_find_species(...)
 }
@@ -31,8 +31,9 @@ search, by default \code{'keywords'} for \code{rsp_profile_info} and
 \item{partial}{logical, if \code{TRUE} (default)
 \code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.}
 
-\item{source}{character, the data set to search: \code{'us'} (default)
-US EPA SPECIATE or \code{'eu'} JRC SPECIEUROPE.}
+\item{source}{character, the data set to search: \code{'us'}
+US EPA SPECIATE; \code{'eu'} JRC SPECIEUROPE; or, \code{'all'} (default)
+both archives.}
 }
 \value{
 \code{rsp_info} provides a brief version information report on the
