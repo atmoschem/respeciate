@@ -105,6 +105,7 @@ rsp_find_profile <- function(..., by = "keywords", partial = TRUE,
 
   #search for requested in
   terms <- c(...)
+
   if(tolower(by) %in% c(".species")){
     ############################
     #special case
@@ -167,7 +168,7 @@ rsp_find_species <- function(..., by = ".species", partial = TRUE,
     out <- out[!is.na(out$SPECIES_ID),]
   }
   if(tolower(source)=="eu"){
-    out <- out[!is.na(out$.species.id),]
+    out <- out[!is.na(out$Species.Id),]
   }
   terms <- c(...)
   for(ti in terms){

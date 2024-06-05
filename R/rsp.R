@@ -149,7 +149,7 @@ rsp <- function(..., include.refs=FALSE, source="all") {
     stop("RSP> unknown 'source' requested...",
          call.=FALSE)
   }
-  code <- gsub("us:|us:", "", tolower(code))
+  code <- gsub("us:|eu:", "", tolower(code))
   if(tolower(source)=="us"){
     code <- paste("US:", code, sep="")
   }
