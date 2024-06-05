@@ -1,27 +1,27 @@
-#' @name rsp.q
+#' @name rsp.us
 #' @title Quick access to common SPECIATE subsets.
-#' @aliases rsp_q rsp_q_gas rsp_q_other rsp_q_pm rsp_q_pm.ae6 rsp_q_pm.ae8
-#' rsp_q_pm.cr1 rsp_q_pm.simplified
+#' @aliases rsp_us rsp_us_gas rsp_us_other rsp_us_pm rsp_us_pm.ae6 rsp_us_pm.ae8
+#' rsp_us_pm.cr1 rsp_us_pm.simplified
 
-#' @description \code{rsp_q_} functions are quick access wrappers to commonly
+#' @description \code{rsp_us_} functions are quick access wrappers to commonly
 #' requested SPECIATE subsets.
-#' @return \code{rsp_q_} functions typically return a \code{respeciate}
+#' @return \code{rsp_us_} functions typically return a \code{respeciate}
 #' \code{data.frame} of the requested profiles.
 #'
 #' For example:
 #'
-#' \code{rsp_q_gas()} returns all gaseous profiles in SPECIATE
+#' \code{rsp_us_gas()} returns all gaseous profiles in SPECIATE
 #' (\code{PROFILE_TYPE == 'GAS'}).
 #'
-#' \code{rsp_q_pm} returns all particulate matter (PM) profiles in SPECIATE
+#' \code{rsp_us_pm} returns all particulate matter (PM) profiles in SPECIATE
 #' not classified as a special PM type (\code{PROFILE_TYPE == 'PM'}).
 #'
 #' The special PM types are subsets profiles intended for special
-#' applications, and these include \code{rsp_q_pm.ae6} (type \code{PM-AE6}),
-#' \code{rsp_q_pm.ae8} (type \code{PM-AE8}), \code{rsp_q_pm.cr1} (type
-#' \code{PM-CR1}), and \code{rsp_q_pm.simplified} (type \code{PM-Simplified}).
+#' applications, and these include \code{rsp_us_pm.ae6} (type \code{PM-AE6}),
+#' \code{rsp_us_pm.ae8} (type \code{PM-AE8}), \code{rsp_us_pm.cr1} (type
+#' \code{PM-CR1}), and \code{rsp_us_pm.simplified} (type \code{PM-Simplified}).
 #'
-#' \code{rsp_q_other} returns all profiles classified as other in SPECIATE
+#' \code{rsp_us_other} returns all profiles classified as other in SPECIATE
 #' (\code{PROFILE_TYPE == 'OTHER'}).
 #'
 
@@ -41,52 +41,52 @@
 
 # any others worth doing???
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_gas <- function(){
+rsp_us_gas <- function(){
   rsp_profile(rsp_profile_info("gas", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_other <- function(){
+rsp_us_other <- function(){
   rsp_profile(rsp_profile_info("other", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_pm <- function(){
+rsp_us_pm <- function(){
   rsp_profile(rsp_profile_info("pm", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_pm.ae6 <- function(){
+rsp_us_pm.ae6 <- function(){
   rsp_profile(rsp_profile_info("pm-ae6", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_pm.ae8 <- function(){
+rsp_us_pm.ae8 <- function(){
   rsp_profile(rsp_profile_info("pm-ae8", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_pm.cr1 <- function(){
+rsp_us_pm.cr1 <- function(){
   rsp_profile(rsp_profile_info("pm-cr1", by = "profile_type", partial=FALSE))
 }
 
-#' @rdname rsp.q
+#' @rdname rsp.us
 #' @export
 
-rsp_q_pm.simplified <- function(){
+rsp_us_pm.simplified <- function(){
   rsp_profile(rsp_profile_info("pm-simplified", by = "profile_type", partial=FALSE))
 }
 

@@ -4,33 +4,33 @@
 
 
 #' @description rsp function(s) to reconfigure data.frames (and similar
-#' object classes) for use with data and functions in respeciate.
+#' object classes) for use with data and functions in \code{respeciate}.
 
 #' @param x \code{data.frame} or similar (i.e.
 #' something that can be coerced into a \code{data.frame} using
 #' \code{as.data.frame}) to be converted into a \code{respeciate} object.
-#' @param profile_name,profile_code (\code{character}) The name of the column
-#' in \code{x} containing profile name and code records, respectively. If not
-#' already named according to SPECIATE conventions, at least one of these will
-#' need to be assigned.
-#' @param species_name,species_id (\code{character}) The name of the column
-#' in \code{x} containing species name and id records, respectively. If not
-#' already named according to SPECIATE conventions, at least one of these will
+#' @param profile_name,profile_id (\code{character}) The names of the columns
+#' in \code{x} containing profile names and identifiers, respectively. If not
+#' already named according to \code{respeciate} conventions, at least one
+#' of these will need to be assigned.
+#' @param species_name,species_id (\code{character}) The names of the columns
+#' in \code{x} containing species name and identifiers, respectively. If not
+#' already named according to \code{respeciate} conventions, at least one of these will
 #' need to be assigned.
 #' @param value (\code{character}) The name of the column in \code{x}
-#' containing measurement values. If not already named according to SPECIATE
+#' containing measurement values. If not already named according to \code{respeciate}
 #' conventions, this will need to be assigned.
 #' @param ... (any other arguments) currently ignored.
-#' @return \code{rsp_build}s attempt to build and return a respeciate-like
-#' object that can be compared with data from respeciate.
-#' @note If you want to compare your data with profiles in the SPECIATE archive,
-#' you need to use EPA SPECIATE conventions when assigning species names and
-#' identifiers. Currently, we are working on options to improve on this (and
+#' @return \code{rsp_build}s attempt to build and return a \code{respeciate}-like
+#' object that can be directly compared with data from \code{respeciate}.
+#' @note If you want to compare your data with profiles in the \code{respeciate} archive,
+#' you need \code{respeciate} conventions when assigning species names and
+#' identifiers. We are working on options to improve on this (and
 #' very happy to discuss if anyone has ideas), but current best suggestion is:
-#' (1) identify the SPECIATE species code for each of the species in your data set,
-#' and (2) assign these as \code{species_id} when \code{rsp_build}ing. The
-#' function will then associate the \code{species_name} from SPECIATE species
-#' records.
+#' (1) identify the \code{respeciate} species code for each of the species in
+#' your data set, and (2) assign these as \code{species_id} when \code{rsp_build}ing.
+#' The function will then associate the \code{species_name} from \code{respeciate}
+#' species records.
 
 #NOTES
 #######################
@@ -38,10 +38,14 @@
 #to think about
 #######################
 
-## sp_build_profile to make a profile locally
-##     needs profile_name, profile_code
-##           species_name, species_id
-##           weight_percent (and possibly .value)
+## rsp_build_profile to make a profile locally
+##     needs profile_name and/or profile_id
+##           species_name and/or species_id
+##           value (like .value(rsp),
+##                        weight_percent(SPECIATE) or
+##                        relative.mass (SPECIEUROPE)
+##    maybe something like
+##             .rsp_get_m_from_pls (unexported)
 
 ##############################
 # rsp_build_x
@@ -53,16 +57,15 @@
 # 0.3. notes
 # went from sp_build_rsp_x to rsp_build_x
 # using as.respeciate and adding rsp_x subclass
+#       now searches ..rsp_species_meta()[c(".species", ".species.id")
+#           for the .species.id to .species mapping
 
 # rsp_build_x currently converts x to data.frame (as.data.frame(x))
-#     if tibble is loaded, this currently complicates things...
-
+#     if tibble is loaded, tibbles currently complicates things...
 #     BUT might want to revisit this because it looked like:
 #           the data structure was fine but
 #           print.respeciate was having problems...
-
 #           BUT might be other problems I did not spot
-
 #           BUT be nice if c("respeciate", class("tibble")) could be used...
 #               to retain the data type history
 #               and drop back to tibble rather than data.frame....
@@ -72,7 +75,7 @@
 #' @export
 
 rsp_build_x <-
-  function(x, profile_code, profile_name,
+  function(x, profile_id, profile_name,
            species_name, species_id,
            value, ...){
 
@@ -89,8 +92,8 @@ rsp_build_x <-
     # profile and species columns must be character...
 
     # profile_name:  if not there, if sent in call use,
-    #                              else if there use profile_code
-    # profile_code:  if not there, if sent in call use,
+    #                              else if there use profile_id
+    # profile_id:  if not there, if sent in call use,
     #                              else if there use profile_name
     # species_name:  if not there, if sent in call use,
     #                              else if there use use species_id to look-up
@@ -99,8 +102,8 @@ rsp_build_x <-
     #                              else if there use species_name to look-up
     #                              if any missing, warn
     # .value:        if not there, if sent in call use.
-    #                              (NEW/TESTING) else if there use WEIGHT_PERCENT
-    # WEIGHT_PERCENT:if not there, if sent in call use
+    #                              (NEW/TESTING) else if there use .pc.weight
+    # .pc.weight:if not there, if sent in call use
     #                              else if there use .value to look-up
 
     # should error if any of these missing at end of build
@@ -127,55 +130,55 @@ rsp_build_x <-
     #         and species_id from other...)
     # also
     #    do values need to be as.numeric???
-    if("PROFILE_NAME" %in% names(x)){
-      x$PROFILE_NAME <- as.character(x$PROFILE_NAME)
+    if(".profile" %in% names(x)){
+      x$.profile <- as.character(x$.profile)
     }
-    if("PROFILE_CODE" %in% names(x)){
-      x$PROFILE_CODE <- as.character(x$PROFILE_CODE)
+    if(".profile.id" %in% names(x)){
+      x$.profile.id <- as.character(x$.profile.id)
     }
-    if("SPECIES_NAME" %in% names(x)){
-      x$SPECIES_NAME <- as.character(x$SPECIES_NAME)
+    if(".species" %in% names(x)){
+      x$.species <- as.character(x$.species)
     }
-    if("SPECIES_ID" %in% names(x)){
-      x$SPECIES_ID <- as.character(x$SPECIES_ID)
+    if(".species.id" %in% names(x)){
+      x$.species.id <- as.character(x$.species.id)
     }
 
     #if not there and sent in call
 
     #note:
     #current making all BUT values, character class
-    if(!"PROFILE_NAME" %in% names(x) & (!missing(profile_name))){
+    if(!".profile" %in% names(x) & (!missing(profile_name))){
       if(!profile_name %in% names(x)){
         stop("rsp_build> '", as.character(profile_name)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
-      x$PROFILE_NAME <- as.character(x[, profile_name])
+      x$.profile <- as.character(x[, profile_name])
     }
-    if(!"PROFILE_CODE" %in% names(x) & (!missing(profile_code))){
-      if(!profile_code %in% names(x)){
-        stop("rsp_build> '", as.character(profile_code)[1],
+    if(!".profile.id" %in% names(x) & (!missing(profile_id))){
+      if(!profile_id %in% names(x)){
+        stop("rsp_build> '", as.character(profile_id)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
-      x$PROFILE_CODE <- as.character(x[, profile_code])
+      x$.profile.id <- as.character(x[, profile_id])
     }
-    if(!"SPECIES_NAME" %in% names(x) & (!missing(species_name))){
+    if(!".species" %in% names(x) & (!missing(species_name))){
       if(!species_name %in% names(x)){
         stop("rsp_build> '", as.character(species_name)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
-      x$SPECIES_NAME <- as.character(x[, species_name])
+      x$.species <- as.character(x[, species_name])
     }
-    if(!"SPECIES_ID" %in% names(x) & (!missing(species_id))){
+    if(!".species.id" %in% names(x) & (!missing(species_id))){
       if(!species_id %in% names(x)){
         stop("rsp_build> '", as.character(species_id)[1],
              "' not in 'x'...", sep="", call. = FALSE)
       }
-      x$SPECIES_ID <- as.character(x[, species_id])
+      x$.species.id <- as.character(x[, species_id])
     }
     if(!".value" %in% names(x)){
       if(missing(value)){
-        if("WEIGHT_PERCENT" %in% names(x)){
-          x$.value <- x[, "WEIGHT_PERCENT"]
+        if(".pc.weight" %in% names(x)){
+          x$.value <- x[, ".pc.weight"]
         } else {
           stop("rsp_build> 'value' not found for 'x'...",
                sep="", call. = FALSE)
@@ -201,28 +204,28 @@ rsp_build_x <-
 
     #if still not there try to assign using what is there
 
-    if("PROFILE_NAME" %in% names(x) & !"PROFILE_CODE" %in% names(x)){
-      x$PROFILE_CODE <- x$PROFILE_NAME
+    if(".profile" %in% names(x) & !".profile.id" %in% names(x)){
+      x$.profile.id <- x$.profile
     }
-    if("PROFILE_CODE" %in% names(x) & !"PROFILE_NAME" %in% names(x)){
-      x$PROFILE_NAME <- x$PROFILE_CODE
+    if(".profile.id" %in% names(x) & !".profile" %in% names(x)){
+      x$.profile <- x$.profile.id
     }
-    test <- c("SPECIES_NAME", "SPECIES_ID")[c("SPECIES_NAME", "SPECIES_ID")
+    test <- c(".species", ".species.id")[c(".species", ".species.id")
                                             %in% names(x)]
     if(length(test)==1){
       #one there, other as look-up
       .tmp <- data.table::as.data.table(
-        SPECIATE$SPECIES_PROPERTIES[c("SPECIES_NAME", "SPECIES_ID")]
+        ..rsp_species_meta()[c(".species", ".species.id")]
       )
-      .tmp$SPECIES_NAME <- as.character(.tmp$SPECIES_NAME)
-      .tmp$SPECIES_ID <- as.character(.tmp$SPECIES_ID)
+      .tmp$.species <- as.character(.tmp$.species)
+      .tmp$.species.id <- as.character(.tmp$.species.id)
       x <- merge(data.table::as.data.table(x),
                  data.table::as.data.table(.tmp),
                  all.x=TRUE, all.y=FALSE, allow.cartesian=TRUE)
       x <- as.data.frame(x)
     }
-    if(".value" %in% names(x) & !"WEIGHT_PERCENT" %in% names(x)){
-      x$WEIGHT_PERCENT <- x$.value
+    if(".value" %in% names(x) & !".pc.weight" %in% names(x)){
+      x$.pc.weight <- x$.value
     }
 
     #pass via as.speciate to build rsp_x

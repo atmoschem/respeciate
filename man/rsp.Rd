@@ -12,14 +12,15 @@ rsp_profile(...)
 \arguments{
 \item{...}{The function assumes all inputs (except \code{include.refs}
 and \code{source}) are profile identifiers: namely, \code{PROFILE_CODE}
-and \code{Species.id} in SPECIATE and SPECIEUROPE, respectively, or
+and \code{Species.Id} in SPECIATE and SPECIEUROPE, respectively, or
 potential sources of profile information and requests these
 form the local respeciate archives. Typically, simple
-objects like character and numeric vectors, as assumed to profile codes and
-composite data-types like \code{respeciate} or \code{data.frame} objects
-are assumed to contain a named \code{PROFILE_CODE} column. All potential
-profile codes are requested and unrecognized codes (and code duplicates)
-are ignored.}
+objects like character and numeric vectors, as assumed to be profile
+identifiers and composite data-types like \code{respeciate} or
+\code{data.frame} objects are assumed to contain a column named
+\code{.profile.id}, the \code{respeciate} equivalent of \code{PROFILE_CODE}
+and \code{Species.Id}. All recovered identifiers are requested
+and unrecognized ids (and duplicates) are ignored.}
 
 \item{include.refs}{logical, if profile reference information should be
 included when extracting the requested profile(s) from the archive, default
@@ -68,5 +69,7 @@ European data base for PM source profiles. Atmospheric Pollution Research,
 7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
 }
 \seealso{
-\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
+\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}} regarding
+data sources; and, \code{\link{rsp_find_profile}}
+and \code{\link{rsp_find_species}} regarding archive searching.
 }

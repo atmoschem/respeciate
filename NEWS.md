@@ -1,13 +1,17 @@
 # Release Notes Version 0.3
 
 * [0.3.1] 
-    * released 2024-05-31 
+    * released 2024-06-05 
     * added standard plot output handler for rsp_ and pls_ plots 
     * added SPECIEUROPE data set; and renamed sysdata SPECIATE for 
-    consistency
-    * added source argument to rsp(), 'us' and 'eu' for SPECIATE and 
-    SPECIEUROPE; 
+    consistency 
+    * added source argument to rsp(), 'us', 'eu', 'all' for extraction 
+    from SPECIATE, SPECIEUROPE or both; also added same to rsp_find_... 
+    functions  
     * various function updates to handle SPECIEUROPE profiles  
+    * renamed rsp_q_... functions rsp_us_... because SPECIATE only 
+    * renamed rsp_x_... functions rsp_id_... (request after rsp_x objects 
+    added) 
     * various fixes; some typos in docs; rsp_plot_species id 
     tracking when species is factor 
 

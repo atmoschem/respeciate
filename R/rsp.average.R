@@ -96,7 +96,7 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
   xx <- data.table::as.data.table(x)
 
   #save profiles
-  test <- unique(x$PROFILE_CODE)
+  test <- unique(x$.profile.id)
 
   #extra.args - not sure if we are using these
   .xargs <- list(...)
@@ -105,9 +105,9 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
   if(is.null(code)){
     stop("need a new profile code")
   }
-  xx$PROFILE_CODE <- code
+  xx$.profile.id <- code
 
-  xx$PROFILE_NAME <- if(is.null(name)){
+  xx$.profile <- if(is.null(name)){
     if(length(test)>10){
       "average of multiple cases"
     } else {
@@ -118,8 +118,8 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
   }
 
   out <- xx[,
-            .(PROFILE_NAME = PROFILE_NAME[1],
-              SPECIES_NAME = SPECIES_NAME[1],
+            .(.profile = .profile[1],
+              .species = .species[1],
   ##########################
   # testing
               #SPEC_MW = SPEC_MW[1],
@@ -129,9 +129,9 @@ rsp_average_profile <- function(rsp, code = NULL, name = NULL, method = 1,
               .n = length(.value[!is.na(.value)]),
               .sd = sd(.value, na.rm = TRUE)
             ),
-            by=.(PROFILE_CODE, SPECIES_ID)]
+            by=.(.profile.id, .species.id)]
   #I said we would NOT do this...
-  out$WEIGHT_PERCENT <- out$.value
+  out$.pc.weight <- out$.value
 
   #########################
   #pad missing info

@@ -5,52 +5,44 @@
 \alias{rsp_build_x}
 \title{Building respeciate-like Objects}
 \usage{
-rsp_build_x(
-  x,
-  profile_code,
-  profile_name,
-  species_name,
-  species_id,
-  value,
-  ...
-)
+rsp_build_x(x, profile_id, profile_name, species_name, species_id, value, ...)
 }
 \arguments{
 \item{x}{\code{data.frame} or similar (i.e.
 something that can be coerced into a \code{data.frame} using
 \code{as.data.frame}) to be converted into a \code{respeciate} object.}
 
-\item{profile_name, profile_code}{(\code{character}) The name of the column
-in \code{x} containing profile name and code records, respectively. If not
-already named according to SPECIATE conventions, at least one of these will
-need to be assigned.}
+\item{profile_name, profile_id}{(\code{character}) The names of the columns
+in \code{x} containing profile names and identifiers, respectively. If not
+already named according to \code{respeciate} conventions, at least one
+of these will need to be assigned.}
 
-\item{species_name, species_id}{(\code{character}) The name of the column
-in \code{x} containing species name and id records, respectively. If not
-already named according to SPECIATE conventions, at least one of these will
+\item{species_name, species_id}{(\code{character}) The names of the columns
+in \code{x} containing species name and identifiers, respectively. If not
+already named according to \code{respeciate} conventions, at least one of these will
 need to be assigned.}
 
 \item{value}{(\code{character}) The name of the column in \code{x}
-containing measurement values. If not already named according to SPECIATE
+containing measurement values. If not already named according to \code{respeciate}
 conventions, this will need to be assigned.}
 
 \item{...}{(any other arguments) currently ignored.}
 }
 \value{
-\code{rsp_build}s attempt to build and return a respeciate-like
-object that can be compared with data from respeciate.
+\code{rsp_build}s attempt to build and return a \code{respeciate}-like
+object that can be directly compared with data from \code{respeciate}.
 }
 \description{
 rsp function(s) to reconfigure data.frames (and similar
-object classes) for use with data and functions in respeciate.
+object classes) for use with data and functions in \code{respeciate}.
 }
 \note{
-If you want to compare your data with profiles in the SPECIATE archive,
-you need to use EPA SPECIATE conventions when assigning species names and
-identifiers. Currently, we are working on options to improve on this (and
+If you want to compare your data with profiles in the \code{respeciate} archive,
+you need \code{respeciate} conventions when assigning species names and
+identifiers. We are working on options to improve on this (and
 very happy to discuss if anyone has ideas), but current best suggestion is:
-(1) identify the SPECIATE species code for each of the species in your data set,
-and (2) assign these as \code{species_id} when \code{rsp_build}ing. The
-function will then associate the \code{species_name} from SPECIATE species
-records.
+(1) identify the \code{respeciate} species code for each of the species in
+your data set, and (2) assign these as \code{species_id} when \code{rsp_build}ing.
+The function will then associate the \code{species_name} from \code{respeciate}
+species records.
 }

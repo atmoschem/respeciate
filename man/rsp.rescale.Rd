@@ -45,13 +45,13 @@ short-cuts to these options.
 }
 \note{
 Data sometimes needs to be normalised, e.g. when applying some
-statistical analyses. Rather than modify the EPA records in the
-\code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
-\code{.value} which is modified by operations like \code{sp_rescale_profile}
-and \code{sp_rescale_species}. This means rescaling is always applied to
-the source information, rather than rescaling an already rescaled value,
-and the EPA records are retained unaffected. So, the original source
-information can be easily recovered.
+statistical analyses. Rather than modify source information in
+\code{SPECIATE} and \code{SPECIEUROPE}, \code{respeciate} creates a
+duplicate column \code{.value} which is modified by operations
+like \code{sp_rescale_profile} and \code{sp_rescale_species}. This means
+rescaling is always applied to the source information, rather than
+rescaling an already rescaled value, and the EPA records are retained
+unaffected. So, the original source information can be easily recovered.
 }
 \references{
 Dowle M, Srinivasan A (2023). data.table: Extension of `data.frame`.

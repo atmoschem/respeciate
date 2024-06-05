@@ -6,14 +6,17 @@
 \alias{rsp_id}
 \alias{rsp_id_nalkane}
 \alias{rsp_id_btex}
+\alias{rsp_id_pah16}
 \title{rsp_id_ functions to identify common species groups for grouping and
 subsetting respeciate profiles}
 \usage{
-rsp_id_copy(rsp, ref = NULL, by = "species_id")
+rsp_id_copy(rsp, ref = NULL, by = ".species.id")
 
 rsp_id_nalkane(rsp)
 
 rsp_id_btex(rsp)
+
+rsp_id_pah16(rsp)
 }
 \arguments{
 \item{rsp}{a \code{respeciate} object, a \code{data.frame} of respeciate

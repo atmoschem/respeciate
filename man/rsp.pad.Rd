@@ -16,8 +16,8 @@ profiles.}
 \code{'standard'} (default; all but \code{'reference'}), and \code{'all'}
 (all).}
 
-\item{drop.nas}{logical, discard any rows where \code{WEIGHT_PERCENT} is
-\code{NA}, default \code{TRUE}.}
+\item{drop.nas}{logical, discard any rows where the \code{respeciate}
+species amount column \code{.pc.weight} is \code{NA}, default \code{TRUE}.}
 }
 \value{
 \code{rsp_pad} returns supplied \code{respeciate} data set, with
@@ -37,4 +37,7 @@ and \code{rsp_pad}s provide a quick rebuild/repair. For example,
 form strips some meta-data, and padding is used as part of the
 \code{\link{rsp_melt_wide}} to re-add this meta-data
 when returning the data set to its standard long form.
+}
+\seealso{
+\code{\link{rsp_pad}}
 }

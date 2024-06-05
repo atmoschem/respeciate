@@ -3,66 +3,24 @@
 \name{rsp.info}
 \alias{rsp.info}
 \alias{rsp_info}
-\alias{rsp_profile_info}
-\alias{rsp_species_info}
-\alias{rsp_find_profile}
-\alias{rsp_find_species}
 \title{Information about data sets currently in respeciate}
 \usage{
 rsp_info()
-
-rsp_profile_info(..., by = "keywords", partial = TRUE, source = "all")
-
-rsp_find_profile(...)
-
-rsp_species_info(..., by = "species_name", partial = TRUE, source = "all")
-
-rsp_find_species(...)
-}
-\arguments{
-\item{...}{character(s), any search term(s) to use when searching
-the local respeciate archive for relevant records using
-\code{rsp_profile_info} or \code{rsp_species_info}.}
-
-\item{by}{character, the section of the archive to
-search, by default \code{'keywords'} for \code{rsp_profile_info} and
-\code{'species_names'} for \code{sp_species_info}.}
-
-\item{partial}{logical, if \code{TRUE} (default)
-\code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.}
-
-\item{source}{character, the data set to search: \code{'us'}
-US EPA SPECIATE; \code{'eu'} JRC SPECIEUROPE; or, \code{'all'} (default)
-both archives.}
 }
 \value{
 \code{rsp_info} provides a brief version information report on the
 currently installed respeciate archive.
-
-\code{rsp_profile_info} returns a \code{data.frame} of
-profile information, as a \code{respeciate} object.
-\code{rsp_species_info} returns a \code{data.frame} of
-species information as a \code{respeciate} object.
 }
 \description{
 Functions that provide respeciate
 source information.
 \code{rsp_info} generates a brief version report for the currently installed
 respeciate data sets.
-\code{rsp_profile_info} searches the currently installed respeciate
-data sets for profile records.
-\code{rsp_species_info} searches the currently installed respeciate
-data sets for species records.
 }
 \examples{
 \dontrun{
-profile <- "Ethanol"
-pr <- rsp_find_profile(profile)
-pr
-
-species <- "Ethanol"
-sp <- rsp_find_species(species)
-sp}
+rsp_info()
+}
 
 }
 \references{

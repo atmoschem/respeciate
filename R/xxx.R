@@ -7,11 +7,31 @@
 #     error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
 
 #     dropping the (re)SPECIATE shorthand for r package and SPECIATE together
-#          adding SPECIEUROPE makes this complicated
+#          (adding SPECIEUROPE makes this complicated)
 
 #     made main respeciate object argument name rsp rather than x
 #         that helps rsp_plot..() if it passed args to lattice
-#              but not sure it really help with plot() if respeciate not loaded...
+#              but not sure it really help with plot()...
+
+#     changed the required columns when adding SPECIEUROPE
+#          SPECIES_ID -> .species.id
+#          SPECIES_NAME -> .species
+#          PROFILE_CODE -> .profile.id
+#          PROFILE_NAME -> .profile
+#          WEIGHT_PERCENT -> .pc.weight
+
+#     made ..rsp_ function common sources for merged SPECIATE + SPECIEUROPE data
+
+#     can now combine or compare US and EU profiles with
+#          rsp(), rsp_find_profile(), etc...
+#               extra arg source = "us" limits you to just SPECIATE or
+#                     "eu" for SPECIEUROPE
+
+#      switched rsp_q_... functions to rsp_us_... when SPECIEUROPE added
+#          reason: these function only access SPECIATE data
+#                and a function like rsp_q_pm might be assumed to give user
+#                all pm samples (from any source)
+#          follow-on: should we have rsp_eu_... functions???
 
 #####################
 #to check
@@ -27,23 +47,73 @@
 ##############################
 
 # add specieurope data to package
-#     DONE
-# rename sysdata SPECIATE and add new as SPECIEUROPE
-#     DONE
-#     ...BUT
-#         think about how these will impact other packages???
+#     DONE now TESTING ...
+#     BUT also
+#         think about how names changes will impact other packages???
 #                  ATMOSCHEM, EMBRS, etc
-#         need to check/update other functions,
-#                  so they can use eu as well as us data...
+#                     main one for those using respeciate is
+#                               sysdata -> SPECIATE
+#                  might also need to think about how they could use EU data...
 
-#  also like to be able to pull and use profiles in both databases
-#         at same time...
-#         OR at least merge them...
 
 
 ###############################
 # possible future projects ???
 ###############################
+
+# move more to data.table
+#     like to move more of code to use data.table objects/code
+#         (rather than standard data.frame equivalents)
+#         lot faster...
+#         BUT needs time to think through, do, and test...
+#      like to have a quicker library search rsp_match_profile
+#      like to know how to quickly strip out columns which are all NAs
+
+# extra functions
+#      rsp_get... (pull?) [s'cut for those too lazy to learn .profile, etc...]
+#      rsp_repair.. like pad but a reset to remove column and replace from source.
+#      rsp_cbind/merge and rsp_rbind like functions (not sure if we need??)
+#      rsp_barebones - (skeleton) strip to minimal columns (not needed...?)
+#      rsp_pad_profile and rsp_pad_species s'cuts for rsp_pad (not needed..?)
+
+# switch between respeciate and SPECIATE-like or SPECIEUROPE-like data structures
+#      I have (unexported) .rsp_eu2us from early work merging US and EU archives
+#           that converted EU data to US-like column naming
+#           could think about a converter rsp -> SPECIATE
+
+# improve rsp_find_species
+#      current search .species for matches
+#            US equivalent SPECIES_NAME has multiple names
+#               could also search that but be an issue if exact requested...
+#                   (partial = FALSE)
+#       NB: not a fan of partial as a find formal (but in both rsp_find...
+#            functions...
+
+# rsp_match_profile improvement
+#      like to make it quicker, (also under more data.table above)
+#      like to make the function output multiple agreement measures
+#            currently just does one at time: pd or sid
+#            like to have a table of number (useable x/y pairs), pd and sid
+#       could then plot, e.g. x=pd, y=sid, pt size = number of pairs,
+#                and maybe colour-code by a sample descriptor...
+
+# print.respeciate improvement
+#      does not know if .species is missings and
+#         calls any number of columns !0 if .species.id there but not .species
+
+# improve the ..rsp_ merged (SPECIATE + SPECIEUROPE) data sources
+#     the build involves going through the data sets and manually checking them...
+#         and hardcoded adjustment for any misalignments...
+#               e.g. .species.id/.species match US/EU until entry 2786...
+#               see function scripts for latest versions and associated
+#     in future like to automate as much as possible of the builds these
+
+#     (related) the merge maps SPECIATE species metadata onto SPECIEUROPE species
+#         but it is not always straightforward
+#              the EU Profile.Type different to US PROFILE_TYPE...
+#                    .profile.type could be more consistent
+#              no US profile meta column keywords equivalent in EU/SPECIEUROPE...
+#                    (current copying EU Profile for using in rsp_find_profile
 
 # boxplot output option for rsp_plot_species
 #     maybe x = species, y = .value, no group default...
@@ -53,17 +123,21 @@
 
 # better handling for the rsp ->(dcast)-> rsp_p/sw ->(melt)-> rsp (and rsp_x)
 #     1. look at general handling for rsp and rsp_x
+#            wondering if rsp_x objects should have a sample number id rather
+#                 than .profile and .profile.id??
+#                 (they are x matrices rather than m...)
 #     2. look at melt padding for rsp_x or when rsp meta data is missing...
 #            not sure how common the last case is ???
-#     3. look at melt padding when some or all of .value or WEIGHT_PERCENT missing...
+#                 wondering if unknown species need an auto labelling option...
+#                       maybe compare with rsp_build_x
+#     3. look at melt padding when some or all of .value or .pc.weight missing...
 #            might need to be different for rsp and rsp_x ???
 #            might also need a repair function
 #     4. should we include rsp_pad_profile and rsp_pad_species as shortcuts ??
-
-
-# speed up rsp_match_profile
-#     I think this could be faster...
-#            maybe there is a better approach in data.table ???
+#     5. wondering if pad could have an extra argument
+#            ref (a reference to pull meta data from...)
+#               that could be used to add in any columns
+#               e.g. this could be the pre-dcast data and passed back via melt
 
 #  new function rsp_build_sim_x
 #     make a simulation data set for example pls models
@@ -96,9 +170,10 @@
 
 #globals
 utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
-                         "PROFILE_CODE", "PROFILE_NAME", "PROFILE_TYPE",
-                         "SPECIES_ID", "SPECIES_NAME", "SPEC_MW",
-                         "WEIGHT_PERCENT", ".", ".value", "Id"))
+                         "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
+                         ".profile.id", ".profile", "PROFILE_TYPE",
+                         ".species.id", ".species", "SPEC_MW", ".profile.type",
+                         ".pc.weight", ".", ".value", "Id"))
 
 #to think about...
 
@@ -132,9 +207,266 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #might be able to drop legend?
 #   check plot.respeciate
 
+
+
+##################################
+##################################
+## common unexported 1
+##################################
+##################################
+
+# ..rsp functions
+
+############################
+# unexported ..rsp scripts
+############################
+
+# these are unexported functions that extract data from the archives
+
+# the reason these are unexported is because they account for features
+# of the archives that prevent they merging completely.
+
+# NOTE
+###################
+# if you want to merge data from US and EU archive, we recommend that
+# you use these (or better yet the exported functions build using them)
+# rather than go to SPECIATE and SPECIEUROPE directly
+
+# there may be a small time/memory cost in doing that BUT it means
+# all merged US+EU data will be consistently merged ...
+
+#####################
+# to think about
+#####################
+
+###############################
+# possible future projects ???
+###############################
+
+# automate the species handling in ..rsp_species and ..rsp_weight functions
+###############################
+#    currently relying on developer to manual correct one when other is
+#          updated...
+#    maybe move common code to a separate ..rsp_ function...
+
+
 ################################
 ##############################
 ## common unexported
+##############################
+################################
+
+# suggesting standardizing naming for these:: ..rsp_[function_description]
+
+##################################
+##  testing ..rsp as data mergers
+##################################
+
+# related issue some Specie are not the same for
+#            eu:Specie.Id versus us:.species.id...
+
+..rsp_species_meta <-function(){
+
+  ##############################
+  #speciate species.us
+  ##############################
+  species.us <- SPECIATE$SPECIES_PROPERTIES
+
+  #current local tidies/corrections
+  ########################
+  species.us$CAS[species.us$CAS=="N/A"] <- NA
+  #NOTE
+  ########################
+  #Heneicosanoic acid duplicated
+  #but also lots of others - see also Duplicate_ID
+  #    tried but discontinued following...
+  ##species.us$.species.id[species.us$.species=="Heneicosanoic acid -duplicate"] <-
+  ##   species.us$.species.id[species.us$.species=="Heneicosanoic acid -duplicate"] + 0.2
+
+  #add common term for merge...
+  #################################
+  species.us$.species.id <- as.character(species.us$SPECIES_ID)
+  #see merging step
+
+  ############################
+  #specieurope species.eu
+  ############################
+  species.eu <- SPECIEUROPE$source
+
+  #current local tidies/corrections
+  ########################
+  #NOTE: same need to be done in ..rsp_weights_meta
+  #      but point at which it is done is different...
+  #      so variable naming will be different...
+  species.eu <- species.eu[c("Specie.Id", "Specie", "Analythical.Method",
+                             "Uncertainty.Method", "Sampling.Method", "Cas",
+                             "Symbol")]
+  species.eu <- species.eu[!duplicated(species.eu$Specie.Id),]
+  species.eu$.species.id <- as.numeric(species.eu$Specie.Id)
+  #ids above 2786 different for Us and EU data sets...
+  #   so adding 0.5 to make species unqiue...
+  species.eu$.species.id[species.eu$.species.id>2786] <-
+    species.eu$.species.id[species.eu$.species.id>2786] + 0.5
+  # most SPECIE/.species for these do not seem to be in both BUT..
+  # aluminum oxide assigned in both with different ids..
+  species.eu$.species.id[tolower(species.eu$Specie)=="aluminum oxide"] <- 2848
+
+  #add common term for merge...
+  #################################
+  species.eu$.species.id <- as.character(species.eu$.species.id)
+
+  #merged out!
+  #########################
+  #NOTE: this makes a large data set
+  #    all columns from SPECIATE, SPECIEUROPE and what I add
+  #         could simplify later but for now this retain all info
+  #         for error/issue checking
+  out <- as.data.frame(data.table::merge.data.table(
+    data.table::as.data.table(species.us),
+    data.table::as.data.table(species.eu),
+    by = ".species.id", all.y=TRUE, all.x=TRUE,
+    allow.cartesian=TRUE), suffixes = c(".us", ".eu"))
+  #make common term .species (the species name)
+  ########################################
+  out$.species <- ifelse(is.na(out$.species),
+                         out$Specie,
+                         .rsp_tidy_species_name(out$.species))
+  #current using EU name if there or my simplified version of US name if not...
+  out
+}
+
+#a <- ..rsp_species_meta()
+#View(subset(a, !is.na(Specie))[,c(".species.id", "Specie", ".species")])
+
+
+..rsp_profile_meta <- function(){
+
+  #################
+  #us profiles
+  ################
+  profiles.us <- SPECIATE$PROFILES
+  profiles.us$.profile.id <- paste("US:", profiles.us$PROFILE_CODE, sep="")
+  profiles.us$.profile <- profiles.us$PROFILE_NAME
+  profiles.us$.profile.type <- paste("US:", profiles.us$PROFILE_TYPE, sep="")
+
+  ######################
+  #eu profile meta
+  ######################
+  profiles.eu <- SPECIEUROPE$source
+  profiles.eu <- profiles.eu[!duplicated(profiles.eu$Id),]
+  profiles.eu <- profiles.eu[c("Id", "Name", "Original.Name", "Country",
+                               "Place", "Test.Year", "Profile.Type",
+                               "Latitude", "Longitude")]
+  profiles.eu$Keywords <- profiles.eu$Name
+  profiles.eu$.profile.id <- paste("EU:", profiles.eu$Id, sep="")
+  profiles.eu$.profile <- profiles.eu$Name
+#####################
+#like to add (or replace this with) the pm type in to this?
+#####################
+  profiles.eu$.profile.type <- paste("EU:", profiles.eu$Profile.Type, sep="")
+
+  #######################
+  #rbindlist out!
+  #######################
+  # stacking these because eu and us profiles are different...
+  as.data.frame(data.table::rbindlist(list(data.table::as.data.table(profiles.us),
+                                           data.table::as.data.table(profiles.eu)),
+                                      fill=TRUE))
+}
+
+
+#issue some negatives in specieurope relative.amounts!!!
+
+..rsp_weights_meta <- function(){
+
+  ######################
+  # us weights
+  ######################
+  pc.wts.us <- SPECIATE$SPECIES[c("PROFILE_CODE", "SPECIES_ID", "WEIGHT_PERCENT")]
+  names(pc.wts.us) <- c(".profile.id", ".species.id", ".pc.weight")
+  pc.wts.us$.profile.id <- paste("US:", pc.wts.us$.profile.id, sep="")
+  pc.wts.us$.species.id <- as.character(pc.wts.us$.species.id)
+
+  ##################
+  #eu weights
+  ##################
+  pc.wts.eu <- SPECIEUROPE$source
+
+  #corrections
+  ######################
+  #from ..rsp_species_id
+  #    need to transpose any changes
+  pc.wts.eu$Specie.Id[pc.wts.eu$Specie.Id>2786] <-
+    pc.wts.eu$Specie.Id[pc.wts.eu$Specie.Id>2786] + 0.5
+  pc.wts.eu$Specie.Id[tolower(pc.wts.eu$Specie)=="aluminum oxide"] <- 2848
+
+  #other changes
+  #######################
+  pc.wts.eu <- pc.wts.eu[c("Id", "Specie.Id", "Relative.Mass")]
+  names(pc.wts.eu) <- c(".profile.id", ".species.id", ".pc.weight")
+  pc.wts.eu$.profile.id <- paste("EU:", pc.wts.eu$.profile.id, sep="")
+  pc.wts.eu$.pc.weight[tolower(pc.wts.eu$.pc.weight)=="not detected"] <- NA
+  pc.wts.eu$.pc.weight <- as.numeric(pc.wts.eu$.pc.weight) * 100
+  pc.wts.eu$.species.id <- as.character(pc.wts.eu$.species.id)
+
+  #rbindlist out!
+  ################
+  #  stacking....
+  as.data.frame(data.table::rbindlist(
+    list(data.table::as.data.table(pc.wts.us),
+         data.table::as.data.table(pc.wts.eu)),
+    fill=TRUE))
+}
+
+
+..rsp_references_meta <- function(){
+
+  #####################
+  #us references
+  #####################
+  refs.us <- as.data.frame(data.table::merge.data.table(
+    data.table::as.data.table(SPECIATE$PROFILE_REFERENCE),
+    data.table::as.data.table(SPECIATE$REFERENCES),
+    by = "REF_Code", all.y=TRUE, all.x=TRUE,
+    allow.cartesian=TRUE), suffixes = c(".us", ".eu"))
+  #"REF_Code"        "PROFILE_CODE"    "REFERENCE"       "REF_DESCRIPTION" "LINK"
+  names(refs.us)[names(refs.us)=="PROFILE_CODE"] <- ".profile.id"
+  refs.us$.profile.id <- paste("US:", refs.us$.profile.id)
+
+  ######################
+  #eu references
+  ######################
+  refs.eu <- SPECIEUROPE$source[c("Id", "Reference")]
+  refs.eu <- refs.eu[!duplicated(paste(refs.eu$Id, refs.eu$Reference)),]
+  names(refs.eu) <- c(".profile.id", "REFERENCE")
+  refs.eu$.profile.id <- paste("EU:", refs.eu$.profile.id)
+
+  ######################
+  #rbindlist out!
+  ######################
+  #stacking
+  as.data.frame(data.table::rbindlist(list(data.table::as.data.table(refs.us),
+                                           data.table::as.data.table(refs.eu)),
+                                      fill=TRUE))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+################################
+##############################
+## common unexported 2
 ##############################
 ################################
 
@@ -156,8 +488,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 
 ##.rsp_ <- function(x){
 ##  .o <- rsp_profile(x)
-##  .o$PROFILE_NAME <- paste("test", .o$PROFILE_NAME, sep=">")
-##  .o$PROFILE_CODE <- "test"
+##  .o$.profile <- paste("test", .o$.profile, sep=">")
+##  .o$.profile.id <- "test"
 ##  .o
 ##}
 
@@ -170,6 +502,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #      as a new .rsp_tidy or .rsp_barebones
 #          to simplify the data sent and work with in functions
 #      then use a rsp_pad or rsp_meta/repair to add meta data when wanted???
+
 
 
 #.rsp_eu2us(rsp)
@@ -185,20 +518,20 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   #note:
   #   the if... names is redundant if x is from SPECIEUROPE
   if("Id" %in% names(x)){
-    names(x)[names(x)=="Id"] <- "PROFILE_CODE"
+    names(x)[names(x)=="Id"] <- ".profile.id"
   }
   if("Name" %in% names(x)){
-      names(x)[names(x)=="Name"] <- "PROFILE_NAME"
+      names(x)[names(x)=="Name"] <- ".profile"
   }
   if("Specie" %in% names(x)){
-    names(x)[names(x)=="Specie"] <- "SPECIES_NAME"
+    names(x)[names(x)=="Specie"] <- ".species"
   }
   if("Specie.Id" %in% names(x)){
-    names(x)[names(x)=="Specie.Id"] <- "SPECIES_ID"
-    x$SPECIES_ID <- as.character(x$SPECIES_ID)
+    names(x)[names(x)=="Specie.Id"] <- ".species.id"
+    x$.species.id <- as.character(x$.species.id)
   }
   if("Relative.Mass" %in% names(x)){
-    names(x)[names(x)=="Relative.Mass"] <- "WEIGHT_PERCENT"
+    names(x)[names(x)=="Relative.Mass"] <- ".pc.weight"
   }
   if("Particle.Size" %in% names(x)){
     names(x)[names(x)=="Particle.Size"] <- "PROFILE_TYPE"
@@ -219,10 +552,10 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
     #      like this ???
     #      (might need to think about handling...)
     #      [user could go rsp("eu:1") instead of rsp(1, source="us")]
-    x$PROFILE_CODE <- paste("EU:", x$PROFILE_CODE, sep="")
-    x$WEIGHT_PERCENT[x$WEIGHT_PERCENT=="not detected"] <- NA
-    x$WEIGHT_PERCENT <- as.numeric(x$WEIGHT_PERCENT) * 100
-    x$.value <- x$WEIGHT_PERCENT
+    x$.profile.id <- paste("EU:", x$.profile.id, sep="")
+    x$.pc.weight[x$.pc.weight=="not detected"] <- NA
+    x$.pc.weight <- as.numeric(x$.pc.weight) * 100
+    x$.value <- x$.pc.weight
   }
   class(x) <- class(x)[class(x)!="rsp_eu"]
   x
@@ -282,8 +615,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #    and code in plot.respeciate.old ???
 
 .rsp_split_profile <- function(x){
-  ref <- unique(x$PROFILE_CODE)
-  lapply(ref, function(y) x[x$PROFILE_CODE==y,])
+  ref <- unique(x$.profile.id)
+  lapply(ref, function(y) x[x$.profile.id==y,])
 }
 
 
@@ -321,8 +654,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 .rsp_build_respeciate <-
   function(x, ...){
     x <- as.data.frame(x)
-    if("WEIGHT_PERCENT" %in% names(x)) {
-      x$.value <- x$WEIGHT_PERCENT
+    if(".pc.weight" %in% names(x)) {
+      x$.value <- x$.pc.weight
     }
     class(x) <- c("respeciate", class(x))
     x
@@ -352,6 +685,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 
   .x.args <- list(...)
   x <- .rsp_tidy_profile(x)
+
   ##test object type
   test <- .rsp_test_respeciate(x, level=2, silent=TRUE)
   if(test != "respeciate"){
@@ -366,19 +700,22 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   }
   #check for duplicates
   x <- .rsp_test_profile(x)
+
+
   if(any(x$.n>1) & !silent){
     warning(paste("RSP> found duplicate species in profiles (merged and averaged...)",
                   sep=""), call.=FALSE)
   }
   #shorten names for plotting
-  x$SPECIES_NAME <- .rsp_tidy_species_name(x$SPECIES_NAME)
+  x$.species <- .rsp_tidy_species_name(x$.species)
 
   ####################################
   #issue profile names are not always unique
   ####################################
   test <- x
-  test$SPECIES_ID <- ".default"
+  test$.species.id <- ".default"
   test <- .rsp_test_profile(test)
+
   ###################
   #rep_test
   #can now replace this with data.table version
@@ -386,17 +723,17 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   ###################
 
   #does this need a warning?
-  if(length(unique(test$PROFILE_NAME))<nrow(test)){
+  if(length(unique(test$.profile))<nrow(test)){
     if(!silent){
       warning(paste("RSP> found profiles with common names (making unique...)",
                     sep=""), call. = FALSE)
     }
-    test$PROFILE_NAME <- make.unique(test$PROFILE_NAME)
-    x <- x[names(x) != "PROFILE_NAME"]
-    x <- merge(x, test[c("PROFILE_NAME", "PROFILE_CODE")], by="PROFILE_CODE")
+    test$.profile <- make.unique(test$.profile)
+    x <- x[names(x) != ".profile"]
+    x <- merge(x, test[c(".profile", ".profile.id")], by=".profile.id")
     ############################
     #why not just
-    #x$PROFILE_NAME <- make.unique(x$PROFILE_NAME)
+    #x$.profile <- make.unique(x$.profile)
     ############################
   }
 
@@ -436,14 +773,14 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   test <- test[1]=="respeciate"
   #order below matters
   #maybe tidy??
-  if(all(c("SPECIES_NAME", "SPECIES_ID") %in% names(x))){
+  if(all(c(".species", ".species.id") %in% names(x))){
     out <- "respeciate.species.ref"
   }
-  if(all(c("PROFILE_NAME", "PROFILE_CODE") %in% names(x))){
+  if(all(c(".profile", ".profile.id") %in% names(x))){
     out <- "respeciate.profile.ref"
   }
-  if(all(c("SPECIES_NAME", "SPECIES_ID", "PROFILE_NAME", "PROFILE_CODE",
-           "WEIGHT_PERCENT") %in% names(x))){
+  if(all(c(".species", ".species.id", ".profile", ".profile.id",
+           ".pc.weight") %in% names(x))){
     out <- "respeciate"
   }
   if(!silent){
@@ -463,8 +800,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #######################
 #tidy profile
 
-#now using a .value column as a local version of WEIGHT_PERCENT...
-#then WEIGHT_PERCENT remains as EPA made it even if we rescale...
+#now using a .value column as a local version of .pc.weight...
+#then .pc.weight remains as EPA made it even if we rescale...
 
 ## testing this idea at the moment
 ##     make .value using rsp_tidy_profile
@@ -474,11 +811,12 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #used by
 ###############################
 #.rsp_plot_fix
+#rsp_pad
 
 .rsp_tidy_profile <- function(x){
   #.value is local version of weight
   if(!".value" %in% names(x)){
-    x$.value <- x$WEIGHT_PERCENT
+    x$.value <- x$.pc.weight
   }
   x
 }
@@ -552,8 +890,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   tmp <- class(x)
   xx <- data.table::as.data.table(x)
   out <- xx[,
-            .(PROFILE_NAME = PROFILE_NAME[1],
-              SPECIES_NAME = SPECIES_NAME[1],
+            .(.profile = .profile[1],
+              .species = .species[1],
   #######################
   #test
   ########################
@@ -564,13 +902,13 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
               .n = length(.value[!is.na(.value)]),
               .sd = sd(.value, na.rm = TRUE)
             ),
-            by=.(PROFILE_CODE, SPECIES_ID)]
+            by=.(.profile.id, .species.id)]
 
   #might regret .value
-  out$WEIGHT_PERCENT <- out$.value
+  out$.pc.weight <- out$.value
   #note: I *think* this is fine as long as x is never permanently replaced
   #      with the rsp_test_profile without a warning
-  #           might be cases where we want to change WEIGHT_PERCENT
+  #           might be cases where we want to change .pc.weight
 
   #           change case making an average profile
 
@@ -590,20 +928,20 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #base case idiot test
 
 #rsp_test <- function(x){
-#  .prf <- unique(x$PROFILE_CODE)
+#  .prf <- unique(x$.profile.id)
 #  ans <- lapply(.prf, function(y){
-#    temp <- subset(x, PROFILE_CODE==y)
-#    .spc <- unique(temp$SPECIES_ID)
+#    temp <- subset(x, .profile.id==y)
+#    .spc <- unique(temp$.species.id)
 #    ans <- lapply(.spc, function(z){
-#      temp2 <- subset(temp, SPECIES_ID==z)
-#      data.frame(PROFILE_CODE = y,
-#                 PROFILE_NAME = temp2$PROFILE_NAME[1],
-#                 SPECIES_ID = z,
-#                 SPECIES_NAME = temp2$SPECIES_NAME[1],
-#                 COUNT = length(temp2$WEIGHT_PERCENT[!is.na(temp2$WEIGHT_PERCENT)]),
-#                 TOTAL = sum(temp2$WEIGHT_PERCENT[!is.na(temp2$WEIGHT_PERCENT)]),
+#      temp2 <- subset(temp, .species.id==z)
+#      data.frame(.profile.id = y,
+#                 .profile = temp2$.profile[1],
+#                 .species.id = z,
+#                 .species = temp2$.species[1],
+#                 COUNT = length(temp2$.pc.weight[!is.na(temp2$.pc.weight)]),
+#                 TOTAL = sum(temp2$.pc.weight[!is.na(temp2$.pc.weight)]),
 #                 SPEC_MW = temp2$SPEC_MW[1],
-#                 WEIGHT_PERCENT=mean(temp2$WEIGHT_PERCENT, na.rm=TRUE))
+#                 .pc.weight=mean(temp2$.pc.weight, na.rm=TRUE))
 #    })
 #    do.call(rbind, ans)
 #  })
@@ -613,16 +951,16 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #require(dplyr)
 #test1 <- function(x){
 #  x %>%
-#    group_by(PROFILE_CODE, SPECIES_ID) %>%
-#    summarise(PROFILE_NAME = PROFILE_NAME[1],
-#              SPECIES_NAME = SPECIES_NAME[1],
+#    group_by(.profile.id, .species.id) %>%
+#    summarise(.profile = .profile[1],
+#              .species = .species[1],
 #              SPEC_MW = SPEC_MW[1],
-#              total = sum(WEIGHT_PERCENT, na.rm=T),
-#              mean = mean(WEIGHT_PERCENT, na.rm=T),
-#             sd = sd(WEIGHT_PERCENT, na.rm=T),
-#             n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]))
+#              total = sum(.pc.weight, na.rm=T),
+#              mean = mean(.pc.weight, na.rm=T),
+#             sd = sd(.pc.weight, na.rm=T),
+#             n = length(.pc.weight[!is.na(.pc.weight)]))
 #}
-#aa <- sp_profile(sp_find_profile("ae6", by="profile_type")$PROFILE_CODE)
+#aa <- sp_profile(sp_find_profile("ae6", by="profile_type")$.profile.id)
 #require(data.table)
 #test2 <- function(x){
 #  #######################################
@@ -630,15 +968,15 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #  #######################################
 #  xx <- as.data.table(x)
 #  out <- xx[,
-#            .(PROFILE_NAME = PROFILE_NAME[1],
-#              SPECIES_NAME = SPECIES_NAME[1],
+#            .(.profile = .profile[1],
+#              .species = .species[1],
 #              SPEC_MW = SPEC_MW[1],
-#              .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
-#              WEIGHT_PERCENT = mean(WEIGHT_PERCENT, na.rm = TRUE),
-#              .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
-#              .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
+#              .total = sum(.pc.weight, na.rm = TRUE),
+#              .pc.weight = mean(.pc.weight, na.rm = TRUE),
+#              .n = length(.pc.weight[!is.na(.pc.weight)]),
+#              .sd = sd(.pc.weight, na.rm = TRUE)
 #            ),
-#            by=.(PROFILE_CODE, SPECIES_ID)]
+#            by=.(.profile.id, .species.id)]
 #  #output
 #  #currently data.frame
 #  #could be respeciate
@@ -920,10 +1258,10 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 # get profile order in case you need it latter...
 
 .rsp_profile_code_order <- function(data){
-  .tmp <-  data.table::as.data.table(data)[, .(ans=length(unique(PROFILE_CODE))),by="SPECIES_NAME"]
-  .tmp <- subset(.tmp, ans == max(.tmp$ans, na.rm=TRUE))$SPECIES_NAME
-  .tmp <- subset(data, SPECIES_NAME %in% .tmp)
-  sort(unique(.tmp$PROFILE_CODE))
+  .tmp <-  data.table::as.data.table(data)[, .(ans=length(unique(.profile.id))),by=".species"]
+  .tmp <- subset(.tmp, ans == max(.tmp$ans, na.rm=TRUE))$.species
+  .tmp <- subset(data, .species %in% .tmp)
+  sort(unique(.tmp$.profile.id))
 }
 
 
@@ -1239,7 +1577,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   .xx <- pls_report(pls)
   #name might want to be case-non-sensitive at some point
   #think about how to do this one...
-  .data <- .xx[.xx$SPECIES_NAME==name,]
+  .data <- .xx[.xx$.species==name,]
   #get and hold all the m_ values
   #update profile contributions for named species
   .ms <- names(.data)[grepl("^m_", names(.xx))]
@@ -1271,21 +1609,21 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   #lazy
   .ans <- .data
 
-  for(i in .ans$PROFILE_CODE){
-    .ii <- subset(.ans, PROFILE_CODE==i)
+  for(i in .ans$.profile.id){
+    .ii <- subset(.ans, .profile.id==i)
     .ii <- .ii[names(.ii) %in% names(pls[[i]]$args$data)]
-    .sp.ord <- unique(pls[[i]]$args$data$SPECIES_ID)
-    pls[[i]]$args$data <- subset(pls[[i]]$args$data, SPECIES_NAME!=name)
+    .sp.ord <- unique(pls[[i]]$args$data$.species.id)
+    pls[[i]]$args$data <- subset(pls[[i]]$args$data, .species!=name)
     pls[[i]]$args$data <- rbind(pls[[i]]$args$data, .ii)
     #put back in right order
     pls[[i]]$args$data <-
-      pls[[i]]$args$data[order(ordered(pls[[i]]$args$data$SPECIES_ID,
+      pls[[i]]$args$data[order(ordered(pls[[i]]$args$data$.species.id,
                                        levels=.sp.ord)),]
     #rebuild model
     .for <- as.character(formula(pls[[i]]$mod))
     .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
     .ms <- names(pls[[i]]$args$data)
-    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ms <- .ms[!.ms %in% c(".species.id", ".species", "test")]
     .ls <- lapply(.ms, function(x){0})
     names(.ls) <- paste("m_", .ms, sep="")
     .da <- pls[[i]]$args$data
@@ -1349,8 +1687,8 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   #and have same profiles as pls model data
   #and its contribution to all sources is set by .value
 
-  .out <- subset(.out, SPECIES_ID == unique(.out$SPECIES_ID)[1])
-  .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+  .out <- subset(.out, .species.id == unique(.out$.species.id)[1])
+  .test <- c(".profile.id", ".value", ".pc.weight")
   .test <- names(parent)[names(parent) %in% .test]
   .data <- parent[.test]
   names(.data)[2] <- "parent"
@@ -1377,23 +1715,23 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
              control=nls.control(tol=1e-5) #think about tolerance
   )
   .ans <- data.frame(
-    PROFILE_CODE = .data$PROFILE_CODE,
-    SPECIES_ID = parent$SPECIES_ID[1],
-    SPECIES_NAME = parent$SPECIES_NAME[1],
+    .profile.id = .data$.profile.id,
+    .species.id = parent$.species.id[1],
+    .species = parent$.species[1],
     t(coefficients(mod)),
     test = .data$parent
   )
   names(.ans) <- gsub("^n_", "", names(.ans))
-  for(i in .ans$PROFILE_CODE){
-    .ii <- subset(.ans, PROFILE_CODE==i)
-    .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+  for(i in .ans$.profile.id){
+    .ii <- subset(.ans, .profile.id==i)
+    .ii <- .ii[names(.ii) != ".profile.id"]
     pls[[i]]$args$data <-
       rbind(pls[[i]]$args$data, .ii)
     #rebuild model
     .for <- as.character(formula(pls[[i]]$mod))
     .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
     .ms <- names(pls[[i]]$args$data)
-    .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+    .ms <- .ms[!.ms %in% c(".species.id", ".species", "test")]
     .ls <- lapply(.ms, function(x){0})
     names(.ls) <- paste("m_", .ms, sep="")
     .da <- pls[[i]]$args$data
@@ -1435,30 +1773,30 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   #get m data
   ###########################
   .refs <- names(dat)[grepl("^[.]m_", names(dat))]
-  .tmp <- dat[c("SPECIES_NAME", .refs)]
-  .tmp <- .tmp[!duplicated(.tmp$SPECIES_NAME),]
+  .tmp <- dat[c(".species", .refs)]
+  .tmp <- .tmp[!duplicated(.tmp$.species),]
 
   #restructure
   #########################
   #renaming columns
   .tmp <- data.table::melt.data.table(data.table::as.data.table(.tmp),
-                                      id.var="SPECIES_NAME")
+                                      id.var=".species")
   .tmp <- as.data.frame(.tmp)
-  names(.tmp)[names(.tmp)=="variable"] <- "PROFILE_CODE"
-  .tmp$PROFILE_CODE <- as.character(.tmp$PROFILE_CODE)
-  .tmp$PROFILE_CODE <- gsub("^.m_", "", .tmp$PROFILE_CODE)
+  names(.tmp)[names(.tmp)=="variable"] <- ".profile.id"
+  .tmp$.profile.id <- as.character(.tmp$.profile.id)
+  .tmp$.profile.id <- gsub("^.m_", "", .tmp$.profile.id)
   names(.tmp)[names(.tmp)=="value"] <- ".value"
   #addition cheats so it is respeciate-like
-  .tmp$PROFILE_NAME <- .tmp$PROFILE_CODE
-  .tmp$SPECIES_ID <- .tmp$SPECIES_NAME
-  .tmp$WEIGHT_PERCENT <- .tmp$.value
+  .tmp$.profile <- .tmp$.profile.id
+  .tmp$.species.id <- .tmp$.species
+  .tmp$.pc.weight <- .tmp$.value
   ##similay using rsp_build_x
   ##makes rsp_x but some codes may not be assigned...
-  #.p1.prof <- unique(.tmp$PROFILE_CODE)
+  #.p1.prof <- unique(.tmp$.profile.id)
   #.ans <- rsp_build_x(.tmp, test.rsp=FALSE)
-  #.cheat <- .ans$SPECIES_ID[is.na(.ans$SPECIES_ID)]
+  #.cheat <- .ans$.species.id[is.na(.ans$.species.id)]
   #if(length(.cheat)>0){
-  #  .ans$SPECIES_ID[is.na(.ans$SPECIES_ID)] <- .ans$SPECIES_NAME[is.na(.ans$SPECIES_ID)]
+  #  .ans$.species.id[is.na(.ans$.species.id)] <- .ans$.species[is.na(.ans$.species.id)]
   #}
 
   #output
@@ -1477,11 +1815,11 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   .tmp <- names(dat)
   .tmp <- .tmp[grep("^.x_", .tmp)]
   .refs <- c(.tmp, "pred")
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  .sp.ref <- unique(dat$.species)
   #make summary pls. prop.table
   .ans2 <- lapply(.sp.ref, function(x){
-    .tmp <- subset(dat, SPECIES_NAME==x)
-    .d2 <- .tmp[1, c("SPECIES_NAME", .refs)]
+    .tmp <- subset(dat, .species==x)
+    .d2 <- .tmp[1, c(".species", .refs)]
     for(.ref in .refs){
       #use only paired cases to calculate skew...
       .tmp2 <- .tmp[c(.ref, ".value")]
@@ -1496,10 +1834,10 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   #restructure to output
   .ans2 <- .ans2[names(.ans2)!="pred"]
   .ans2 <- data.table::melt(data.table::as.data.table(.ans2),
-                            id.var="SPECIES_NAME")
+                            id.var=".species")
   .ans2 <- as.data.frame(.ans2)
-  names(.ans2)[names(.ans2)=="variable"] <- "PROFILE_CODE"
-  .ans2$PROFILE_CODE <- gsub("^[.]x_", "", as.character(.ans2$PROFILE_CODE))
+  names(.ans2)[names(.ans2)=="variable"] <- ".profile.id"
+  .ans2$.profile.id <- gsub("^[.]x_", "", as.character(.ans2$.profile.id))
   names(.ans2)[names(.ans2)=="value"] <- ".prop"
 
   #output
@@ -1530,7 +1868,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 
 #ggplot example
 #require(ggplot2)
-#ggplot() + geom_col(aes(y=SPECIES_NAME, x=WEIGHT_PERCENT), data=aa) + facet_grid(.~PROFILE_NAME)
+#ggplot() + geom_col(aes(y=.species, x=.pc.weight), data=aa) + facet_grid(.~.profile)
 
 
 
@@ -1555,13 +1893,13 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #https://www.rpubs.com/NYang/ANLY530-IRIS
 
 #devtools::unload(); devtools::load_all()
-#a <- xxx_test(); subset(a, a$.ref)$PROFILE_NAME
+#a <- xxx_test(); subset(a, a$.ref)$.profile
 
 #xxx_test <- function(){
 #
 #  .tmp <- sysdata$PROFILES
-#  .out <-as.data.table(sp_dcast_profile(sp_profile(.tmp$PROFILE_CODE)))
-#  .tmp <- .tmp[c("PROFILE_CODE", "Keywords")]
+#  .out <-as.data.table(sp_dcast_profile(sp_profile(.tmp$.profile.id)))
+#  .tmp <- .tmp[c(".profile.id", "Keywords")]
 #  .tmp$.ref <- grepl("wildfire", tolower(.tmp$Keywords)) |
 #    grepl("burning", tolower(.tmp$Keywords))
 #  .out <- merge(.out, .tmp)

@@ -170,10 +170,10 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   #others refs
   #was profile_code; changed to profile_name
   #    might be an issue; some names not unique...
-  .sp.pro <- if(is.factor(x$PROFILE_NAME)) {
-    levels(x$PROFILE_NAME)
+  .sp.pro <- if(is.factor(x$.profile)) {
+    levels(x$.profile)
   } else {
-    unique(x$PROFILE_NAME)
+    unique(x$.profile)
   }
 
   #n/profile handling
@@ -203,7 +203,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     }
     profile <- profile[1:6]
   }
-  x <- x[x$PROFILE_NAME %in% profile,]
+  x <- x[x$.profile %in% profile,]
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -219,6 +219,8 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     #maybe warning() aw well??
     return(invisible(NULL))
   }
+
+
 
   ####################################
   #switching profile from profile_code to profile_name...
@@ -237,35 +239,36 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     #bit of a cheat...
     ################################
     test <- x
-    test$PROFILE_CODE <- ".default"
+    test$.profile.id <- ".default"
     test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      xx <- unique(test$.species)
     } else {
-      test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      test <- x[order(x$.pc.weight, decreasing = TRUE),]
+      xx <- unique(test$.species)
     }
   } else {
-    xx <- unique(x$SPECIES_NAME)
+    xx <- unique(x$.species)
   }
-  x <- x[c(".value", "PROFILE_NAME", "SPECIES_NAME")]
+  #x <- x[c(".value", ".species", ".species")]
 
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+  #print(x$.profile)
+
+  x$.species <- factor(x$.species,
                            levels = xx)
-  if(!is.factor(x$PROFILE_NAME)){
-    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  if(!is.factor(x$.profile)){
+    x$.profile <- factor(x$.profile, levels=unique(x$.profile))
   }
   #should profile handling be like species_name?
   #    maybe following profile above??
-
 
 #print(as.data.frame(x))
   ##################
   #profile bar chart
   ##################
-  p1.ls <- list(x= .value~SPECIES_NAME,
+  p1.ls <- list(x= .value~.species,
                 data=x, ylab="Profile Loading", xlab="",
                 #NB: prepanel seemed to break ylim when stacking
                 panel = function(x, y, origin, ...){
@@ -298,11 +301,11 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if(length(profile)>1){
     if(tolower(multi.profile) %in% c("panel", "panels")){
       #paneling multiple panels
-      p1.ls$x <- .value~SPECIES_NAME | PROFILE_NAME
+      p1.ls$x <- .value~.species | .profile
     } else {
       #grouping multiple panels
-      p1.ls$x <- .value~SPECIES_NAME
-      p1.ls$groups <- x$PROFILE_NAME
+      p1.ls$x <- .value~.species
+      p1.ls$groups <- x$.profile
     }
   }
 
@@ -322,7 +325,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if("col" %in% names(p1.ls)){
     if(is.function(p1.ls$col)){
       p1.ls$col <- if("groups" %in% names(p1.ls)){
-        p1.ls$col(length(levels(x$PROFILE_NAME)))
+        p1.ls$col(length(levels(x$.profile)))
       } else {
         p1.ls$col(1)
       }
@@ -330,7 +333,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
       rep(trellis.par.get("superpose.polygon")$col,
-          length.out=length(levels(x$PROFILE_NAME)))
+          length.out=length(levels(x$.profile)))
     } else {
       trellis.par.get("superpose.polygon")$col[1]
     }
@@ -356,7 +359,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     .tmp <- list(space="top",
                  #title="Legends",
                  rectangles=list(col=rep(p1.ls$col,
-                                         length.out=length(levels(x$PROFILE_NAME)))),
+                                         length.out=length(levels(x$.profile)))),
                  text = list(profile, cex=0.7))
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
@@ -420,10 +423,10 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #if already factor ???
   #   user could be forcing order
   ##############################
-  .sp.ord <- if(is.factor(x$SPECIES_NAME)){
-    levels(x$SPECIES_NAME)
+  .sp.ord <- if(is.factor(x$.species)){
+    levels(x$.species)
   } else {
-    as.character(unique(x$SPECIES_NAME))
+    as.character(unique(x$.species))
   }
   species <- if (missing(id)) {
     .sp.ord
@@ -439,10 +442,13 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
       .sp.ord[species]
     }
   }
+
   if (!any(species %in% .sp.ord) | any(is.na(species))) {
     stop("RSP> unknown species(s) or missing ids, please check",
          call. = FALSE)
   }
+
+
   if(length(species)>20 & missing(id)){
     if(!silent){
       warning("RSP> ", length(species), " species... ",
@@ -452,7 +458,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
     species <- species[1:20]
   }
-  x <- x[x$SPECIES_NAME %in% species,]
+  x <- x[x$.species %in% species,]
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -474,11 +480,11 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #(see below about reordering)
   ####################################
 
-  species <- species[species %in% unique(x$SPECIES_NAME)]
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=species)
-  x <- x[order(x$SPECIES_NAME),]
+  species <- species[species %in% unique(x$.species)]
+  x$.species <- factor(x$.species, levels=species)
+  x <- x[order(x$.species),]
   #sp.ord <- as.numeric(factor(species, levels=sort(species)))
-  #sp.ord <- 1:length(levels(x$SPECIES_NAME))
+  #sp.ord <- 1:length(levels(x$.species))
 
 
   ##################################
@@ -501,20 +507,20 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     #taken from _profile plots
     ################################
     test <- x
-    test$PROFILE_CODE <- ".default"
+    test$.profile.id <- ".default"
     test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
-      xx <- unique(as.character(test$SPECIES_NAME))
+      xx <- unique(as.character(test$.species))
     } else {
-      test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
-      xx <- unique(as.character(test$SPECIES_NAME))
+      test <- x[order(x$.pc.weight, decreasing = TRUE),]
+      xx <- unique(as.character(test$.species))
     }
   } else {
-    xx <- unique(as.character(x$SPECIES_NAME))
+    xx <- unique(as.character(x$.species))
   }
-  x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
+  x <- x[c(".value",".profile.id", ".profile", ".species")]
 
 
   #print(xx)
@@ -528,15 +534,15 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #not padding, obviously not dropping nas...
   x <- rsp_melt_wide(rsp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
 
-  if(!is.factor(x$PROFILE_NAME)){
-    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  if(!is.factor(x$.profile)){
+    x$.profile <- factor(x$.profile, levels=unique(x$.profile))
   }
   ################
   #testing tracking
-  ##if(!is.factor(x$SPECIES_NAME)){
-  ##  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=unique(x$SPECIES_NAME))
+  ##if(!is.factor(x$.species)){
+  ##  x$.species <- factor(x$.species, levels=unique(x$.species))
   ##}
-  x$SPECIES_NAME <- factor(as.character(x$SPECIES_NAME),
+  x$.species <- factor(as.character(x$.species),
                            levels=xx)
   #################
 
@@ -545,7 +551,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   ##############################
 
   #dropped for now...
-  #x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+  #x$.species <- factor(x$.species,
   #                         levels = xx)
 
   #############################
@@ -570,10 +576,10 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     #initial test reset.x
     #  this is a function and it is applied to profile_code
     #      to build the x axis...
-    x$.x <- .x.args$reset.x(x$PROFILE_CODE)
+    x$.x <- .x.args$reset.x(x$.profile.id)
     .xlab <- ""
   } else {
-    x$.x <- as.numeric(factor(x$PROFILE_CODE))
+    x$.x <- as.numeric(factor(x$.profile.id))
     .xlab <- "Sample [index]"
   }
 
@@ -604,11 +610,11 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if(length(species)>1){
     if(tolower(multi.species) %in% c("panel", "panels")){
       #paneling multiple panels
-      p1.ls$x <- .value~.x | SPECIES_NAME
+      p1.ls$x <- .value~.x | .species
     } else {
       #grouping multiple panels
       p1.ls$x <- .value~.x
-      p1.ls$groups <- x$SPECIES_NAME
+      p1.ls$groups <- x$.species
     }
   }
 
@@ -663,7 +669,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #could be issue here if user uses auto.key???
   #like to track border as well as col...
   if("groups" %in% names(p1.ls)){
-    #print(x$SPECIES_NAME)
+    #print(x$.species)
     .tmp <- list(space="right",
                  #title="Legends",
                  lines=list(col=rep(p1.ls$col,
@@ -671,10 +677,10 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
                                     ##length.out=length(species))),
                                     length.out=length(xx))),
                  ##########################
-                 #text = list(levels(x$SPECIES_NAME), cex=0.7))
+                 #text = list(levels(x$.species), cex=0.7))
                  ##text = list(species, cex=0.7))
                  text = list(xx, cex=0.7))
-                 #changed from above because x$SPECIES_NAME
+                 #changed from above because x$.species
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
     } else {

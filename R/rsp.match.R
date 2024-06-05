@@ -132,7 +132,7 @@
 #                     but might need to rethink n, min.bin, etc???
 
 # often have what looks like replicates in SPECAITE, e.g.
-## a <- rsp(80, source="eu"); rsp_match_profile(a, rsp_q_pm(), method="pd", matches=20);a
+## a <- rsp(80, source="eu"); rsp_match_profile(a, rsp_us_pm(), method="pd");a
 ## PROFILE_CODE                                      PROFILE_NAME          fit
 ## 1       3400410                            Brake Lining, Asbestos 0.0003941924
 ## 2      340042.5                            Brake Lining, Asbestos 0.0003941924
@@ -166,6 +166,10 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
 
   #add .value if not there
   x <- .rsp_tidy_profile(rsp)
+
+  ############################
+  #can we loose these...
+
   if("rsp_eu" %in% class(x)){
     x <- .rsp_eu2us(x)
   }
@@ -182,11 +186,11 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #   assuming only one profile
   #   might think about changing this in future
 
-  if(length(unique(x$PROFILE_CODE))>1){
+  if(length(unique(x$.profile.id))>1){
     x <- rsp_average_profile(x, code = "test")
   } else {
     x <- rsp_average_profile(x, code = "test",
-                            name = paste("test>", x$PROFILE_NAME[1], sep=""))
+                            name = paste("test>", x$.profile[1], sep=""))
   }
 
   #note
@@ -233,13 +237,14 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #.tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
   .tmp <- data.table::as.data.table(rsp_rescale_profile(.tmp, method=rescale))
 
+
   ###################
   #keep species names and ids for renaming
   #    as.character to stop rename tripping on factors
   #         not ideal...
   ###################
-  .tmp.pr.nm <- as.character(.tmp$PROFILE_NAME)
-  .tmp.pr.cd <- as.character(.tmp$PROFILE_CODE)
+  .tmp.pr.nm <- as.character(.tmp$.profile)
+  .tmp.pr.cd <- as.character(.tmp$.profile.id)
 
   ##################
   #dcast to reshape for search
@@ -513,8 +518,8 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
 
   #row.names fulled form .out if you don't overwrite
 
-  .out <- data.frame(PROFILE_CODE=names(.out),
-                     PROFILE_NAME=.tmp,
+  .out <- data.frame(.profile.id=names(.out),
+                     .profile=.tmp,
                      fit=.out,
                      row.names = 1:length(.out))
 
@@ -522,8 +527,8 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #   when time should be a better way...?
   if(!test.rsp){
     matches <- matches - 1
-    if("test" %in% x$PROFILE_CODE){
-      .out <- .out[tolower(.out$PROFILE_CODE)!="test",]
+    if("test" %in% x$.profile.id){
+      .out <- .out[tolower(.out$.profile.id)!="test",]
     }
     if(nrow(.out) > (matches)){
       .out <- .out[1:matches,]

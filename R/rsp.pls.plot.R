@@ -133,11 +133,12 @@ pls_plot <- function (pls, plot.type = 1, ...,
   .x.args <- list(...)
   dat <- pls_report(pls)
   .ord.pro.c <- .rsp_profile_code_order(dat)
+
   ######################################
   #option to not do name simplification?
   #
-  dat$SPECIES_NAME <- .rsp_tidy_species_name(dat$SPECIES_NAME)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  dat$.species <- .rsp_tidy_species_name(dat$.species)
+  .sp.ref <- unique(dat$.species)
 
   #type
   if(!plot.type %in% c(1)){
@@ -159,8 +160,8 @@ pls_plot <- function (pls, plot.type = 1, ...,
     .refs <- c(.tmp, "pred")
     #make summary pls. prop.table
     .ans <- lapply(.sp.ref, function(x){
-      .tmp <- subset(dat, SPECIES_NAME==x)
-      .d2 <- .tmp[1, c("SPECIES_NAME", .refs)]
+      .tmp <- subset(dat, .species==x)
+      .d2 <- .tmp[1, c(".species", .refs)]
       for(.ref in .refs){
         #use only paired cases to calculate skew...
         .tmp2 <- .tmp[c(.ref, ".value")]
@@ -173,8 +174,8 @@ pls_plot <- function (pls, plot.type = 1, ...,
     .ans <- do.call(rbind, .ans)
 
     #barchart formula
-    .for <- paste(.tmp, collapse="+")
-    .for <- as.formula(paste("SPECIES_NAME~", .for, sep=""))
+    .for <- paste(paste("`", .tmp, "`", sep=""),  collapse="+")
+    .for <- as.formula(paste(".species~", .for, sep=""))
     .tmp <- gsub("^.x_", "", .tmp)
     #plot lists
     gr.ls <- list(h=-1, v=-1, col="grey", lty=3)
@@ -292,8 +293,8 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...,
   ######################################
   #option to not do name simplification?
   #
-  dat$SPECIES_NAME <- .rsp_tidy_species_name(dat$SPECIES_NAME)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  dat$.species <- .rsp_tidy_species_name(dat$.species)
+  .sp.ref <- unique(dat$.species)
 
   #plot.type control
   if(!plot.type %in% c(1)){
@@ -309,7 +310,7 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...,
     ##############################
     #get profiles .m_ columns
     .ans <- .rsp_get_m_from_pls(dat)
-    .p1.prof <- unique(.ans$PROFILE_CODE)
+    .p1.prof <- unique(.ans$.profile.id)
     #send to rsp_plot_profile with any user arguments
     #   to make first plot
     #set cols
@@ -332,7 +333,7 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...,
     .ans2$.pc <- .ans2$.prop * 100
     #could do this in the panel so any missing is greyed out ???
     .ans2$.pc[is.na(.ans2$.pc)] <- 0
-    p2.ls <- .rsp_panelPal("tc", list(x =.pc~factor(SPECIES_NAME)|factor(PROFILE_CODE),
+    p2.ls <- .rsp_panelPal("tc", list(x =.pc~factor(.species)|factor(.profile.id),
                                        data=.ans2,
                                        type=c("h", "p"), pch=18, layout=c(1,7),
                                        ylab="Total Contribution (%)",
@@ -396,7 +397,7 @@ pls_plot_profile <- function (pls, plot.type=1, log = FALSE, ...,
 # id enabled but
 #    species order is always as supplied...
 #         probably actually alphabetic
-#         look like order(character(unique(PROFILE_CODE)))
+#         look like order(character(unique(.profile.id)))
 
 # to do
 #    limit default output to < 7 plots?
@@ -423,7 +424,7 @@ pls_plot_species <- function (pls, id, plot.type=1, ...,
   .x.args <- list(...)
   dat <- pls_report(pls)
   .ord.pro.c <- .rsp_profile_code_order(dat)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  .sp.ref <- unique(dat$.species)
   my.species <- if (missing(id)) {
     .sp.ref
     #default option (print the lot...)
@@ -457,33 +458,33 @@ pls_plot_species <- function (pls, id, plot.type=1, ...,
   ######################################
   #option to not do name simplification?
   #
-  dat$SPECIES_NAME <- .rsp_tidy_species_name(dat$SPECIES_NAME)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  dat$.species <- .rsp_tidy_species_name(dat$.species)
+  .sp.ref <- unique(dat$.species)
   my.species <- .rsp_tidy_species_name(my.species)
 
   if (!any(my.species %in% .sp.ref)) {
     stop("pls_plot_species> unknown species, please check", call. = FALSE)
   }
 
-  .tmp <- dat[c("SPECIES_NAME", "PROFILE_CODE", ".value")]
+  .tmp <- dat[c(".species", ".profile.id", ".value")]
   .tmp <- data.table::as.data.table(.tmp)
-  .tmp <- data.table::dcast(.tmp, PROFILE_CODE ~ SPECIES_NAME,
+  .tmp <- data.table::dcast(.tmp, .profile.id ~ .species,
                             mean,
                             na.rm=TRUE,
                             value.var = ".value")
-  .tmp2 <- data.table::melt(.tmp, id.vars="PROFILE_CODE", variable.name="SPECIES_NAME",
+  .tmp2 <- data.table::melt(.tmp, id.vars=".profile.id", variable.name=".species",
                            value.name=".value")
-  .tmp <- dat[c("SPECIES_NAME", "PROFILE_CODE", "pred")]
+  .tmp <- dat[c(".species", ".profile.id", "pred")]
   .tmp <- data.table::as.data.table(.tmp)
-  .tmp <- data.table::dcast(.tmp, PROFILE_CODE ~ SPECIES_NAME,
+  .tmp <- data.table::dcast(.tmp, .profile.id ~ .species,
                             mean,
                             na.rm=TRUE,
                             value.var = "pred")
-  .tmp <- data.table::melt(.tmp, id.vars="PROFILE_CODE", variable.name="SPECIES_NAME",
+  .tmp <- data.table::melt(.tmp, id.vars=".profile.id", variable.name=".species",
                            value.name="pred")
   .tmp <- data.table::merge.data.table(.tmp2, .tmp)
   .tmp <- as.data.frame(.tmp)
-  .tmp$.index <- as.numeric(factor(.tmp$PROFILE_CODE, levels=.ord.pro.c,
+  .tmp$.index <- as.numeric(factor(.tmp$.profile.id, levels=.ord.pro.c,
                                   ordered = TRUE))
   .tmp<- .tmp[order(.tmp$.index),]
 
@@ -493,7 +494,7 @@ pls_plot_species <- function (pls, id, plot.type=1, ...,
          call. = FALSE)
   }
 
-  .tmp <- subset(.tmp, SPECIES_NAME %in% my.species)
+  .tmp <- subset(.tmp, .species %in% my.species)
 
   ############################
   #type 1
@@ -504,7 +505,7 @@ pls_plot_species <- function (pls, id, plot.type=1, ...,
     } else {
       "red"
     }
-    plt <- list(x=pred~.value | SPECIES_NAME, data=.tmp,
+    plt <- list(x=pred~.value | .species, data=.tmp,
                   #prepanel forces x and y lims to same range
                   prepanel=function(...){
                     .tmp <- prepanel.default.xyplot(...)
@@ -565,7 +566,7 @@ pls_plot_species <- function (pls, id, plot.type=1, ...,
     if("mod.col" %in% names(.x.args)){
       .x.args$col <- c(.x.args$col[1], .x.args$mod.col)
     }
-    p2.ls <- list(x= .value + pred ~ .index | SPECIES_NAME, data=.tmp,
+    p2.ls <- list(x= .value + pred ~ .index | .species, data=.tmp,
                   auto.key = list(text=.x.args$key.text,
                                   space="top", columns=2),
                   type="l",
@@ -674,8 +675,8 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
   .x.args <- list(...)
   dat <- pls_report(pls)
   .ord.pro.c <- .rsp_profile_code_order(dat)
-  #dat$SPECIES_NAME <- .rsp_tidy_species_name(dat$SPECIES_NAME)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  #dat$.species <- .rsp_tidy_species_name(dat$.species)
+  .sp.ref <- unique(dat$.species)
   #species
   #  now defaulting to all plots
   species <- if (missing(n)) {
@@ -702,7 +703,7 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
   #  might not need to do this....
   #################################
 
-  .sp.ord <- unique(dat$SPECIES_ID)
+  .sp.ord <- unique(dat$.species)
   #####################################
   #messy at moment...
   .sp.m.pro <- names(dat)[grep("^.n_", names(dat))]
@@ -734,14 +735,14 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
       dat[, paste(".n_", i, sep = "")]
   }
   .sp.x.pro <- names(dat)[grep("^.x_", names(dat))]
-  .rep <- dat[c("SPECIES_NAME", "SPECIES_ID", "PROFILE_CODE",
+  .rep <- dat[c(".species", ".species.id", ".profile.id",
                 .sp.x.pro)]
   .rep <- data.table::melt(data.table::as.data.table(.rep),
-                           id = c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE"))
+                           id = c(".species.id", ".species", ".profile.id"))
   .tot <- data.table::as.data.table(dat)
   .cs <- c(".value", "pred", .sp.x.pro)
   .tot <- .tot[, lapply(.SD, function(x) sum(x, na.rm = TRUE)),
-               .SDcols = .cs, by = c("SPECIES_ID", "SPECIES_NAME")]
+               .SDcols = .cs, by = c(".species.id", ".species")]
 
   ###########################
   # now plotting as panels
@@ -753,12 +754,12 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
   # previous method only tracked valid cases for the plotted data
   #    so no gaps where models dropped/not built...
   #########################################################
-  .rep$.index <- as.numeric(factor(.rep$PROFILE_CODE, levels = .ord.pro.c,
+  .rep$.index <- as.numeric(factor(.rep$.profile.id, levels = .ord.pro.c,
                                    ordered = TRUE))
-  dat$.index <- as.numeric(factor(dat$PROFILE_CODE, levels = .ord.pro.c,
+  dat$.index <- as.numeric(factor(dat$.profile.id, levels = .ord.pro.c,
                                   ordered = TRUE))
 
-  .tmp <- dat[c("SPECIES_ID", "PROFILE_CODE", ".index", ".value", "pred")]
+  .tmp <- dat[c(".species.id", ".profile.id", ".index", ".value", "pred")]
   .rep <- data.table::merge.data.table(.rep, .tmp)
 
   .rep$variable <- gsub("^x_", "", .rep$variable)
@@ -766,34 +767,34 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
   #print(names(.rep))
   #return(dat)
 
-  .rep <- subset(as.data.frame(.rep), SPECIES_NAME %in% species)
+  .rep <- subset(as.data.frame(.rep), .species %in% species)
 
   if (1 %in% plot.type) {
 
     #lattice sets panel order based
-    .sp <- if(is.factor(.rep$SPECIES_NAME)){
-      levels(.rep$SPECIES_NAME)
+    .sp <- if(is.factor(.rep$.species)){
+      levels(.rep$.species)
     } else {
-      sort(unique(.rep$SPECIES_NAME))
+      sort(unique(.rep$.species))
     }
-    .sp <- .sp[.sp %in% .rep$SPECIES_NAME]
-    #.y.scale <- lapply(unique(.rep$SPECIES_NAME), function(x){
+    .sp <- .sp[.sp %in% .rep$.species]
+    #.y.scale <- lapply(unique(.rep$.species), function(x){
     .y.scale <- lapply(.sp, function(x){
-      .tmp <- .rep[.rep$SPECIES_NAME==x,]
+      .tmp <- .rep[.rep$.species==x,]
       c(0, max(c(.tmp$.value, .tmp$pred), na.rm=TRUE))
     })
     ###############################################
     #use loa method to generalise this?
     ###############################################
 
-    p2 <- lattice::xyplot(.value ~ .index | SPECIES_NAME, .rep,
+    p2 <- lattice::xyplot(.value ~ .index | .species, .rep,
                           panel=lattice::panel.xyplot,
                           type="s", xlab="Sample [index]",
                           ylab="Measurement",
                           scales=list(relation="free"),
                           ylim=.y.scale)
 
-    p <- lattice::barchart(value ~ factor(.index) | SPECIES_NAME, .rep,
+    p <- lattice::barchart(value ~ factor(.index) | .species, .rep,
                            groups=.rep$variable, stack=TRUE,
                            panel=function(x, y, col, groups, ..., subscripts){
                              #grid control like loa
@@ -833,7 +834,7 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
                 par.settings = list(superpose.polygon = list(col = .cols),
                                     superpose.symbol = list(fill = .cols))))
 
-    #p2 <- lattice::xyplot(.value ~ factor(.index) | SPECIES_NAME, dat,
+    #p2 <- lattice::xyplot(.value ~ factor(.index) | .species, dat,
     #                      type="l", scales=list(relation="free"))
     #plot(cheat(p, latticeExtra::as.layer(p2)))
 
@@ -842,7 +843,7 @@ pls_plot.old <- function (pls, n, plot.type = 1, ...){
   if (2 %in% plot.type) {
 
 
-    p <- lattice::xyplot(value ~ .index | SPECIES_NAME, .rep,
+    p <- lattice::xyplot(value ~ .index | .species, .rep,
                          groups=.rep$variable,
                          totals=.rep$.value,
                          scales=list(relation="free",
@@ -886,7 +887,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   .x.args <- list(...)
   .plt.args <- .x.args[names(.x.args %in% c())]
   dat <- pls_report(pls)
-  .sp.ord <- unique(dat$SPECIES_ID)
+  .sp.ord <- unique(dat$.species.id)
   .sp.m.pro <- names(dat)[grep("^.m_", names(dat))]
   .sp.pro <- gsub("^.m_", "", .sp.m.pro)
   #defaulting n to all profiles as one plot
@@ -912,7 +913,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   #########################
   n_profile <- paste(".n_", profile, sep = "")
   m_profile <- paste(".m_", profile, sep = "")
-  dat <- dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE",
+  dat <- dat[c(".species.id", ".species", ".profile.id",
                n_profile, m_profile, "pred", ".value")]
   for (i in profile) {
     dat[, paste(".x_", i, sep = "")] <- dat[, paste(".m_", i, sep = "")] *
@@ -922,7 +923,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   .rep <- data.table::as.data.table(dat)
   .cols <- c(".value", "pred", paste(".x_", profile, sep = ""))
   .rep <- .rep[, lapply(.SD, function(x) sum(x, na.rm = TRUE)),
-               .SDcols = .cols, by = c("SPECIES_ID", "SPECIES_NAME")]
+               .SDcols = .cols, by = c(".species.id", ".species")]
   .rep <- as.data.frame(.rep)
 
   #########################
@@ -944,12 +945,12 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   }
   #might not need all of following now we
   #we are not pulling apart to plot one at time...
-  dat <- dat[!duplicated(dat$SPECIES_NAME), ]
-  dat$PROFILE_NAME <- dat$PROFILE_NAME[1]
-  dat$PROFILE_CODE <- dat$PROFILE_CODE[1]
-  dat <- merge(.rep, dat[c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE",
+  dat <- dat[!duplicated(dat$.species), ]
+  dat$.profile <- dat$.profile[1]
+  dat$.profile.id <- dat$.profile.id[1]
+  dat <- merge(.rep, dat[c(".species.id", ".species", ".profile.id",
                            m_profile)], )
-  dat <- dat[order(ordered(dat$SPECIES_ID, levels = .sp.ord)), ]
+  dat <- dat[order(ordered(dat$.species.id, levels = .sp.ord)), ]
 
 
   ################################
@@ -957,7 +958,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   ################################
   rownames(dat) <- 1:nrow(dat)
   .ref <- names(dat)[grep("pc_", names(dat))]
-  .oth <- c("SPECIES_ID", "SPECIES_NAME", "PROFILE_CODE", ".value", "pred")
+  .oth <- c(".species.id", ".species", ".profile.id", ".value", "pred")
   .temp <- data.table::as.data.table(dat[c(.oth, gsub("^pc_", ".x_", .ref))])
   .d1 <- data.table::melt(.temp, measure.vars = gsub("^pc_", ".x_", .ref),
                           variable.name = "pls_profile", value.name = "loading")
@@ -997,7 +998,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
   #now using lattice/latticeExtra
   ##
   #think there is more here that can be generalized...
-  p1.ls <- list(x = loading~SPECIES_NAME | pls_profile,
+  p1.ls <- list(x = loading~.species | pls_profile,
                 data=dat, ylab="Source Loading",
                 panel = function(...){
                   .rsp_panelPal("grid", list(h=-1,v=-1, col="grey", lty=3),
@@ -1028,7 +1029,7 @@ pls_plot_profile.old <- function (pls, n, log = FALSE, ...)
     } else {
       trellis.par.get("superpose.line")$col[2]
     }
-    p2.ls <- list(x = percent_contr ~ factor(SPECIES_NAME) | pls_profile,
+    p2.ls <- list(x = percent_contr ~ factor(.species) | pls_profile,
                   pch=16, type=c("h", "p"), col= c(.col2, .col2),
                   ylab="Total Contribution (%)",
                   data=dat)
@@ -1074,7 +1075,7 @@ pls_plot_species.old <- function (pls, id, plot.type = 1, ...)
   .x.args <- list(...)
   dat <- pls_report(pls)
   .ord.pro.c <- .rsp_profile_code_order(dat)
-  .sp.ref <- unique(dat$SPECIES_NAME)
+  .sp.ref <- unique(dat$.species)
   species <- if (missing(id)) {
     .sp.ref
     #default option (print the lot...)
@@ -1123,14 +1124,14 @@ pls_plot_species.old <- function (pls, id, plot.type = 1, ...)
   } else {
     "red"
   }
-  dat <- subset(dat, SPECIES_NAME %in% species)
+  dat <- subset(dat, .species %in% species)
   #    lims <- range(c(d2$.value, d2$pred), na.rm = TRUE, finite = TRUE)
   #    mod <- lm(pred ~ 0 + .value, d2)
   #    .sum <- paste("y = ", signif(summary(mod)$coefficients[1,
   #        1], 3), "x (adj.R2 = ", signif(summary(mod)$adj.r.squared,
   #        3), ")", sep = "")
   .lims <- lapply(species, function(x){
-    .d <- subset(dat, SPECIES_NAME==x)
+    .d <- subset(dat, .species==x)
     range(c(.d$pred, .d$.value), finite=TRUE, na.rm=TRUE)
   })
   if (1 %in% plot.type) {
@@ -1139,7 +1140,7 @@ pls_plot_species.old <- function (pls, id, plot.type = 1, ...)
     } else {
       "red"
     }
-    p1.ls <- list(x=pred~.value | SPECIES_NAME, data=dat,
+    p1.ls <- list(x=pred~.value | .species, data=dat,
                   #prepanel forces x and y lims to same range
                   prepanel=function(...){
                     .tmp <- prepanel.default.xyplot(...)
@@ -1246,10 +1247,10 @@ pls_plot_species.old <- function (pls, id, plot.type = 1, ...)
     #make 'ordered profile codes' at top
     #      before any subsetting...
     #      .ord.pro.c <- rsp_profile_code_order(dat)
-    dat$.index <- as.numeric(factor(dat$PROFILE_CODE, levels=.ord.pro.c,
+    dat$.index <- as.numeric(factor(dat$.profile.id, levels=.ord.pro.c,
                                     ordered = TRUE))
     dat<- dat[order(dat$.index),]
-    p2.ls <- list(x= .value + pred ~ .index | SPECIES_NAME, data=dat,
+    p2.ls <- list(x= .value + pred ~ .index | .species, data=dat,
                   auto.key = list(text=.x.args$key.text,
                                   space="top", columns=2),
                   type="l",

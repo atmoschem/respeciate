@@ -63,14 +63,15 @@ be slow and memory inefficient. So, \code{respeciate} uses the
 method. The \code{rsp_dcast_species} method,
 applied using \code{widen='species'}, is effectively:
 
-\code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
+\code{dcast(..., profile.id+.profile~.species, value.var=".value")}
 
 And, the alternative \code{widen='profile'}:
 
-\code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
+\code{dcast(..., species.id+.species~.profile, value.var=".value")}
 
-Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
-\code{.value}, so the EPA source information can easily be recovered. See also
+Although, \code{respeciate} uses a local version of the \code{SPECIATE} and
+\code{SPECIEUROPE} weight measurements \code{.value}, so the EPA and
+JCR source information can easily be recovered. See also
 \code{\link{rsp_rescale_profile}}.
 }
 \references{

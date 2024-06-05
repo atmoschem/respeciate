@@ -1,7 +1,7 @@
 #' @name rsp.id
 #' @title rsp_id_ functions to identify common species groups for grouping and
 #' subsetting respeciate profiles
-#' @aliases rsp_id rsp_id_copy rsp_id_nalkane rsp_id_btex
+#' @aliases rsp_id rsp_id_copy rsp_id_nalkane rsp_id_btex rsp_id_pah16
 #' @description \code{rsp_id_} functions generate a vector of assignment
 #' terms and can be used to subset or condition a supplied (re)SPECIATE
 #' \code{data.frame}.
@@ -73,10 +73,10 @@
 #           by is column in ref; case is x$by %in% unique(ref$by)
 #              could ref also be a vector of terms???
 
-#' @rdname rsp.x
+#' @rdname rsp.id
 #' @export
 
-rsp_id_copy <- function(rsp, ref = NULL, by="species_id"){
+rsp_id_copy <- function(rsp, ref = NULL, by=".species.id"){
 
   #maybe warn???
   if(is.null(ref)){
@@ -115,13 +115,13 @@ rsp_id_copy <- function(rsp, ref = NULL, by="species_id"){
 ## b <- subset(a, rsp_id_nalkane(a))
 ## b[order(b$SPEC_MW),]
 
-#' @rdname rsp.x
+#' @rdname rsp.id
 #' @export
 
 rsp_id_nalkane <- function(rsp){
 
   #group x by is/isn't n-alkane
-  tolower(rsp$SPECIES_NAME) %in% c("methane",            #C1
+  tolower(rsp$.species) %in% c("methane",            #C1
                                  "ethane",
                                  "propane",
                                  "n-butane",
@@ -205,7 +205,7 @@ rsp_id_nalkane <- function(rsp){
 
 ## to do
 
-#' @rdname rsp.x
+#' @rdname rsp.id
 #' @export
 
 rsp_id_btex <- function(rsp){
@@ -213,7 +213,7 @@ rsp_id_btex <- function(rsp){
   #identify species that is a btex
   #might need to think about mixtures...
   #    for example all xylenes or all c2 benzenes, etc...
-  tolower(rsp$SPECIES_NAME) %in% c(
+  tolower(rsp$.species) %in% c(
     #to test/check...
     "benzene",
     "toluene",
@@ -222,6 +222,56 @@ rsp_id_btex <- function(rsp){
     "o-xylene",
     "p-xylene"
   )
+}
+
+
+#' @rdname rsp.id
+#' @export
+
+rsp_id_pah16 <- function(rsp){
+
+  #identify species that are on epa 16 priority pahs list
+  # but also several are on other list
+  # https://uk-air.defra.gov.uk/assets/documents/reports/cat08/0512011419_REPFIN_all_nov.pdf
+  # (above is UK document, will be something more driection from EPA)
+
+  #Naphthalene
+  #Acenaphthylene
+  #Acenaphthene
+  #Fluorene
+  #Anthracene
+  #Phenanthrene
+  #Fluoranthene
+  #Pyrene
+  #Benz[a]anthracene
+  #Chrysene
+  #Benzo[b]fluoranthene
+  #Benzo[k]fluoranthene
+  #Benzo[a]pyrene
+  #Dibenz[ah]anthracene
+  #Indeno[123cd]pyrene
+  #Benzo[ghi]perylene
+
+    tolower(rsp$.species.id) %in% c(
+    #testing use of .species.id
+      "611",               #Naphthalene 91-20-3
+      "847",               #Acenaphthylene 208-96-8
+      "846",               #Acenaphthene  83-32-9
+      "883",               #Fluorene 86-73-7
+      "852",               #Anthracene 120-12-7
+      "902",               #Phenanthrene 85-01-8
+      "882",               #Fluoranthene 206-44-0
+      "904",               #Pyrene 129-00-0
+      "854",               #Benz[a]anthracene, BUT as Benz(a)anthracene 56-55-3
+      "867",               #Chrysene 218-01-9
+      "1171",              #Benzo[b]fluoranthene 205-99-2
+      "1610",              #Benzo[k]fluoranthene 207-08-9
+      "855",               #Benzo[a]pyrene 50-32-8
+      "1848",              #Dibenz[ah]anthracene as Dibenz[a,h]anthracene
+                           #      but also in mixtures in SPECIATE
+      "884",               #Indeno[123cd]pyrene as Indeno[1,2,3-cd]pyrene 193-39-5
+      "858"                #Benzo[ghi]perylene as Benzo(ghi)perylene 191-24-2
+    )
 }
 
 

@@ -82,14 +82,14 @@ as.respeciate.default <- function(x, ...){
 
   #test structure
   if(!"test.rsp" %in% names(.xargs) || .xargs$test.rsp){
-    .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_NAME", "SPECIES_ID",
-               ".value", "WEIGHT_PERCENT")
+    .test <- c(".profile", ".profile.id", ".species", ".species.id",
+               ".value", ".pc.weight")
     .test <- .test[!.test %in% names(.try)]
     if(length(.test)>0){x
       stop("as.respeciate> bad data structure, expected column(s) missing/unassigned:\n",
            paste(.test, sep="", collapse = ", "), "\n", sep="", call.=FALSE)
     }
-    if(any(is.na(.try$SPECIES_ID)) | any(is.na(.try$SPECIES_NAMES))){
+    if(any(is.na(.try$.species.id)) | any(is.na(.try$.species))){
       warning("as.respeciate> suspect species data, values missing:\n",
               "(respeciate needs valid species entries)\n",
               sep="", call.=FALSE)
@@ -128,13 +128,13 @@ print.respeciate <-
     ######################
     #for specieurope
     #######################
-    if("rsp_eu" %in% class(.x)){
-      .x <- .rsp_eu2us(.x)
-    }
+    #if("rsp_eu" %in% class(.x)){
+    #  .x <- .rsp_eu2us(.x)
+    #}
 
     #species info
     if(class(.x)[1] == "rsp_si"){
-      .y <- unique(.x$SPECIES_ID)
+      .y <- unique(.x$.species.id)
       report <- paste("respeciate species list:",
                       length(.y), "\n",
                       "[NO PROFILES]", "\n", sep="")
@@ -142,7 +142,7 @@ print.respeciate <-
         yy <- if(length(.y)>n) {.y[1:n]} else {.y}
         for(i in yy){
           .m1 <- paste("  (", "ID ", i, ") ",
-                       subset(.x, SPECIES_ID == i)$SPECIES_NAME[1],
+                       subset(.x, .species.id == i)$.species[1],
                        "\n", sep="")
           if(nchar(.m1)>.tmp){
             .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
@@ -154,7 +154,7 @@ print.respeciate <-
 
     #profile info
     if(class(x)[1] == "rsp_pi"){
-      .y <- unique(x$PROFILE_CODE)
+      .y <- unique(x$.profile.id)
       report <- paste("respeciate profile list: ",
                       length(.y), "\n",
                       "[NO SPECIES]", "\n", sep="")
@@ -162,7 +162,7 @@ print.respeciate <-
         yy <- if(length(.y)>n) {.y[1:n]} else {.y}
         for(i in yy){
           .m1 <- paste("  (", "CODE ", i, ") ",
-                       subset(.x, PROFILE_CODE == i)$PROFILE_NAME[1],
+                       subset(.x, .profile.id == i)$.profile[1],
                        "\n", sep="")
           if(nchar(.m1)>.tmp){
             .m1 <- paste(substring(.m1, 1, .tmp-3), "...\n")
@@ -183,7 +183,9 @@ print.respeciate <-
     if(class(.x)[1] == "rsp_sw"){
       rsp.rep <- paste(rsp.rep, " (wide/species)", sep="")
       .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
-      .x$SPECIES_ID <- .x$SPECIES_NAME
+      #####################################
+      #should we loose this if we start testing if missing below...
+      .x$.species.id <- .x$.species
     }
     if(class(.x)[1] == "rsp_pw"){
       rsp.rep <- paste(rsp.rep, " (wide/profile)", sep="")
@@ -197,19 +199,23 @@ print.respeciate <-
 
     #standard respeciate
     if(class(.x)[1] == "respeciate"){
-      .y <- unique(.x$PROFILE_CODE)
+      .y <- unique(.x$.profile.id)
       report <- paste(rsp.rep, ": count ",
                       length(.y), "\n", sep="")
       if(length(.y)>0){
         yy <- if(length(.y)>n) {.y[1:n]} else {.y}
         for(i in yy){
-          if("PROFILE_NAME" %in% names(.x)){
-            i2 <- .x$PROFILE_NAME[.x$PROFILE_CODE==i][1]
+          if(".profile" %in% names(.x)){
+            i2 <- .x$.profile[.x$.profile.id==i][1]
           } else {
             i2 <- "[unknown]"
           }
-          if("SPECIES_ID" %in% names(.x)){
-            .spe <- length(unique(.x$SPECIES_ID[.x$PROFILE_CODE==i]))
+          #####################################
+          # we could check for both .species and .species.id here...
+          #     then we could count from either ? but warn other is
+          #        missing...???
+          if(".species.id" %in% names(.x)){
+            .spe <- length(unique(.x$.species.id[.x$.profile.id==i]))
           } else {
             .spe <- "0!"
           }
@@ -348,9 +354,9 @@ plot.respeciate <- function(x, ...){
   ######################
   #for specieurope
   ######################
-  if("rsp_eu" %in% class(x)){
-    x <- .rsp_eu2us(x)
-  }
+  #if("rsp_eu" %in% class(x)){
+  #  x <- .rsp_eu2us(x)
+  #}
   rsp_plot_profile(x, ...)
 }
 
@@ -601,48 +607,52 @@ summary.respeciate <-
     #}
 
     #check what we have
-    test <- c("WEIGHT_PERCENT","PROFILE_NAME","PROFILE_TYPE",
-              "SPECIES_ID")
+    test <- c(".pc.weight",".profile",".profile.type",
+              ".species.id")
     test <- test[ test %in% colnames(xx)]
-    if(!"PROFILE_CODE" %in% colnames(xx)){
-      xx$PROFILE_CODE <- "{{ICK}}"
+    if(!".profile.id" %in% colnames(xx)){
+      xx$.profile.id <- "{{ICK}}"
     }
 
+##########################################
+# like to shorten .profile if very long...
+# like to think about names
+###########################################
     out <- xx[,
               .(#SPECIES_NAME = SPECIES_NAME[1],
                 #SPEC_MW = SPEC_MW[1],
-                .checksum = if("WEIGHT_PERCENT" %in% names(xx)){
-                  sum(WEIGHT_PERCENT, na.rm = TRUE)
+                .checksum = if(".pc.weight" %in% names(xx)){
+                  sum(.pc.weight, na.rm = TRUE)
                 } else {
                   NA
                 },
-                .checkname = if("PROFILE_NAME" %in% names(xx)){
-                  length(unique(PROFILE_NAME))}
+                .checkname = if(".profile" %in% names(xx)){
+                  length(unique(.profile))}
                 else {
                   NA
                 },
-                .name = if("PROFILE_NAME" %in% names(xx)){
-                  PROFILE_NAME[1]
+                .name = if(".profile" %in% names(xx)){
+                  .profile[1]
                 } else {
                   NA
                 },
-                .type = if("PROFILE_TYPE" %in% names(xx)){
-                  PROFILE_TYPE[1]
+                .type = if(".profile.type" %in% names(xx)){
+                  .profile.type[1]
                 } else {
                   NA
                 },
-                .nspecies = if("SPECIES_ID" %in% names(xx)){
-                  length(unique(SPECIES_ID))
+                .nspecies = if(".species.id" %in% names(xx)){
+                  length(unique(.species.id))
                 } else {
                   NA
                 }
               ),
-              by=.(PROFILE_CODE)]
+              by=.(.profile.id)]
 
     #out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
     #             allow.cartesian=TRUE)
 
-    out$PROFILE_CODE[out$PROFILE_CODE=="{{ICK}}"] <- NA
+    out$.profile.id[out$.profile.id=="{{ICK}}"] <- NA
     out <- as.data.frame(out)
     #if(!.silent){
     #  if(nrow(out) > .max.n){
