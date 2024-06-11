@@ -38,14 +38,30 @@
 #to think about
 #######################
 
-## rsp_build_profile to make a profile locally
-##     needs profile_name and/or profile_id
-##           species_name and/or species_id
-##           value (like .value(rsp),
-##                        weight_percent(SPECIATE) or
-##                        relative.mass (SPECIEUROPE)
-##    maybe something like
-##             .rsp_get_m_from_pls (unexported)
+## think this needs more/better documentation
+
+#     but only me using it at moment
+
+## think about a rsp_build_profile to make a profile locally
+
+#     would need profile_name and/or profile_id
+#         species_name and/or species_id
+#         value (like .value(rsp),
+#                 weight_percent(SPECIATE) or
+#                 relative.mass (SPECIEUROPE)
+
+#    maybe something like
+#         .rsp_get_m_from_pls (unexported)
+
+## think about a rsp_build_sim_x
+
+#     to simulate a rsp_x data set
+#         .rsp_build_sim_x (m, n, err, ...)
+#               m - (or rsp) a set of profiles
+#               n - something that can be built into an n matrix
+#               err - a set of error that can be applied to the model
+#         this is simulation studies with the pls functions
+#
 
 ##############################
 # rsp_build_x
@@ -80,7 +96,8 @@ rsp_build_x <-
            value, ...){
 
     # light build for a rsp_x data object
-    # might need spec_mwt
+    # might want spec_mwt
+    #        (could map from ..rsp_species_meta)
 
     ###########################
     # current build rules

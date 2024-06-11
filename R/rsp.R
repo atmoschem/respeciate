@@ -94,6 +94,8 @@
 #to think about
 #####################
 
+## respeciate object builds
+
 # not sure but I think main SPECIATE build is:
 #    (default; include.refs = FALSE) [source="us"]
 #    PROFILES[subset.requested.codes]>>SPECIES>>SPECIES_PROPERTIES
@@ -102,11 +104,30 @@
 #    (BUT this is replicating profiles with more than 1 reference...)
 
 # SPECIEUROPE build is simpler because it is just one data frame
-#    [saved as list(source=[data.frame]), in case we need to add any supporting meta-data]
+#    [saved as list(source=[data.frame]), in case we need to add any supporting
+#             meta-data]
 #    (default; include.refs = FALSE) [source="eu"]
 #    source[subset.requested.codes];remove(REFRENCES)
 #    (full build; include.refs = TRUE) [source="em"]
 #    source[subset.requested.codes]
+
+# this approach was used in an earlier versions of rsp(), etc,...
+#     above is still done for SPECIATE but most in ..rsp_[whatever]_...
+#     unexported functions BUT SPECIEUROPE is now chopped up to build
+#     PROFILES and SPECIES_PROPERTIES equivalents to merge with these
+#           reason: easier to merge species info from both sources
+
+## SPECIATE-like and SPECIEUROPE-like structured data
+
+# if users want SPECIATE-like and SPECIEUROPE-like data could
+#     include rsp_convert2... or rsp_...2... functions
+#     to convert between respeciate, eu and us data
+#           we could base this on ..rsp_[whatever]_meta and .rsp_eu2us
+#           unexported functions. .rsp_eu2us was used to handle eu data
+#           when we were defaulting to us structure (early code from 0.3.1,
+#           now superceded)...
+
+
 
 #' @rdname rsp
 #' @export

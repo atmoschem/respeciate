@@ -3,9 +3,9 @@
 #' @aliases rsp_plot rsp_plot_profile rsp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
-
 #' @description \code{rsp_plot} functions generate plots for supplied
 #' respeciate data sets.
+
 #' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param id numeric, the indices of profiles or species to use when
@@ -26,9 +26,12 @@
 #' requested plot; 'data' to return just the data; and, c('plot', 'data') to
 #' plot then return the data invisibly (default).
 #' @param multi.species, character, like \code{multi.profile} in
-#' \code{sp_plot_profile} but for species in \code{sp_plot_species}.
-#' @return \code{sp_plot} graph, plot, etc usually as a trellis object.
+#' \code{rsp_plot_profile} but for species in \code{rsp_plot_species}.
+#'
+#' @return \code{rsp_plot} graph, plot, etc usually as a trellis object.
+
 #' @note These functions are currently in development, so may change.
+
 #' @references Most \code{respeciate} plots make extensive use of
 #' \code{lattice} and \code{latticeExtra} code:
 #'
@@ -48,6 +51,7 @@
 #functions
 # rsp_plot_profile
 # rsp_plot_species
+
 # plot.respeciate is wrapper for rsp_plot_profile
 
 #uses unexported code
@@ -57,9 +61,13 @@
 #     (so need to update them all if .rsp function formals change)
 
 
-
 #JOBS
 #######################
+
+#  common approachs needed for ordering, subsetting and renaming
+#       for both species and profiles when plotting.
+#       also like to make this same for these and pls_plots
+#            so more consistent
 
 #references may need formatting tidying
 #   currently these are lattice, latticeEXtra and loa...
@@ -84,6 +92,17 @@
 #from: https://stackoverflow.com/questions/26314701/r-reducing-colour-saturation-of-a-colour-palette
 #function(x) colorRampPalette(rainbow(12, s = 0.5, v = 1)[2:11],interpolate = "spline")(x)
 ##   ?? could extrapolate the default colors using something like above ???
+
+
+##############################
+# to think about
+##############################
+
+# box plot as rsp_plot_species option maybe plot.type=1, default.
+
+# common approaches for ordering subsetting and renaming
+#       for both species and profiles when plotting.
+#       also like to make this and pls__plot consistent
 
 
 # dennis asked for data as part of return

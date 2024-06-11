@@ -58,10 +58,10 @@ requested plot; 'data' to return just the data; and, c('plot', 'data') to
 plot then return the data invisibly (default).}
 
 \item{multi.species, }{character, like \code{multi.profile} in
-\code{sp_plot_profile} but for species in \code{sp_plot_species}.}
+\code{rsp_plot_profile} but for species in \code{rsp_plot_species}.}
 }
 \value{
-\code{sp_plot} graph, plot, etc usually as a trellis object.
+\code{rsp_plot} graph, plot, etc usually as a trellis object.
 }
 \description{
 General plots for \code{respeciate} objects.

@@ -16,18 +16,19 @@
 #to think about
 #########################
 
-# testing idea to remove need to set source...
-#    following seems messy
+## testing idea to remove need to set source...
+
+#    following seemed messy
 #        rsp(rsp_find_profile("diesel", source="eu"), source="eu")
-#    using profile_code = US:... and EU:... for source used
-#        now need to set source when you want to be specific...
+#    using .profile.id = US:... and EU:... for source used
+#        Only need to set source when you want to be specific...
 #    notes:
 #        seems to be working BUT...
 #    rsp_find_species might have issue
 #        because species info can be coming from either
-#        SPECIATE or SPECIEUROPE...
-#    data.table::rbindlist seems to be forcing WEIGHT_PERCENT to character
-#        when bind is list(us, NULL)...
+#        SPECIATE or SPECIEUROPE... and overlap is not perfect
+#              see notes
+
 
 #' @description Functions that provide respeciate
 #' source information.

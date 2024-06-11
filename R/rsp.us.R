@@ -5,6 +5,7 @@
 
 #' @description \code{rsp_us_} functions are quick access wrappers to commonly
 #' requested SPECIATE subsets.
+
 #' @return \code{rsp_us_} functions typically return a \code{respeciate}
 #' \code{data.frame} of the requested profiles.
 #'
@@ -32,14 +33,24 @@
 
 # might not be keeping these
 
-# should be a quicker way of doing this...
-#    maybe try going sysdata directly instead of using rsp_profile_info???
-#       BUT might not be much a speed saving...
+# SPECIATE profile types
+# GAS, OTHER, PM, PM-AE6, PM-AE8, PM-CR1, PM-Simplified
 
-#profile types
-#GAS, OTHER, PM, PM-AE6        PM-AE8        PM-CR1 PM-Simplified
+
+##########################
+# to do / think about ...
+#########################
 
 # any others worth doing???
+#     others from SPECIATE (as rsp_us_... ???)
+#     anything similar in SPECIEUROPE (as rsp_eu_... ???)
+
+# feels like ther should be a quicker way of doing this...
+#    maybe try going SPECIATE directly instead of using rsp_profile_info???
+#       BUT might not be much a speed saving...
+
+# rsp() or rsp_profile() ????
+
 
 #' @rdname rsp.us
 #' @export

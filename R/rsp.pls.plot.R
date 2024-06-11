@@ -26,23 +26,41 @@
 #' @param log (for \code{pls_plot_profile} only) logical, if \code{TRUE} this
 #' applies 'log' scaling to the primary Y axes of the plot.
 
-#########################
-# need to check terminology for this...
-#      The zero handling is a based on offset in plot(..., log="y", off.set)
-#      but automatically estimated...
-# shifted type to plot.type because it conflicts with type in lattice::xyplot....
+#' @return \code{pls_plot}s produce various plots commonly used in source
+#' apportionment studies.
+
+######################################################
+# notes on recent changes
+######################################################
+
+# shifted my type to type to plot.type because it conflicts with type in lattice::xyplot....
 
 # all plots use .rsp_plot_output
 #     so need to update them all if .rsp function formals change
 #     also pls_plot_profile uses rsp_plot_profile with output forced...
 #          for first plot layer
+#     CHECK: are we doing same for rsp_plot???
 
 # all plots have old versions
 #     pls_plot... old
 #         can hopefully loose these at some point.
 
-#' @return \code{pls_plot}s produce various plots commonly used in source
-#' apportionment studies.
+
+# to think about
+#########################
+
+# log axes - possible improvement
+# NOTE: maybe log note  here and do in rsp_plot or xxx.r ???
+
+#      need to check barplot handling of origin for this...
+#           zero handling is currently a based on a hard-coded offset in plot(..., log="y", off.set)
+#           but like it automatically estimated...
+
+#      should check log axes handling when only 1 or 2 species in profile
+#           I think it is suspect
+
+#      also like a tidier handling of spacing when plotting log axes
+
 
 # GENERAL NOTES
 
@@ -50,9 +68,23 @@
 
 # these all need code tidying
 
+# to think about
+###################################
+
+#  common approaches for ordering subsetting and renaming
+#       for both species and profiles when plotting.
+#       also like to make this and rsp_plot consistent
+
 # check individual function notes
 
+# plot.type=2 for pls_plot pls_plot_species or pls_plot_profile
+#       the standard per species summary:
+#             rsp_x species amount versus sample n#/index axes,
+#             black line of actual .actual spcies
+#             stacked bar plot of prediction per [profile]
+#                 (like what CRC plots but automated plot)
 
+# plot.type=3 summary as pie chart ???
 
 ####################################
 ###################################
@@ -76,7 +108,7 @@
 ## this replaces previous pls_plot (now pls_plot.old)
 
 ##   now imports via data.table::
-##        need this to kill the as.data.table load message
+##        need this to kill as.data.table load warning message
 ##   #' @import data.table
 
 #test
