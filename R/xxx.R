@@ -328,10 +328,11 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
     allow.cartesian=TRUE), suffixes = c(".us", ".eu"))
   #make common term .species (the species name)
   ########################################
-  out$.species <- ifelse(is.na(out$.species),
+  out$.species <- ifelse(is.na(out$SPECIES_NAME),
                          out$Specie,
-                         .rsp_tidy_species_name(out$.species))
-  #current using EU name if there or my simplified version of US name if not...
+                         .rsp_tidy_species_name(out$SPECIES_NAME))
+  #current my simplified version of US name or Specie name
+  #    if US name not there...
   out
 }
 

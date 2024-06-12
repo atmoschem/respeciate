@@ -85,7 +85,7 @@ rsp_info <- function() {
                 "\n\tProfiles: ", length(unique(SPECIATE$PROFILES$PROFILE_CODE)),
                 "; species: ", length(unique(SPECIATE$SPECIES_PROPERTIES$SPECIES_ID)),
                 sep="")
-  .eu <- paste("source: SPECIEUROPE \n\t[in respeciate since 0.3.1]",
+  .eu <- paste("source: SPECIEUROPE 2.0\n\t[in respeciate since 0.3.1]",
                "\n\tProfiles: ", length(unique(SPECIEUROPE$source$Id)),
                "; species: ", length(unique(SPECIEUROPE$source$Specie.Id)),
                sep="")
