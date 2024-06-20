@@ -581,7 +581,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #   for output standardisation
 #      so all will need updating and checking if this is changed
 #      also pls_plot_profile uses rsp_plot_profile to make first layer
-#            p1. handling should also be checked...
+#            p1. handling in code body should also be checked...
 
 .rsp_plot_output <- function(da, li, plt, output){
   output <- tolower(paste(output, sep=",", collapse=","))

@@ -1,6 +1,6 @@
 #' @name rsp.build
 #' @title Building respeciate-like Objects
-#' @aliases rsp_build_x
+#' @aliases rsp_build_x rsp_build_simx
 
 
 #' @description rsp function(s) to reconfigure data.frames (and similar
@@ -21,14 +21,28 @@
 #' containing measurement values. If not already named according to \code{respeciate}
 #' conventions, this will need to be assigned.
 #' @param ... (any other arguments) currently ignored.
+#' @param m \code{respeciate} data set of source profiles intended to be used
+#' as the source profiles (or M) matrix when building a simulated data set for
+#' use with a PLS model (see \code{rsp_pls_x})
+#' @param n a numeric object, e.g. a \code{vector}, \code{matrix}, \code{data.frame} or
+#' a similar object that can be coerced into a \code{data.frame} of suitable
+#' dimensions for use as the source strength matrix (N) to build a simulated data set for
+#' use with a PLS model (see \code{rsp_pls_x}).
 #' @return \code{rsp_build}s attempt to build and return a \code{respeciate}-like
 #' object that can be directly compared with data from \code{respeciate}.
+#'
+#' \code{rsp_build_x} is the standard object builder.
+#'
+#' \code{rsp_build_simx} builds a simulation of an \code{x} data set based on
+#' the `linear combination of profiles` model applied in conventional source
+#' apportionment. (See below and \code{rsp_pls_x})
+#'
 #' @note If you want to compare your data with profiles in the \code{respeciate} archive,
 #' you need \code{respeciate} conventions when assigning species names and
 #' identifiers. We are working on options to improve on this (and
 #' very happy to discuss if anyone has ideas), but current best suggestion is:
 #' (1) identify the \code{respeciate} species code for each of the species in
-#' your data set, and (2) assign these as \code{species_id} when \code{rsp_build}ing.
+#' your data set, and (2) assign these as \code{species_code} when \code{rsp_build}ing.
 #' The function will then associate the \code{species_name} from \code{respeciate}
 #' species records.
 
@@ -262,7 +276,112 @@ rsp_build_x <-
 
 
 
+#' @rdname rsp.build
+#' @export
 
+#use: build simulation dat for pls demo...
+
+# notes
+
+# might not keep current arguments
+
+# m from PLS model typically reference data set to use to build simulation from
+#    for example rsp object of one or more profiles
+# n something that can be scaled to make an n matrix for a PLS model
+# ... others ??? to be decided...
+
+#########################
+#current example
+#########################
+
+# devtools::unload(); devtools::load_all()
+# m <- rsp("US:8992VBS", "US:8996VBS")
+# x <- rsp_build_simx(m, c(1,2,3,3,2,1))
+##  US:8992VBS US:8996VBS .sample
+##1          1          3       1
+##2          2          2       2
+##3          3          1       3
+# mod <- rsp_pls_x(x, m)
+# pls_plot_species(mod, id=1:29)
+
+# decide to show/not show the data.table ??
+
+# decide how to try
+
+# think about issue with dt[,.(sum)]
+#      seemed to give ans + 1
+
+# decide what to do about warning for perfect models (like above)
+
+# expand docs, build proper links and link to rsp_pls_x
+
+# intending using this for trivial example
+
+rsp_build_simx <-
+  function(m, n=1, ...){
+    # set up
+    .xargs <- list(...)
+    .pro <- unique(m$.profile.id)
+    #n
+    # can be vector, matrix or data.frame
+    # maybe better way of doing this??
+    if(is.numeric(n) & is.vector(n)){
+      .tmp <- .xargs[names(.xargs) %in% names(formals(matrix))]
+      .tmp$data <- n
+      .tmp$ncol <- length(.pro)
+      n <- do.call(matrix, .tmp)
+    }
+    #handling if
+    if(is.matrix(n)){
+      n <- as.data.frame(n)
+      names(n) <- .pro
+      #row.names(n) <- paste("SIM", 1:nrow(n), sep="")
+    }
+    if(!is.data.frame(n)){
+       stop("rsp_build> can't convert 'n' to data.frame",
+            call.=FALSE)
+    }
+    if(ncol(n)!=length(.pro)){
+      stop("rsp_build> 'n' wrong dimensions",
+           call.=FALSE)
+    }
+    names(n) <- .pro
+    n$.sample <- row.names(n)
+
+    print(n)
+    #rearrange n to merge with m
+    n <- data.table::melt.data.table(data.table::as.data.table(n),
+                                     variable.name = ".profile.id",
+                                     value.name = ".load",
+                                     id.var=".sample")
+    out <- data.table::merge.data.table(
+      data.table::as.data.table(m), data.table::as.data.table(n),
+      by=".profile.id", allow.cartesian=TRUE
+    )
+    #rescale .value (x$.value = m$.value * n$.load)
+    if(".value" %in% names(out)){
+      out <- out[, .value:=.value*.load]
+    }
+    #might not want next update...
+    #if(".pc.weight" %in% names(out)){
+    #  out$.pc.weight <- out$.pc.weight * out$.load
+    #}
+    out <- out[, .(
+      .species = .species[1],
+      #.cheat = paste(.value, collapse="+"),
+      #.v2 = sum(.value, na.rm = TRUE),
+      # this seemed to be reporting [right.answer]+1 during testing
+      .value = sum(c(.value[!is.na(.value)],0))
+    ), by=c(".species.id", ".sample")]
+    #tidy to output
+    out <- as.data.frame(out)
+    out$.profile.id <- out$.sample
+    out <- out[names(out)[names(out) %in% c(".species", ".species.id",
+                                            ".profile.id", ".value")]]
+    #output as rsp_x
+    #  this currently fixes some missing columns
+    rsp_build_x(out)
+  }
 
 
 

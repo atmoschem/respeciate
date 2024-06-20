@@ -396,7 +396,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
 
 
 ###################################
-#sp_plot_species
+#rsp_plot_species
 ###################################
 
 #' @rdname rsp.plot
