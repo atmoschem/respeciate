@@ -140,7 +140,7 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
     }
   }
 
-  #species
+  #weight
   if(any(c("weight", "weights", "standard", "all") %in% tolower(pad))){
     .test <- c(".species.id", ".profile.id")
     .test <- .test[.test %in% names(out)]
@@ -149,15 +149,14 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
       .tmp <- names(weights)[!names(weights) %in%
                                intersect(names(out), names(weights))]
       if(length(.tmp)>0){
-        weights <- weights[c(.test[1], .tmp)]
+        weights <- weights[c(.test[1:2], .tmp)]
         out <- data.table::merge.data.table(data.table::as.data.table(out),
                                             data.table::as.data.table(weights),
-                                            by = .test[1], all.y=FALSE,
+                                            by = .test[1:2], all.y=FALSE,
                                             all.x=TRUE, allow.cartesian=TRUE)
       }
     }
   }
-
 
   #references
   if(any(c("reference", "references", "all") %in% tolower(pad))){
@@ -179,24 +178,31 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #################################################
   #need to think about this
-  #weight_percent not there if up don't pad weights
+  #weight_percent not there if we don't pad weights
   #     or profiles and will be NA for anything not
-  #     in the SPECIATE archive
+  #     in the SPECIATE/SPECIEUROPE archive
   #################################################
   #drop.nas.
-
   if(drop.nas){
-    out <- out[!is.na(out$.pc.weight),]
+    if(".pc.weight" %in% names(out)){
+      out <- out[!is.na(out$.pc.weight),]
+    }
+    if(".value" %in% names(out)){
+      out <- out[!is.na(out$.value),]
+    }
   }
 
   #rsp/rsp_profile reorders
   #   not sure if this is a good idea but could add as option
-  out <- out[order(out$PROFILE_CODE, decreasing = FALSE),]
+  if(".profile.id" %in% names(out)){
+    out <- out[order(out$.profile.id, decreasing = FALSE),]
+  }
 
   #not sure how to handle output...
   # could return as input class
   # see notes
   out <- as.data.frame(out)
+
   #.rsp_build_respeciate(out)
   class(out) <- .cls
   out
