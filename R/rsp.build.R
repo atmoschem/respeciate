@@ -67,7 +67,9 @@
 #    maybe something like
 #         .rsp_get_m_from_pls (unexported)
 
-## think about a rsp_build_sim_x
+## rsp_build_sim_x
+
+#     status: in-development (below)
 
 #     to simulate a rsp_x data set
 #         .rsp_build_sim_x (m, n, err, ...)
@@ -276,12 +278,15 @@ rsp_build_x <-
 
 
 
-#' @rdname rsp.build
-#' @export
+
+#################################
+# rsp_build_simx
+#################################
 
 #use: build simulation dat for pls demo...
 
 # notes
+###############################
 
 # might not keep current arguments
 
@@ -289,6 +294,9 @@ rsp_build_x <-
 #    for example rsp object of one or more profiles
 # n something that can be scaled to make an n matrix for a PLS model
 # ... others ??? to be decided...
+
+# in development
+################################
 
 #########################
 #current example
@@ -304,18 +312,32 @@ rsp_build_x <-
 # mod <- rsp_pls_x(x, m)
 # pls_plot_species(mod, id=1:29)
 
-# decide to show/not show the data.table ??
+# to do/sort
+#####################
+
+# add formal args for errs
+#      could be like n but errors to go with x ???
+#      BUT might also need a function to apply the errors???
+
+# decide to show/not show the data.table/frame ??
+#      option to show, option to keep ???
 
 # decide how to try
 
 # think about issue with dt[,.(sum)]
-#      seemed to give ans + 1
+#      seemed to give ans + 1 but only SOMETIMES
 
 # decide what to do about warning for perfect models (like above)
+#      get with pls_plot_species(mod, id=1:29)
+#         but maybe source is one of the pls_functions ???
 
 # expand docs, build proper links and link to rsp_pls_x
 
 # intending using this for trivial example
+
+
+#' @rdname rsp.build
+#' @export
 
 rsp_build_simx <-
   function(m, n=1, ...){

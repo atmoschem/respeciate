@@ -1,36 +1,52 @@
 #' @name respeciate.generics
 #' @title respeciate.generics
-#' @description \code{respeciate} object classes and generic functions.
+#' @description Generic functions for use with \code{respeciate} object classes.
 
 ########################
 #might move all the @description to top
 #    hard to keep style consistent when docs are in between
 #    multiple functions
 
-#' @description When supplied a \code{data.frame} or similar,
+#' @return These generic functions/methods generate typical outputs for
+#' \code{respeciate} data sets and models:
+
+#' When supplied a \code{data.frame} or similar,
 #' \code{\link{as.respeciate}} attempts to coerce it into a
 #' \code{respeciate} object.
-
-#' @description When supplied a \code{respeciate}
-#' object or similar, \code{\link{print}} manages its appearance.
-#' @description When supplied a \code{respeciate}
-#' object, \code{\link{plot}} provides a basic plot
-#' output. This uses base function \code{\link{barchart}};
-#' also see note.
+#'
+#' When supplied a \code{respeciate} object, \code{\link{print}} manages its
+#' appearance.
+#
+#' When supplied a \code{respeciate} object, \code{\link{plot}} provides a
+#' basic plot output. This is currently wrapper for the \code{respeciate}
+#' function \code{\link{rsp_plot_profile}}.
+#'
+#' When supplied a \code{respeciate} object, \code{\link{summary}} generates
+#' a summary table of profile information.
+#'
+#' When supplied a \code{respeciate} object and a second \code{respeciate}-like
+#' object, e.g. \code{data.frame}, \code{respeciate} object, etc,
+#' \code{\link{merge}} attempts to merge them using common data columns. You
+#' can refine the merge operation using additional arguments.
+#'
 #' @param x the \code{respeciate}
 #' object to be printed, plotted, etc.
 #' @param n when plotting or printing a multi-profile object, the
 #' maximum number of profiles to report.
 #' @param ... any extra arguments, mostly ignored except by
-#' \code{plot} which passes them to \code{\link{rsp_plot_profile}}.
+#' \code{plot} which passes them to \code{\link{rsp_plot_profile}}
+#' and \code{merge} with passes them to \code{\link{merge}}.
 #' @param object like \code{x} but for \code{summary}.
+#' @param y a second data set, typically a \code{data.frame} or a
+#' \code{respeciate} object, to be \code{merge}d with \code{x}
+
 #' @note \code{respeciate} objects revert to
 #' \code{data.frame}s when not doing anything
-#' package-specific, so you can still
-#' use as previously with \code{lattice} or
-#' \code{ggplot2}, useful if you are pulling multiple
-#' profiles and you exceed the base \code{\link{barchart}}
-#' capacity...
+#' package-specific, so you can still use them like \code{data.frame}s
+#' with other packages. This is useful if you have other ideas how to
+#' plot more complex (multiple-profile, multiple-species)
+#' data sets, and want to use graphics packages like \code{lattice} or
+#' \code{ggplot2}.
 
 
 ##################################
@@ -39,7 +55,14 @@
 
 # TO DO...
 
-# check what tidying jobs were at the think about stage...
+##################################
+# notes
+##################################
+
+# need to finish documents for merge
+#    ref data.table merge
+#
+
 
 #################################
 # as.respeciate
@@ -52,7 +75,8 @@
 # currently only allows for data.frames and object that can be converted
 #    to data.frames using as.data.frames...
 
-# might also want to add setAs ????
+# not sure this is right method for as.respeciate
+#     might also want to add setAs ????
 
 #' @rdname respeciate.generics
 #' @export
@@ -81,6 +105,12 @@ as.respeciate.default <- function(x, ...){
   }
 
   #test structure
+  ########################
+  # this currently tests for all of:
+  # .profile, etc,...
+  #     wondering if it should be
+  #         one of .profile and .profile.id, one of .species and .species.id
+  #             and one of .value and .pc.weight ???
   if(!"test.rsp" %in% names(.xargs) || .xargs$test.rsp){
     .test <- c(".profile", ".profile.id", ".species", ".species.id",
                ".value", ".pc.weight")
@@ -546,9 +576,7 @@ plot.rsp_pls <- function(x, ...){
 #summary
 ##################################
 
-#like something to get us to...
-#database.summary
-#summary.respeciate(sysdata$PROFILES)
+# summary for resepciate objects
 
 #' @rdname respeciate.generics
 #' @method summary respeciate
@@ -664,6 +692,52 @@ summary.respeciate <-
     #  }
     #  return(invisible(out))
     #}
+    out
+  }
+
+
+
+
+
+##################################
+# merge
+##################################
+
+# local merge for respeciate objects...
+# based on merge.data.table rather than merge.data.frame
+
+#' @rdname respeciate.generics
+#' @method merge respeciate
+#' @export
+
+
+################################
+# think about
+################################
+
+#
+### example
+## a <- rsp_us_pm.ae8()
+## b1 <- a[c(".species", ".species.id", ".profile", ".profile.id", ".value", ".pc.weight")]
+## b2 <- respeciate:::..rsp_species_meta()
+
+merge.respeciate <-
+  function(x, y, ...){
+    #setup
+    .cls <- class(x)
+    x <- data.table::as.data.table(x)
+    y <- data.table::as.data.table(y)
+    # handle args for merge.data.table
+    #      sort = FALSE; follow x order
+    .li <- modifyList(list(x = x, y = y, sort=FALSE),
+                      list(...))
+    #merge
+    out <- do.call(data.table::merge.data.table,
+                   .li)
+    #tidy and return merge data
+    #     as original object class
+    out <- as.data.frame(out)
+    class(out) <- .cls
     out
   }
 

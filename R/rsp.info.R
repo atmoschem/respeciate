@@ -68,10 +68,12 @@
 #    little messy???
 
 #like to include summary(factor(SPECIATE$PROFILES$PROFILE_TYPE))
-#  or something like that
+#       or summary.respeciate(sysdata$PROFILES)
+#       BUT for SPECIATE and SPECIEUROPE
+#  ??? database.summary
 
 # this is not currently catchable!!!!
-# a <- sp_info() #a = NULL
+# a <- rsp_info() #a = NULL
 
 #' @rdname rsp.info
 #' @export

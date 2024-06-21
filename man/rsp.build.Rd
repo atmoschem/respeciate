@@ -47,8 +47,8 @@ object that can be directly compared with data from \code{respeciate}.
 \code{rsp_build_x} is the standard object builder.
 
 \code{rsp_build_simx} builds a simulation of an \code{x} data set based on
-the `linear combination of profiles` applied in conventional source
-apportionment. (See \code{rsp_pls_x})
+the `linear combination of profiles` model applied in conventional source
+apportionment. (See below and \code{rsp_pls_x})
 }
 \description{
 rsp function(s) to reconfigure data.frames (and similar
