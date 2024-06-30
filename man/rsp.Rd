@@ -3,39 +3,47 @@
 \name{rsp}
 \alias{rsp}
 \alias{rsp_profile}
-\title{rsp_profile}
+\title{Getting archived profiles}
 \usage{
-rsp_profile(..., include.refs = FALSE)
+rsp(..., include.refs = FALSE, source = "all")
 
-rsp(...)
+rsp_profile(...)
 }
 \arguments{
-\item{...}{The function assumes all inputs (except \code{include.refs})
-are \code{SPECIES_CODE}s (the unique descriptor the EPA assigns to all
-profiles in SPECIATE) or sources of profile information and requests these
-form the local (re)SPECIATE archive. Typically, simple
-objects like character and numeric vectors, as assumed to profile codes and
-composite data-types like \code{respeciate} objects or \code{data.frame},
-are assumed to contain a named \code{PROFILE_CODE} column. All potential
-profile codes are requested and unrecognized codes are ignored.}
+\item{...}{The function assumes all inputs (except \code{include.refs}
+and \code{source}) are profile identifiers: namely, \code{PROFILE_CODE}
+and \code{Species.Id} in SPECIATE and SPECIEUROPE, respectively, or
+potential sources of profile information and requests these
+form the local respeciate archives. Typically, simple
+objects like character and numeric vectors, as assumed to be profile
+identifiers and composite data-types like \code{respeciate} or
+\code{data.frame} objects are assumed to contain a column named
+\code{.profile.id}, the \code{respeciate} equivalent of \code{PROFILE_CODE}
+and \code{Species.Id}. All recovered identifiers are requested
+and unrecognized ids (and duplicates) are ignored.}
 
 \item{include.refs}{logical, if profile reference information should be
 included when extracting the requested profile(s) from the archive, default
 \code{FALSE}.}
+
+\item{source}{character, the local archive to request a profile from:
+\code{'us'} US EPA SPECIATE, \code{'eu'} EU JRC SPECIEUROPE, or \code{'all'}
+(the default) both.}
 }
 \value{
 \code{rsp_profile} or the short-hand \code{rsp} return an object of
 \code{respeciate} class, a \code{data.frame} containing one or more profile
-from the local (re)SPECIATE archive.
+from the local respeciate archive.
 }
 \description{
-Getting profile(s) from the R (re)SPECIATE archive
+Getting source profile(s) from the local respeciate archives.
 }
 \note{
 The option \code{include.refs} adds profile source reference
 information to the returned \code{respeciate} data set. The default option
-is to not include these because some profiles have several associated
-references and including these replicates records, once per reference.
+is to not include these because some SPECIATE profiles have several
+associated references and including these replicates records, once per
+reference.
 \code{respeciate} code is written to handle this but if you are developing
 own methods or code and include references in any profile build you may be
 biasing some analyses in favor of those multiple-reference profile unless
@@ -47,8 +55,21 @@ x <- rsp_profile(8833, 8850)
 plot(x)}
 }
 \references{
+For SPECIATE:
+
 Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
 The development and uses of EPA SPECIATE database.
 Atmospheric Pollution Research, 1(4), pp.196-206.
+
+For SPECIEUROPE:
+
+Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+European data base for PM source profiles. Atmospheric Pollution Research,
+7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
+}
+\seealso{
+\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}} regarding
+data sources; and, \code{\link{rsp_find_profile}}
+and \code{\link{rsp_find_species}} regarding archive searching.
 }

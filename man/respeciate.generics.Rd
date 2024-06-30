@@ -9,6 +9,7 @@
 \alias{plot.respeciate}
 \alias{plot.rsp_pls}
 \alias{summary.respeciate}
+\alias{merge.respeciate}
 \title{respeciate.generics}
 \usage{
 as.respeciate(x, ...)
@@ -24,40 +25,55 @@ as.respeciate(x, ...)
 \method{plot}{rsp_pls}(x, ...)
 
 \method{summary}{respeciate}(object, ...)
+
+\method{merge}{respeciate}(x, y, ...)
 }
 \arguments{
 \item{x}{the \code{respeciate}
 object to be printed, plotted, etc.}
 
 \item{...}{any extra arguments, mostly ignored except by
-\code{plot} which passes them to \code{\link{rsp_plot_profile}}.}
+\code{plot} which passes them to \code{\link{rsp_plot_profile}}
+and \code{merge} with passes them to \code{\link{merge}}.}
 
 \item{n}{when plotting or printing a multi-profile object, the
 maximum number of profiles to report.}
 
 \item{object}{like \code{x} but for \code{summary}.}
-}
-\description{
-\code{respeciate} object classes and generic functions.
 
+\item{y}{a second data set, typically a \code{data.frame} or a
+\code{respeciate} object, to be \code{merge}d with \code{x}}
+}
+\value{
+These generic functions/methods generate typical outputs for
+\code{respeciate} data sets and models:
 When supplied a \code{data.frame} or similar,
 \code{\link{as.respeciate}} attempts to coerce it into a
 \code{respeciate} object.
 
-When supplied a \code{respeciate}
-object or similar, \code{\link{print}} manages its appearance.
+When supplied a \code{respeciate} object, \code{\link{print}} manages its
+appearance.
+When supplied a \code{respeciate} object, \code{\link{plot}} provides a
+basic plot output. This is currently wrapper for the \code{respeciate}
+function \code{\link{rsp_plot_profile}}.
 
-When supplied a \code{respeciate}
-object, \code{\link{plot}} provides a basic plot
-output. This uses base function \code{\link{barchart}};
-also see note.
+When supplied a \code{respeciate} object, \code{\link{summary}} generates
+a summary table of profile information.
+
+When supplied a \code{respeciate} object and a second \code{respeciate}-like
+object, e.g. \code{data.frame}, \code{respeciate} object, etc,
+\code{\link{merge}} attempts to merge them using common data columns. You
+can refine the merge operation using additional arguments.
+}
+\description{
+Generic functions for use with \code{respeciate} object classes.
 }
 \note{
 \code{respeciate} objects revert to
 \code{data.frame}s when not doing anything
-package-specific, so you can still
-use as previously with \code{lattice} or
-\code{ggplot2}, useful if you are pulling multiple
-profiles and you exceed the base \code{\link{barchart}}
-capacity...
+package-specific, so you can still use them like \code{data.frame}s
+with other packages. This is useful if you have other ideas how to
+plot more complex (multiple-profile, multiple-species)
+data sets, and want to use graphics packages like \code{lattice} or
+\code{ggplot2}.
 }

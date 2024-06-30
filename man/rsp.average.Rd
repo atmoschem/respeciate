@@ -3,12 +3,12 @@
 \name{rsp.average}
 \alias{rsp.average}
 \alias{rsp_average_profile}
-\title{(re)SPECIATE data averaging functions}
+\title{Data averaging multiple profile data sets}
 \usage{
 rsp_average_profile(rsp, code = NULL, name = NULL, method = 1, ...)
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{code}{required character, the unique profile code to assign to the
@@ -28,7 +28,7 @@ of all the profiles averaged.}
 version of the supplied \code{respeciate} profile.
 }
 \description{
-Functions to build composite (re)SPECIATE profiles
+Functions to build composite respeciate profiles
 
 \code{rsp_average_profile} generates an average composite
 of a supplied multi-profile \code{respeciate} object.

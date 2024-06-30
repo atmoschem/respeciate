@@ -50,9 +50,9 @@ up to \code{n} fit reports for the nearest matches to \code{rsp} from the
 reference profile data set, \code{ref}.
 }
 \description{
-\code{rsp_match_profile} compares a supplied species
-(re)SPECIATE profile (or similar data set) and a reference set of
-supplied profiles and attempt to identify nearest matches on the
+\code{rsp_match_profile} compares a supplied respeciate
+profile (or similar data set) and a reference set of supplied profiles
+and attempts to identify nearest matches on the
 basis of similarity.
 }
 \references{

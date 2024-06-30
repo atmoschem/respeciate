@@ -1,13 +1,13 @@
 ############################################
-#' @title sysdata
+#' @title SPECIATE
 ############################################
 #'
-#' @name sysdata
-#' @description the re(SPECIATE) sysdata, a local versions of SPECIATE,
-#' the EPA's repository of organic gas and particulate matter (PM) speciation
+#' @name SPECIATE
+#' @description the SPECIATE data set is a local version of the EPA's
+#' SPECIATE repository of organic gas and particulate matter (PM) speciation
 #' profiles of air pollution sources.
 #'
-#' @format A (long) list, containing:
+#' @format A ( 13  long) 'list' object
 #' \describe{
 #'   \item{PROFILES}{The main \code{data.frame} of profile-specific meta-data,
 #'   with one row per profile, key term \code{PROFILE_CODE}.}
@@ -24,19 +24,10 @@
 #'   source meta-data, one row per reference, key term \code{REF_Code}.}
 #'   \item{And others}{Currently not documented.}
 #' }
-
-##################################
-##################################
-## IMPORTANT
-##################################
-##################################
-
-# this documentation needs doing
-
 #' @source https://www.epa.gov/air-emissions-modeling/speciate
 #' @references
 #' Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
 #' Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
 #' The development and uses of EPA SPECIATE database.
 #' Atmospheric Pollution Research, 1(4), pp.196-206.
-"sysdata"
+"SPECIATE"

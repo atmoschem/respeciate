@@ -4,8 +4,11 @@
 [![R build
 status](https://github.com/atmoschem/respeciate/workflows/R-CMD-check/badge.svg)](https://github.com/atmoschem/respeciate/actions)
 
-respeciate gives you access to the [US/EPA Speciate
-v5.2](https://www.epa.gov/air-emissions-modeling/speciate) profiles in R
+respeciate gives you access to air pollutant emissions profiles in the
+[US/EPA Speciate
+v5.2](https://www.epa.gov/air-emissions-modeling/speciate) and [EU/JRC
+SPECIEUROPE](https://source-apportionment.jrc.ec.europa.eu/) archives
+via R.
 
 The installation is:
 

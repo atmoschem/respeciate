@@ -1,29 +1,29 @@
 #' @name rsp.pls
-#' @title (re)SPECIATE profile Positive Least Squares models
-#' @aliases rsp_pls_profile pls_report pls_test pls_fit_species
+#' @title Positive Least Squares models
+#' @aliases rsp_pls_x pls_report pls_test pls_fit_species
 #' pls_refit_species pls_rebuild
 
 #' @description Functions for Positive Least Squares (PSL) fitting of
-#' (re)SPECIATE profiles
+#' respeciate profiles
 
 #' @description
-#' \code{rsp_pls_profile} builds PSL models for supplied profile(s) using
+#' \code{rsp_pls_x} builds PSL models for supplied profile(s) using
 #' the \code{\link{nls}} function, the 'port' algorithm and a lower
 #' limit of zero for all model outputs to enforce the positive fits. The
 #' modeled profiles are typically from an external source, e.g. a
 #' measurement campaign, and are fit as a linear additive series of reference
-#' profiles, here typically from (re)SPECIATE, to provide a measure of
+#' profiles, here typically from \code{respeciate}, to provide a measure of
 #' source apportionment based on the assumption that the profiles in the
 #' reference set are representative of the mix that make up the modeled
-#' sample. The \code{pls_} functions work with \code{rsp_pls_profile}
+#' sample. The \code{pls_} functions work with \code{rsp_pls_x}
 #' outputs, and are intended to be used when refining and analyzing
 #' these PLS models. See also \code{pls_plot}s for PLS model plots.
 
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of
+#' @param x A \code{respeciate} object, a \code{data.frame} of
 #' profiles in standard long form, intended for PLS modelling.
-#' @param ref A \code{respeciate} object, a \code{data.frame} of
+#' @param m A \code{respeciate} object, a \code{data.frame} of
 #' profiles also in standard long form, used as the set of candidate
-#' source profiles when fitting \code{rsp}.
+#' source profiles when fitting \code{x}.
 #' @param power A numeric, an additional factor to be added to
 #' weightings when fitting the PLS model. This is applied in the form
 #' \code{weight^power}, and increasing this, increases the relative
@@ -31,7 +31,7 @@
 #' range \code{1 - 2.5} are sometimes helpful.
 #' @param ... additional arguments, typically ignored or passed on to
 #' \code{\link{nls}}.
-#' @param pls A \code{rsp_pls_profile} output, intended for use with
+#' @param pls A \code{rsp_pls_x} output, intended for use with
 #' \code{pls_} functions.
 #' @param species for \code{pls_fit_species}, a data.frame of
 #' measurements of an additional species to be fitted to an existing
@@ -44,9 +44,9 @@
 #' refitted an existing \code{species}), all other species in the reference
 #' profiles are held 'as is' and added \code{species} is fit to the source
 #' contribution time-series of the previous PLS model. By default, the full PLS
-#' model is then refit using the revised \code{ref} source profile to generate
-#' a PLS model based on the revised source profiles (i.e., ref + new species
-#' or ref + refit species). However, this second step can be omitted using
+#' model is then refit using the revised \code{m} source profile to generate
+#' a PLS model based on the revised source profiles (i.e., m + new species
+#' or m + refit species). However, this second step can be omitted using
 #' \code{refit.profile=FALSE} if you want to use the supplied \code{species}
 #' as an indicator rather than a standard member of the apportionment model.
 #' @param as.marker for \code{pls_rebuild}, \code{pls_fit_species} and
@@ -64,8 +64,8 @@
 # document methods and references
 
 
-#' @return \code{rsp_pls_profile} returns a list of nls models, one per
-#' profile/measurement set in \code{rsp}. The \code{pls_} functions work with
+#' @return \code{rsp_pls_x} returns a list of nls models, one per
+#' profile/measurement set in \code{x}. The \code{pls_} functions work with
 #' these outputs. \code{pls_report} generates a \code{data.frame} of
 #' model outputs, and is used of several of the other \code{pls_}
 #' functions. \code{pls_fit_species}, \code{pls_refit_species} and
@@ -77,8 +77,8 @@
 
 #' @note This implementation of PLS applies the following modeling constraints:
 #'
-#' 1. It generates a model of \code{rsp} that is positively constrained linear
-#' product of the profiles in \code{ref}, so outputs can only be
+#' 1. It generates a model of \code{x} that is positively constrained linear
+#' product of the profiles in \code{m}, so outputs can only be
 #' zero or more.  Although the model is generated using \code{\link{nls}},
 #' which is a Nonlinear Least Squares (NLS) model, the fitting term applied
 #' in this case is linear.
@@ -87,12 +87,13 @@
 #'
 #'  \eqn{X_{i,j} = \sum\limits_{k=1}^{K}{N_{i,k} * M_{k,j}  + e_{i,j}}}
 #'
-#'  Where X is the data set of measurements, \code{rsp}, M is data set of
-#'  reference profiles, \code{ref}, N is the data set of source contributions,
-#'  the source apportion solution, to be solved by minimising e, the error terms.
+#'  Where X is the data set of measurements, input \code{x} in \code{rsp_pls_x},
+#'  M (\code{m}) is data set of reference profiles,  and N is the data set of
+#'  source contributions, the source apportion solution, to be solved by
+#'  minimising e, the error terms.
 #'
-#' 3. The number of species in \code{rsp} must be more that the number of
-#' profiles in \code{ref} to reduce the likelihood of over-fitting.
+#' 3. The number of species in \code{x} must be more that the number of
+#' profiles in \code{m} to reduce the likelihood of over-fitting.
 #'
 
 
@@ -140,14 +141,22 @@
 #' @rdname rsp.pls
 #' @export
 
-rsp_pls_profile <- function(rsp, ref,
-                            power = 1,
-                            ...){
+rsp_pls_x <- function(x, m, power = 1,
+                      ...){
 
   ##################
   #quick tidy for now
   ##################
-  x <- rsp
+  #x <- rsp
+  ref <- m
+  ######################
+  # SPECIEUROPE data
+  #can this go???
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  #######################
 
   ##################
   #from rough code
@@ -155,7 +164,7 @@ rsp_pls_profile <- function(rsp, ref,
 
   ########################
   #only allowing profiles < species
-  if(length(unique(ref$PROFILE_CODE)) >= length(unique(x$SPECIES_ID))){
+  if(length(unique(ref$.profile.id)) >= length(unique(x$.species.id))){
     stop("rsp_pls: need n.species > n.profiles, more species or less profiles?",
          call. = FALSE)
   }
@@ -166,11 +175,11 @@ rsp_pls_profile <- function(rsp, ref,
   #make sure we only have one species / profile
   ####################
   #tidying
-  .pr.cd <- unique(x$PROFILE_CODE)
+  .pr.cd <- unique(x$.profile.id)
   ##  .xx <- respeciate:::rsp_tidy_profile(x)
   .xx <- lapply(.pr.cd, function(y){
-    .x <- x[x$PROFILE_CODE==y,]
-    .x <- rsp_average_profile(.x, y, .x$PROFILE_NAME[1])
+    .x <- x[x$.profile.id==y,]
+    .x <- rsp_average_profile(.x, y, .x$.profile[1])
     .x
   })
   .xx <- data.table::rbindlist(.xx)
@@ -181,13 +190,13 @@ rsp_pls_profile <- function(rsp, ref,
   .xx <- .xx[!is.na(.xx$.value),]
 #############################
   #should be same! redundant
-  .pr.cd <- unique(.xx$PROFILE_CODE)
+  .pr.cd <- unique(.xx$.profile.id)
 
   ####################
   #reduce ref to just species in x
   ###################
   #no point to look at any species not in x
-  ref <- subset(ref, SPECIES_ID %in% unique(.xx$SPECIES_ID))
+  ref <- subset(ref, .species.id %in% unique(.xx$.species.id))
 
   ###################
   #nudge
@@ -217,12 +226,12 @@ rsp_pls_profile <- function(rsp, ref,
   ans <- lapply(.pr.cd, function(y){
     .test <- try({
       #need to try this because it does not always work
-      .x <- as.data.frame(.xx[.xx$PROFILE_CODE==y,])
+      .x <- as.data.frame(.xx[.xx$.profile.id==y,])
       .x <- rsp_average_profile(.x, "test", "1_test")
 
       #might not need one of this-and-same-above
       #might be better doing it here...
-      .tmp <- subset(ref, ref$SPECIES_ID %in% unique(.x$SPECIES_ID))
+      .tmp <- subset(ref, ref$.species.id %in% unique(.x$.species.id))
 
       #could change this with rbindlist version??
       .ref <- intersect(names(.x), names(.tmp))
@@ -231,15 +240,16 @@ rsp_pls_profile <- function(rsp, ref,
 
       #build formula and model args
       .tmp <- names(.out)
-      .tmp <- .tmp[!.tmp %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+      .tmp <- .tmp[!.tmp %in% c(".species.id", ".species", "test")]
       names(.out)[names(.out) %in% .tmp] <- paste(".m_", names(.out)[names(.out) %in% .tmp],
                                                   sep="")
       #zero cases for port function
       .ls <- paste(".n_", .tmp, sep="")
       .ls2 <- lapply(.ls, function(x){0})
       names(.ls2) <- .ls
-      .for <- paste("(.n_", .tmp, "*`.m_", .tmp, "`)", sep="", collapse = "+")
+      .for <- paste("(`.n_", .tmp, "`*`.m_", .tmp, "`)", sep="", collapse = "+")
       .for <- as.formula(paste("test~", .for))
+
       .wt <- 1/.out$test
       ############################
       #note
@@ -367,7 +377,7 @@ pls_report <- function(pls){
       .tmp <- summary(.xx$mod)$coefficients
       .p.mod <- .tmp[,4]
       names(.p.mod) <- gsub(".n_", ".p_", names(.p.mod))
-      .out <- data.frame(PROFILE_CODE = x,
+      .out <- data.frame(.profile.id = x,
                          .out,
                          t(.tmp[,1]),
                          t(.p.mod),
@@ -379,6 +389,8 @@ pls_report <- function(pls){
     }
   })
   ans <- data.table::rbindlist(ans, use.names=TRUE, fill=TRUE)
+
+
   if(nrow(ans)==0){
     return(as.data.frame(ans))
   }
@@ -394,12 +406,15 @@ pls_report <- function(pls){
 
   .tmp <- names(ans)
   .tmp <- .tmp[grep("^.m_", .tmp)]
+
   ans <- as.data.frame(ans)
   for(i in .tmp){
     ans[,gsub("^.m_", ".x_", i)] <- ans[,gsub("^.m_", ".n_", i)] * ans[,i]
   }
   ans <- data.table::as.data.table(ans)
   ans$.value <- ans$test
+
+
 
   #######################################
   # previous
@@ -417,16 +432,20 @@ pls_report <- function(pls){
   #################################
   #by-species calculate stats
   #    guessing this could be done in data.table???
-  .sp.ref <- unique(ans$SPECIES_NAME)
+  .sp.ref <- unique(ans$.species)
+  .sp.ref <- .sp.ref[2:length(.sp.ref)]
+
+
   .tmp <- lapply(.sp.ref, function(x){
-    .tmp <- subset(ans, SPECIES_NAME==x)
+    .tmp <- subset(ans, .species==x)
     #################
     # note
     #################
     #    was previouslys pred ~ .value
     #         and reported intercept and intercept p
     #
-    .mod <- lm(pred ~ 0 + .value, data = .tmp)
+    #print(summary(as.data.frame(.tmp)$.value))
+    .mod <- lm(pred ~ 0 + .value, data = as.data.frame(.tmp))
     ###########
     #(also noted in rsp_pls_profile)
     #if we need to calculate aic based on the method parameters...
@@ -440,7 +459,12 @@ pls_report <- function(pls){
     #        you get if you fit a marker...
     #            option to jitters still there
     #############
-    data.frame(SPECIES_NAME = x,
+    if(nrow(.s.mod$coefficients)==0){
+      .s.mod$coefficients <- data.frame(NA, NA, NA, NA)
+    }
+    #to catch cases when no model,
+    #      e.g. because no entry in any of the supplied profiles...
+    data.frame(.species = x,
                adj.r.sq = .s.mod$adj.r.squared,
                slope = .s.mod$coefficients[1, 1],
                p.slope = .s.mod$coefficients[1, 4],
@@ -448,7 +472,7 @@ pls_report <- function(pls){
     )
   })
   .tmp <- data.table::rbindlist(.tmp)
-  ans <- merge(ans, .tmp, by="SPECIES_NAME")
+  ans <- merge(ans, .tmp, by=".species")
 
   as.data.frame(ans)
 }
@@ -474,9 +498,9 @@ pls_report <- function(pls){
 pls_test <- function(pls){
   .rp <- pls_report(pls)
   #species
-  .tmp<- lapply(unique(.rp$SPECIES_NAME), function(i){
-    .ans <- subset(.rp, SPECIES_NAME==i)
-    data.frame(SPECIES_NAME = i,
+  .tmp<- lapply(unique(.rp$.species), function(i){
+    .ans <- subset(.rp, .species==i)
+    data.frame(.species = i,
                adj.r.sq = .ans$adj.r.sq[1],
                slope=.ans$slope[1],
                p.slope=.ans$p.slope[1],
@@ -526,9 +550,9 @@ pls_fit_species <- function(pls, species, power=1,
                             drop.missing=FALSE,
                             ...){
   #wrapper for multiple fits of new data to a pls model
-  .id <- unique(species$SPECIES_NAME)
+  .id <- unique(species$.species)
   for(i in .id){
-    .sub.sp <- subset(species, SPECIES_NAME==i)
+    .sub.sp <- subset(species, .species==i)
     .test <- try(pls_rebuild(pls, species=.sub.sp, power=power,
                              refit.profile=refit.profile,
                              as.marker=as.marker,
@@ -636,12 +660,12 @@ pls_rebuild <- function(pls, species, power=1,
   if(is.character(species)){
     #assuming this is SPECIES_NAME of the species to be fit
     #and species was in modelled data when pls was built...
-    if(!species[1] %in% .out$SPECIES_NAME){
+    if(!species[1] %in% .out$.species){
       stop("RSP_PLS> 'species' not in PLS, please check",
            call. = FALSE)
     }
-    .add <- subset(.out, SPECIES_NAME == species[1])
-    .out <- subset(.out, SPECIES_NAME != species[1])
+    .add <- subset(.out, .species == species[1])
+    .out <- subset(.out, .species != species[1])
 
   } else {
     #assuming this is respeciate object/data.frame of right structure
@@ -651,8 +675,8 @@ pls_rebuild <- function(pls, species, power=1,
   ###################################
   #get and check species name and id
   ###################################
-  sp.nm <- unique(.add$SPECIES_NAME)
-  sp.id <- unique(.add$SPECIES_ID)
+  sp.nm <- unique(.add$.species)
+  sp.id <- unique(.add$.species.id)
   #both need to be 1 element
   if(length(sp.nm) !=1 || length (sp.id) != 1){
     stop("RSP_PLS> 'species' not unique, either missing or multiple",
@@ -676,14 +700,14 @@ pls_rebuild <- function(pls, species, power=1,
   if(as.marker){
     #treat species as marker
     for(i in names(pls)){
-      if(i %in% unique(.add$PROFILE_CODE) & !is.null(pls[[i]])){
+      if(i %in% unique(.add$.profile.id) & !is.null(pls[[i]])){
         #remark off all print when happy with method
         #print(i)
         #########################
         #can simplify a lot below
         #########################
         x <- pls[[i]]
-        .da <- subset(x$args$data, SPECIES_NAME != sp.nm)
+        .da <- subset(x$args$data, .species != sp.nm)
         .da[.mrk.nm] <- 0
         #.cht <- rev(unique(c("test", rev(names(.da)))))
         #.da <- .da[.cht]
@@ -704,7 +728,7 @@ pls_rebuild <- function(pls, species, power=1,
         #print(.add)
         #print(i)
         #print(.add[.add$PROFILE_CODE==i,])
-        .mn.df[,ncol(.da)] <- .add[.add$PROFILE_CODE==i, ".value"]
+        .mn.df[,ncol(.da)] <- .add[.add$.profile.id==i, ".value"]
         if(!is.na(.mn.df[,ncol(.da)])){
 
 
@@ -800,9 +824,9 @@ pls_rebuild <- function(pls, species, power=1,
     #  was missing from those profile_code)
     #
     .test <- .out[.out$pred>0,]
-    .out <- .test[!duplicated(.test$PROFILE_CODE),]
+    .out <- .test[!duplicated(.test$.profile.id),]
 
-    .test <- c("PROFILE_CODE", ".value", "WEIGHT_PERCENT")
+    .test <- c(".profile.id", ".value", ".pc.weight")
     .test <- names(.add)[names(.add) %in% .test]
     .data <- .add[.test]
 
@@ -868,9 +892,9 @@ pls_rebuild <- function(pls, species, power=1,
     #check.names TRUE was applying make.names
     #     so turned off when building data.frames for pls model outputs
     .ans <- data.frame(
-      PROFILE_CODE = .data$PROFILE_CODE,
-      SPECIES_ID = .add$SPECIES_ID[1],
-      SPECIES_NAME = .add$SPECIES_NAME[1],
+      .profile.id = .data$.profile.id,
+      .species.id = .add$.species.id[1],
+      .species.id = .add$.species[1],
       t(coefficients(mod)),
       test = .data$refit,
       check.names=FALSE
@@ -883,11 +907,11 @@ pls_rebuild <- function(pls, species, power=1,
     #for each build model, put new models in pls
     ###################################
     #need to move this to working directly from models
-    for(i in unique(.ans$PROFILE_CODE)){
-      .ii <- subset(.ans, PROFILE_CODE==i)
-      .ii <- .ii[names(.ii) != "PROFILE_CODE"]
+    for(i in unique(.ans$.profile.id)){
+      .ii <- subset(.ans, .profile.id==i)
+      .ii <- .ii[names(.ii) != ".profile.id"]
       .nn <- pls[[i]]$args$data
-      .nn <- subset(.nn, !SPECIES_NAME %in% unique(.ii$SPECIES_NAME))
+      .nn <- subset(.nn, !.species %in% unique(.ii$.species))
       ###########
       #cheat
       #############
@@ -901,7 +925,7 @@ pls_rebuild <- function(pls, species, power=1,
       .for <- as.character(formula(pls[[i]]$mod))
       .for <- as.formula(paste(.for[2], .for[1], .for[3], sep=""))
       .ms <- names(pls[[i]]$args$data)
-      .ms <- .ms[!.ms %in% c("SPECIES_ID", "SPECIES_NAME", "test")]
+      .ms <- .ms[!.ms %in% c(".species.id", ".species", "test")]
       .ls <- lapply(.ms, function(x){0})
       names(.ls) <- paste(".n_", .ms, sep="")
       .da <- pls[[i]]$args$data
@@ -942,7 +966,7 @@ pls_rebuild <- function(pls, species, power=1,
       #     not available, we need to drop the
       #         models that were not (re)fit...
       #print("dropping these!")
-      .test <- names(pls)[!names(pls) %in% unique(.ans$PROFILE_CODE)]
+      .test <- names(pls)[!names(pls) %in% unique(.ans$.profile.id)]
       #print(.test)
       if(length(.test)>0){
         for(i in .test){

@@ -3,8 +3,9 @@
 \name{rsp.plot}
 \alias{rsp.plot}
 \alias{rsp_plot_profile}
+\alias{rsp_plot}
 \alias{rsp_plot_species}
-\title{plotting (re)SPECIATE profiles}
+\title{plotting respeciate source profiles}
 \usage{
 rsp_plot_profile(
   rsp,
@@ -13,7 +14,8 @@ rsp_plot_profile(
   order = TRUE,
   log = FALSE,
   ...,
-  silent = FALSE
+  silent = FALSE,
+  output = "default"
 )
 
 rsp_plot_species(
@@ -23,11 +25,12 @@ rsp_plot_species(
   order = FALSE,
   log = FALSE,
   ...,
-  silent = FALSE
+  silent = FALSE,
+  output = "default"
 )
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{id}{numeric, the indices of profiles or species to use when
@@ -50,17 +53,21 @@ plotting functions.}
 \item{silent}{logical, hide warnings when generating plots (default
 \code{FALSE})}
 
+\item{output}{character, output method, one of: 'plot' to return just the
+requested plot; 'data' to return just the data; and, c('plot', 'data') to
+plot then return the data invisibly (default).}
+
 \item{multi.species, }{character, like \code{multi.profile} in
-\code{sp_plot_profile} but for species in \code{sp_plot_species}.}
+\code{rsp_plot_profile} but for species in \code{rsp_plot_species}.}
 }
 \value{
-\code{sp_plot} graph, plot, etc usually as a trellis object.
+\code{rsp_plot} graph, plot, etc usually as a trellis object.
 }
 \description{
 General plots for \code{respeciate} objects.
 
 \code{rsp_plot} functions generate plots for supplied
-(re)SPECIATE data sets.
+respeciate data sets.
 }
 \note{
 These functions are currently in development, so may change.

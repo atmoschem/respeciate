@@ -1,12 +1,12 @@
 #' @name rsp.plot
-#' @title plotting (re)SPECIATE profiles
-#' @aliases rsp_plot_profile rsp_plot_species
+#' @title plotting respeciate source profiles
+#' @aliases rsp_plot rsp_plot_profile rsp_plot_species
 
 #' @description General plots for \code{respeciate} objects.
-
 #' @description \code{rsp_plot} functions generate plots for supplied
-#' (re)SPECIATE data sets.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' respeciate data sets.
+
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param id numeric, the indices of profiles or species to use when
 #' plotting with \code{rsp_plot_profile} or \code{rsp_plot_species},
@@ -22,10 +22,16 @@
 #' plotting functions.
 #' @param silent logical, hide warnings when generating plots (default
 #' \code{FALSE})
+#' @param output character, output method, one of: 'plot' to return just the
+#' requested plot; 'data' to return just the data; and, c('plot', 'data') to
+#' plot then return the data invisibly (default).
 #' @param multi.species, character, like \code{multi.profile} in
-#' \code{sp_plot_profile} but for species in \code{sp_plot_species}.
-#' @return \code{sp_plot} graph, plot, etc usually as a trellis object.
+#' \code{rsp_plot_profile} but for species in \code{rsp_plot_species}.
+#'
+#' @return \code{rsp_plot} graph, plot, etc usually as a trellis object.
+
 #' @note These functions are currently in development, so may change.
+
 #' @references Most \code{respeciate} plots make extensive use of
 #' \code{lattice} and \code{latticeExtra} code:
 #'
@@ -51,12 +57,17 @@
 #uses unexported code
 #  .rsp_plot_fix
 #  .rsp_yscale.component.log10 (currently in rsp.pls.r)
-
-
+#  .rsp_plot_output
+#     (so need to update them all if .rsp function formals change)
 
 
 #JOBS
 #######################
+
+#  common approachs needed for ordering, subsetting and renaming
+#       for both species and profiles when plotting.
+#       also like to make this same for these and pls_plots
+#            so more consistent
 
 #references may need formatting tidying
 #   currently these are lattice, latticeEXtra and loa...
@@ -83,6 +94,17 @@
 ##   ?? could extrapolate the default colors using something like above ???
 
 
+##############################
+# to think about
+##############################
+
+# box plot as rsp_plot_species option maybe plot.type=1, default.
+
+# common approaches for ordering subsetting and renaming
+#       for both species and profiles when plotting.
+#       also like to make this and pls__plot consistent
+
+
 # dennis asked for data as part of return
 #    that is do-able but may need an object class
 #         (maybe like the openair code...)
@@ -91,6 +113,18 @@
 #  to compare profile x and profile(s) y
 #  started project (in own-notes)
 
+#think about tidying out from code...
+#     plot(rsp_q_pm.ae8(), log=T, key=list(space=NULL, x=0.45,y=0.95))
+#         key argument needs to be a list... could be key. arguments...
+#         and key(space) needs to be null because default space value overrides...
+#         also looks like too much white space below bottom of plot
+#         also not sure how many of the plot functions do same....
+
+#possible issue
+#     check order = TRUE/FALSE behavior...
+#          rsp_plot_profile seems OK but...
+#          rsp_plot_species seem to be ignoring this, but be careful...
+#               need to check it works in all combinations
 
 ###################################
 #rsp_plot_profile
@@ -128,10 +162,18 @@
 
 rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
                               order=TRUE, log=FALSE, ...,
-                              silent=FALSE){
+                              silent=FALSE, output="default"){
 
   #setup
   x <- rsp ## this needs sorting...
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  #######################
+  x <- .rsp_plot_fix(x, silent=silent, ...)
   .x.args <- list(...)
 
   #currently not even trying to stack logs...
@@ -147,11 +189,12 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   #others refs
   #was profile_code; changed to profile_name
   #    might be an issue; some names not unique...
-  .sp.pro <- if(is.factor(x$PROFILE_NAME)) {
-    levels(x$PROFILE_NAME)
+  .sp.pro <- if(is.factor(x$.profile)) {
+    levels(x$.profile)
   } else {
-    unique(x$PROFILE_NAME)
+    unique(x$.profile)
   }
+
   #n/profile handling
   profile <- if (missing(id)) {
     .sp.pro
@@ -179,8 +222,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     }
     profile <- profile[1:6]
   }
-  x <- x[x$PROFILE_NAME %in% profile,]
-
+  x <- x[x$.profile %in% profile,]
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -196,6 +238,8 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     #maybe warning() aw well??
     return(invisible(NULL))
   }
+
+
 
   ####################################
   #switching profile from profile_code to profile_name...
@@ -214,33 +258,36 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     #bit of a cheat...
     ################################
     test <- x
-    test$PROFILE_CODE <- ".default"
+    test$.profile.id <- ".default"
     test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      xx <- unique(test$.species)
     } else {
-      test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      test <- x[order(x$.pc.weight, decreasing = TRUE),]
+      xx <- unique(test$.species)
     }
   } else {
-    xx <- unique(x$SPECIES_NAME)
+    xx <- unique(x$.species)
   }
-  x <- x[c(".value", "PROFILE_NAME", "SPECIES_NAME")]
+  #x <- x[c(".value", ".species", ".species")]
 
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+  #print(x$.profile)
+
+  x$.species <- factor(x$.species,
                            levels = xx)
-  if(!is.factor(x$PROFILE_NAME)){
-    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  if(!is.factor(x$.profile)){
+    x$.profile <- factor(x$.profile, levels=unique(x$.profile))
   }
-
+  #should profile handling be like species_name?
+  #    maybe following profile above??
 
 #print(as.data.frame(x))
   ##################
   #profile bar chart
   ##################
-  p1.ls <- list(x= .value~SPECIES_NAME,
+  p1.ls <- list(x= .value~.species,
                 data=x, ylab="Profile Loading", xlab="",
                 #NB: prepanel seemed to break ylim when stacking
                 panel = function(x, y, origin, ...){
@@ -273,11 +320,11 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if(length(profile)>1){
     if(tolower(multi.profile) %in% c("panel", "panels")){
       #paneling multiple panels
-      p1.ls$x <- .value~SPECIES_NAME | PROFILE_NAME
+      p1.ls$x <- .value~.species | .profile
     } else {
       #grouping multiple panels
-      p1.ls$x <- .value~SPECIES_NAME
-      p1.ls$groups <- x$PROFILE_NAME
+      p1.ls$x <- .value~.species
+      p1.ls$groups <- x$.profile
     }
   }
 
@@ -297,7 +344,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   if("col" %in% names(p1.ls)){
     if(is.function(p1.ls$col)){
       p1.ls$col <- if("groups" %in% names(p1.ls)){
-        p1.ls$col(length(levels(x$PROFILE_NAME)))
+        p1.ls$col(length(levels(x$.profile)))
       } else {
         p1.ls$col(1)
       }
@@ -305,7 +352,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
       rep(trellis.par.get("superpose.polygon")$col,
-          length.out=length(levels(x$PROFILE_NAME)))
+          length.out=length(levels(x$.profile)))
     } else {
       trellis.par.get("superpose.polygon")$col[1]
     }
@@ -331,7 +378,7 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
     .tmp <- list(space="top",
                  #title="Legends",
                  rectangles=list(col=rep(p1.ls$col,
-                                         length.out=length(levels(x$PROFILE_NAME)))),
+                                         length.out=length(levels(x$.profile)))),
                  text = list(profile, cex=0.7))
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
@@ -339,13 +386,17 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
       .tmp
     }
   }
-  do.call(barchart, p1.ls)
+
+  #output
+  ##################
+  p <- do.call(barchart, p1.ls)
+  .rsp_plot_output(as.data.frame(p1.ls$data), p1.ls, p, output)
 }
 
 
 
 ###################################
-#sp_plot_species
+#rsp_plot_species
 ###################################
 
 #' @rdname rsp.plot
@@ -358,10 +409,18 @@ rsp_plot_profile <-   function(rsp, id, multi.profile = "group",
 
 rsp_plot_species <- function(rsp, id, multi.species = "group",
                             order = FALSE, log = FALSE,
-                            ..., silent = FALSE){
+                            ..., silent = FALSE, output = "default"){
 
   #setup
   x <- rsp ## this needs sorting...
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+
+  x <- .rsp_plot_fix(x, silent=silent, ...)
   .x.args <- list(...)
 
   ######################################
@@ -378,16 +437,15 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
   }
 
-
   #need to get species as character
   ##############################
   #if already factor ???
   #   user could be forcing order
   ##############################
-  .sp.ord <- if(is.factor(x$SPECIES_NAME)){
-    levels(x$SPECIES_NAME)
+  .sp.ord <- if(is.factor(x$.species)){
+    levels(x$.species)
   } else {
-    as.character(unique(x$SPECIES_NAME))
+    as.character(unique(x$.species))
   }
   species <- if (missing(id)) {
     .sp.ord
@@ -403,10 +461,13 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
       .sp.ord[species]
     }
   }
+
   if (!any(species %in% .sp.ord) | any(is.na(species))) {
     stop("RSP> unknown species(s) or missing ids, please check",
          call. = FALSE)
   }
+
+
   if(length(species)>20 & missing(id)){
     if(!silent){
       warning("RSP> ", length(species), " species... ",
@@ -416,7 +477,7 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
     species <- species[1:20]
   }
-  x <- x[x$SPECIES_NAME %in% species,]
+  x <- x[x$.species %in% species,]
 
   #check for duplicates, etc...
   #tidy naming etc...
@@ -438,11 +499,11 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #(see below about reordering)
   ####################################
 
-  species <- species[species %in% unique(x$SPECIES_NAME)]
-  x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=species)
-  x <- x[order(x$SPECIES_NAME),]
+  species <- species[species %in% unique(x$.species)]
+  x$.species <- factor(x$.species, levels=species)
+  x <- x[order(x$.species),]
   #sp.ord <- as.numeric(factor(species, levels=sort(species)))
-  #sp.ord <- 1:length(levels(x$SPECIES_NAME))
+  #sp.ord <- 1:length(levels(x$.species))
 
 
   ##################################
@@ -465,20 +526,20 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     #taken from _profile plots
     ################################
     test <- x
-    test$PROFILE_CODE <- ".default"
+    test$.profile.id <- ".default"
     test <- .rsp_test_profile(test)
     #previous barplot had bedside
     if("stack" %in% names(.x.args) && .x.args$stack){
       test <- test[order(test$.total, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      xx <- unique(as.character(test$.species))
     } else {
-      test <- x[order(x$WEIGHT_PERCENT, decreasing = TRUE),]
-      xx <- unique(test$SPECIES_NAME)
+      test <- x[order(x$.pc.weight, decreasing = TRUE),]
+      xx <- unique(as.character(test$.species))
     }
   } else {
-    xx <- unique(x$SPECIES_NAME)
+    xx <- unique(as.character(x$.species))
   }
-  x <- x[c(".value","PROFILE_CODE", "PROFILE_NAME", "SPECIES_NAME")]
+  x <- x[c(".value",".profile.id", ".profile", ".species")]
 
 
   #print(xx)
@@ -492,19 +553,24 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #not padding, obviously not dropping nas...
   x <- rsp_melt_wide(rsp_dcast_species(x), pad=FALSE, drop.nas = FALSE)
 
-  if(!is.factor(x$PROFILE_NAME)){
-    x$PROFILE_NAME <- factor(x$PROFILE_NAME, levels=unique(x$PROFILE_NAME))
+  if(!is.factor(x$.profile)){
+    x$.profile <- factor(x$.profile, levels=unique(x$.profile))
   }
-  if(!is.factor(x$SPECIES_NAME)){
-    x$SPECIES_NAME <- factor(x$SPECIES_NAME, levels=unique(x$SPECIES_NAME))
-  }
+  ################
+  #testing tracking
+  ##if(!is.factor(x$.species)){
+  ##  x$.species <- factor(x$.species, levels=unique(x$.species))
+  ##}
+  x$.species <- factor(as.character(x$.species),
+                           levels=xx)
+  #################
 
   ###############################
   #species handling
   ##############################
 
   #dropped for now...
-  #x$SPECIES_NAME <- factor(x$SPECIES_NAME,
+  #x$.species <- factor(x$.species,
   #                         levels = xx)
 
   #############################
@@ -529,13 +595,12 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     #initial test reset.x
     #  this is a function and it is applied to profile_code
     #      to build the x axis...
-    x$.x <- .x.args$reset.x(x$PROFILE_CODE)
+    x$.x <- .x.args$reset.x(x$.profile.id)
     .xlab <- ""
   } else {
-    x$.x <- as.numeric(factor(x$PROFILE_CODE))
+    x$.x <- as.numeric(factor(x$.profile.id))
     .xlab <- "Sample [index]"
   }
-
 
   ##############################
   #species alignment
@@ -564,11 +629,11 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if(length(species)>1){
     if(tolower(multi.species) %in% c("panel", "panels")){
       #paneling multiple panels
-      p1.ls$x <- .value~.x | SPECIES_NAME
+      p1.ls$x <- .value~.x | .species
     } else {
       #grouping multiple panels
       p1.ls$x <- .value~.x
-      p1.ls$groups <- x$SPECIES_NAME
+      p1.ls$groups <- x$.species
     }
   }
 
@@ -588,7 +653,9 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   if("col" %in% names(p1.ls)){
     if(is.function(p1.ls$col)){
       p1.ls$col <- if("groups" %in% names(p1.ls)){
-        p1.ls$col(length(species))
+        ##testing tracking
+        ##p1.ls$col(length(species))
+        p1.ls$col(length(xx))
       } else {
         p1.ls$col(1)
       }
@@ -596,7 +663,9 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   } else {
     p1.ls$col <- if("groups" %in% names(p1.ls)){
       colorRampPalette(rainbow(12, s = 0.5, v = 1)[1:11],
-                               interpolate = "spline")(length(species))
+                               ##testing tracking
+                               ##interpolate = "spline")(length(species))
+                               interpolate = "spline")(length(xx))
       #or:
       #colorRampPalette(rainbow(12, s = 0.5, v = 1),interpolate = "spline")(x)
       #was:
@@ -619,20 +688,28 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
   #could be issue here if user uses auto.key???
   #like to track border as well as col...
   if("groups" %in% names(p1.ls)){
-    #print(x$SPECIES_NAME)
+    #print(x$.species)
     .tmp <- list(space="right",
                  #title="Legends",
                  lines=list(col=rep(p1.ls$col,
-                                    length.out=length(species))),
+                                    ##testing tracking
+                                    ##length.out=length(species))),
+                                    length.out=length(xx))),
                  ##########################
-                 #text = list(levels(x$SPECIES_NAME), cex=0.7))
-                 text = list(species, cex=0.7))
-                 #changed from above because x$SPECIES_NAME
+                 #text = list(levels(x$.species), cex=0.7))
+                 ##text = list(species, cex=0.7))
+                 text = list(xx, cex=0.7))
+                 #changed from above because x$.species
     p1.ls$key <- if("key" %in% names(p1.ls)){
       modifyList(.tmp, p1.ls$key)
     } else {
       .tmp
     }
   }
-  do.call(xyplot, p1.ls)
+  p <- do.call(xyplot, p1.ls)
+
+  #output
+  ##################
+  .rsp_plot_output(as.data.frame(p1.ls$data), p1.ls, p, output)
+
 }

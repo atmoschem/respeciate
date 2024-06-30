@@ -1,17 +1,17 @@
 #' @name rsp.reshape
-#' @title (re)SPECIATE profile reshaping functions
+#' @title Reshaping respeciate data sets
 #' @aliases rsp_dcast rsp_dcast_profile rsp_dcast_species rsp_melt_wide
 
-#' @description Functions for reshaping (re)SPECIATE profiles
+#' @description Functions for reshaping respeciate profiles
 
 #' @description \code{rsp_dcast} and \code{rsp_melt_wide} reshape supplied
-#' (re)SPECIATE profile(s). \code{rsp_dcast} converts these from their supplied
+#' respeciate profile(s). \code{rsp_dcast} converts these from their supplied
 #' long form to a widened form, \code{dcast}ing the data set by either species
 #' or profiles depending on the \code{widen} setting applied.
 #' \code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
 #' options. \code{rsp_melt_wide} attempts to return a previously widened data
 #' set to the original long form.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles in standard long form or widened form using
 #' \code{\link{rsp_dcast}} and \code{\link{rsp_melt_wide}}, respectively.
 #' @param widen character, when widening \code{rsp} with
@@ -40,15 +40,16 @@
 #' method. The \code{rsp_dcast_species} method,
 #' applied using \code{widen='species'}, is effectively:
 #'
-#' \code{dcast(..., PROFILE_CODE+PROFILE_NAME~SPECIES_NAME, value.var="WEIGHT_PERCENT")}
+#' \code{dcast(..., profile.id+.profile~.species, value.var=".value")}
 #'
 #' And, the alternative \code{widen='profile'}:
 #'
-#' \code{dcast(..., SPECIES_ID+SPECIES_NAME~PROFILE_CODE, value.var="WEIGHT_PERCENT")}
+#' \code{dcast(..., species.id+.species~.profile, value.var=".value")}
 #'
-#' Although, \code{respeciate} uses a local version of \code{WEIGHT_PERCENT} called
-#' \code{.value}, so the EPA source information can easily be recovered. See also
-#' \code{\link{sp_rescale_profile}}.
+#' Although, \code{respeciate} uses a local version of the \code{SPECIATE} and
+#' \code{SPECIEUROPE} weight measurements \code{.value}, so the EPA and
+#' JCR source information can easily be recovered. See also
+#' \code{\link{rsp_rescale_profile}}.
 #'
 #' @references
 #'   Dowle M, Srinivasan A (2023). _data.table: Extension of `data.frame`_.
@@ -104,9 +105,18 @@ rsp_dcast <- function(rsp, widen = "species"){
   #      so user can set the dcast term, e.g. ~ species or profile
   #      name key? wide? variable.name?
 
+  ######################
+  # SPECIEUROPE data
+  ######################
+  if("rsp_eu" %in% class(rsp)){
+    rsp <- .rsp_eu2us(rsp)
+  }
+  #######################
+
   #adds .value if missing
   ## using .value rather the WEIGHT_PERCENT in case rescaled
   x <- .rsp_tidy_profile(rsp)
+
 
   #save class
   cls <- class(x)
@@ -119,14 +129,14 @@ rsp_dcast <- function(rsp, widen = "species"){
   }
   if(widen=="species"){
     out <- data.table::dcast(xx,
-                 PROFILE_CODE + PROFILE_NAME ~ SPECIES_NAME,
+                 .profile.id + .profile ~ .species,
                  mean,
                  na.rm=TRUE,
                  value.var = ".value")
   }
   if(widen=="profile"){
     out <- data.table::dcast(xx,
-                 SPECIES_ID + SPECIES_NAME ~PROFILE_CODE,
+                 .species.id + .species ~ .profile.id,
                  mean,
                  na.rm=TRUE,
                  value.var = ".value")
@@ -220,25 +230,25 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   #test log/wide
   ####################
   #should be able to simplify this a lot
-  .test <- c("PROFILE_NAME", "PROFILE_CODE", "SPECIES_ID", "SPECIES_NAME",
-             "WEIGHT_PERCENT", ".value")
+  .test <- c(".profile", ".profile.id", ".species.id", ".species",
+             ".pc.weight", ".value")
   .test <- .test[.test %in% names(xx)]
   if(length(.test)>2){
     stop("RSP> melt halted; rsp already looks like a long profile.", call.=FALSE)
   }
-  .test.sp <- length(grep("PROFILE", .test))
-  .test.pr <- length(grep("SPECIES", .test))
+  .test.sp <- length(grep("profile", .test))
+  .test.pr <- length(grep("species", .test))
   if(.test.pr>0 & .test.sp>0){
     stop("RSP> melt halted; rsp looks looks suspect.", call.=FALSE)
   }
   .long <- "bad"
   if(.test.pr>0 & length(.test)==.test.pr){
     .id.vars <- .test
-    .long <- "PROFILE_CODE"
+    .long <- ".profile.id"
   }
   if(.test.sp>0 & length(.test)==.test.sp){
     .id.vars <- .test
-    .long <- "SPECIES_NAME"
+    .long <- ".species"
   }
   if(.long=="bad"){
     stop("RSP> melt halted; rsp looks suspect.", call.=FALSE)
@@ -250,14 +260,14 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   out <- data.table::melt(xx, id.vars = .id.vars)
   names(out)[names(out)=="variable"] <- .long
   names(out)[names(out)=="value"] <- ".value"
-  if("SPECIES_ID" %in% names(out)){
-    out$SPECIES_ID <- as.character(out$SPECIES_ID)
+  if(".species.id" %in% names(out)){
+    out$.species.id <- as.character(out$.species.id)
   }
-  if("SPECIES_NAME" %in% names(out)){
-    out$SPECIES_NAME <- as.character(out$SPECIES_NAME)
+  if(".species" %in% names(out)){
+    out$.species <- as.character(out$.species)
   }
-  if("PROFILE_CODE" %in% names(out)){
-    out$PROFILE_CODE <- as.character(out$PROFILE_CODE)
+  if(".profile.id" %in% names(out)){
+    out$.profile.id <- as.character(out$.profile.id)
   }
 
   #out$WEIGHT_PERCENT <- out$.value
@@ -274,12 +284,12 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   if(is.character(pad)){
     out <- rsp_pad(out, pad, drop.nas)
     #tidy bad profile_name
-    if(all(is.na(out$PROFILE_NAME)) && "PROFILE_CODE" %in% names(out)){
-      out$PROFILE_NAME <- out$PROFILE_CODE
+    if(all(is.na(out$.profile)) && ".profile.id" %in% names(out)){
+      out$.profile <- out$.profile.id
     }
     #tidy bad species_id
-    if(all(is.na(out$SPECIES_ID)) && "SPECIES_NAME" %in% names(out)){
-      out$SPECIES_ID <- as.character(-as.numeric(factor(out$SPECIES_NAME)))
+    if(all(is.na(out$.species.id)) && ".species" %in% names(out)){
+      out$.species.id <- as.character(-as.numeric(factor(out$.species)))
     }
 
   }
@@ -300,8 +310,8 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
     if(".value" %in% names(out)){
       out <- out[!is.na(out$.value),]
     } else {
-      if("WEIGHT_PERCENT" %in% names(out)){
-        out <- out[!is.na(out$WEIGHT_PERCENT),]
+      if(".pc.weight" %in% names(out)){
+        out <- out[!is.na(out$.pc.weight),]
       }
         #do we want to warn if nothing to strip
         #if so, in else here??
@@ -322,7 +332,7 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
 #######################
 
 #test data 219 records
-#aa <- sp_profile(sp_find_profile("ae6", by="profile_type"))
+#aa <- rsp_profile(rsp_find_profile("ae6", by="profile_type"))
 
 #idiot-test reference.
 

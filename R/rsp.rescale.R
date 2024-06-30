@@ -1,14 +1,14 @@
 #' @name rsp.rescale
-#' @title (re)SPECIATE profile rescaling functions
-#' @aliases sp_rescale sp_rescale_profile sp_rescale_species
+#' @title rescaling respeciate profiles
+#' @aliases rsp_rescale rsp_rescale_profile rsp_rescale_species
 
-#' @description Functions for rescaling
+#' @description Functions for rescaling respeciate data sets
 
 #' @description \code{rsp_rescale} rescales the percentage weight records in
-#' a supplied (re)SPECIATE profile data set. This can be by profile or species
+#' a supplied respeciate profile data set. This can be by profile or species
 #' subsets, and \code{rsp_rescale_profile} and \code{rsp_rescale_species} provide
 #' short-cuts to these options.
-#' @param rsp A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+#' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles.
 #' @param method numeric, the rescaling method to apply:
 #'   1 \code{x/total(x)};
@@ -19,19 +19,19 @@
 #' The alternative 0 returns the records to their original
 #' values.
 #' @param by character, when rescaling \code{x} with
-#' \code{\link{sp_rescale}}, the data type to group and rescale,
+#' \code{\link{rsp_rescale}}, the data type to group and rescale,
 #' currently \code{'species'} (default) or \code{'profile'}.
-#' @return \code{sp_rescale} and \code{sp_rescale} return the
+#' @return \code{rsp_rescale} and \code{rsp_rescale} return the
 #' \code{respeciate} profile with the percentage weight records rescaled using
 #' the requested method. See Note.
 #' @note Data sometimes needs to be normalised, e.g. when applying some
-#' statistical analyses. Rather than modify the EPA records in the
-#' \code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
-#' \code{.value} which is modified by operations like \code{sp_rescale_profile}
-#' and \code{sp_rescale_species}. This means rescaling is always applied to
-#' the source information, rather than rescaling an already rescaled value,
-#' and the EPA records are retained unaffected. So, the original source
-#' information can be easily recovered.
+#' statistical analyses. Rather than modify source information in
+#' \code{SPECIATE} and \code{SPECIEUROPE}, \code{respeciate} creates a
+#' duplicate column \code{.value} which is modified by operations
+#' like \code{sp_rescale_profile} and \code{sp_rescale_species}. This means
+#' rescaling is always applied to the source information, rather than
+#' rescaling an already rescaled value, and the EPA records are retained
+#' unaffected. So, the original source information can be easily recovered.
 #' @references
 #'   Dowle M, Srinivasan A (2023). data.table: Extension of `data.frame`.
 #'   R package version 1.14.8, \url{https://CRAN.R-project.org/package=data.table}.
@@ -68,8 +68,17 @@ rsp_rescale <- function(rsp, method = 2, by = "species"){
   #################################
   #check x is a respeciate object??
 
+  ######################
+  # SPECIEUROPE data
+  ######################
+  x <- rsp
+  if("rsp_eu" %in% class(x)){
+    x <- .rsp_eu2us(x)
+  }
+  #######################
+
   #check it has .value
-  x <- .rsp_tidy_profile(rsp)
+  x <- .rsp_tidy_profile(x)
 
   #save to return as is..
   #    thinking about this
@@ -108,32 +117,32 @@ rsp_rescale <- function(rsp, method = 2, by = "species"){
     out <- xx[,
               .(#SPECIES_NAME = SPECIES_NAME[1],
                 #SPEC_MW = SPEC_MW[1],
-                .min = min(WEIGHT_PERCENT, na.rm = TRUE),
-                .max = max(WEIGHT_PERCENT, na.rm = TRUE),
-                .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
-                .mean = mean(WEIGHT_PERCENT, na.rm = TRUE),
-                .na = length(WEIGHT_PERCENT[is.na(WEIGHT_PERCENT)]),
-                .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
-                .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
+                .min = min(.pc.weight, na.rm = TRUE),
+                .max = max(.pc.weight, na.rm = TRUE),
+                .total = sum(.pc.weight, na.rm = TRUE),
+                .mean = mean(.pc.weight, na.rm = TRUE),
+                .na = length(.pc.weight[is.na(.pc.weight)]),
+                .n = length(.pc.weight[!is.na(.pc.weight)]),
+                .sd = sd(.pc.weight, na.rm = TRUE)
               ),
-              by=.(PROFILE_CODE)]
+              by=.(.profile.id)]
 
-    out <- merge(xx, out, by="PROFILE_CODE", all.x=TRUE, all.y=FALSE,
+    out <- merge(xx, out, by=".profile.id", all.x=TRUE, all.y=FALSE,
                  allow.cartesian=TRUE)
   }
   if(by == "species"){
     out <- xx[,
-              .(.min = min(WEIGHT_PERCENT, na.rm = TRUE),
-                .max = max(WEIGHT_PERCENT, na.rm = TRUE),
-                .total = sum(WEIGHT_PERCENT, na.rm = TRUE),
-                .mean = mean(WEIGHT_PERCENT, na.rm = TRUE),
-                .na = length(WEIGHT_PERCENT[is.na(WEIGHT_PERCENT)]),
-                .n = length(WEIGHT_PERCENT[!is.na(WEIGHT_PERCENT)]),
-                .sd = sd(WEIGHT_PERCENT, na.rm = TRUE)
+              .(.min = min(.pc.weight, na.rm = TRUE),
+                .max = max(.pc.weight, na.rm = TRUE),
+                .total = sum(.pc.weight, na.rm = TRUE),
+                .mean = mean(.pc.weight, na.rm = TRUE),
+                .na = length(.pc.weight[is.na(.pc.weight)]),
+                .n = length(.pc.weight[!is.na(.pc.weight)]),
+                .sd = sd(.pc.weight, na.rm = TRUE)
               ),
-              by=.(SPECIES_ID)]
+              by=.(.species.id)]
 
-    out <- merge(xx, out, by="SPECIES_ID", all.x=TRUE, all.y=FALSE,
+    out <- merge(xx, out, by=".species.id", all.x=TRUE, all.y=FALSE,
                  allow.cartesian=TRUE)
   }
 
@@ -161,24 +170,24 @@ rsp_rescale <- function(rsp, method = 2, by = "species"){
     stop("unknown method")
   }
   if(method==0){
-    out$.value<- out$WEIGHT_PERCENT
+    out$.value<- out$.pc.weight
   }
   if(method==1){
-    out$.value<- out$WEIGHT_PERCENT / out$.total
+    out$.value<- out$.pc.weight / out$.total
   }
   if(method==2){
-    out$.value<- out$WEIGHT_PERCENT /out$.mean
+    out$.value<- out$.pc.weight /out$.mean
   }
   if(method==3){
     #might be an issue if only one value
-    out$.value <- (out$WEIGHT_PERCENT - out$.min) / (out$.max - out$.min)
+    out$.value <- (out$.pc.weight - out$.min) / (out$.max - out$.min)
   }
   if(method==4){
     #might be an issue if only one value
-    out$.value <- (out$WEIGHT_PERCENT - out$.mean) / out$.sd
+    out$.value <- (out$.pc.weight - out$.mean) / out$.sd
   }
   if(method==5){
-    out$.value<- out$WEIGHT_PERCENT / out$.max
+    out$.value<- out$.pc.weight / out$.max
   }
 
   ############################

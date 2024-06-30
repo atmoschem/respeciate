@@ -6,16 +6,16 @@
 \alias{pls.plot}
 \alias{pls_plot_species}
 \alias{pls_plot_profile}
-\title{Plots for use with (re)SPECIATE profile Positive Least Squares models}
+\title{Plots for use with respeciate profile Positive Least Squares models}
 \usage{
-pls_plot(pls, plot.type = 1, ...)
+pls_plot(pls, plot.type = 1, ..., output = "default")
 
-pls_plot_profile(pls, plot.type = 1, log = FALSE, ...)
+pls_plot_profile(pls, plot.type = 1, log = FALSE, ..., output = "default")
 
-pls_plot_species(pls, id, plot.type = 1, ...)
+pls_plot_species(pls, id, plot.type = 1, ..., output = "default")
 }
 \arguments{
-\item{pls}{A \code{sp_pls_profile} output, intended for use with
+\item{pls}{A \code{rsp_pls_profile} output, intended for use with
 \code{pls_} functions.}
 
 \item{plot.type}{numeric, the plot type if
@@ -23,6 +23,10 @@ multiple options are available.}
 
 \item{...}{other arguments, typically passed on to the associated
 \code{lattice} plot.}
+
+\item{output}{character, output method, one of: 'plot' to return just the
+requested plot; 'data' to return just the data; and, c('plot', 'data') to
+plot then return the data invisibly (default).}
 
 \item{log}{(for \code{pls_plot_profile} only) logical, if \code{TRUE} this
 applies 'log' scaling to the primary Y axes of the plot.}

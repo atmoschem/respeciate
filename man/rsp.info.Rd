@@ -3,61 +3,40 @@
 \name{rsp.info}
 \alias{rsp.info}
 \alias{rsp_info}
-\alias{rsp_profile_info}
-\alias{rsp_species_info}
-\alias{rsp_find_profile}
-\alias{rsp_find_species}
-\title{re(SPECIATE) information}
+\title{Information about data sets currently in respeciate}
 \usage{
 rsp_info()
-
-rsp_profile_info(..., by = "keywords", partial = TRUE)
-
-rsp_find_profile(...)
-
-rsp_species_info(..., by = "species_name", partial = TRUE)
-
-rsp_find_species(...)
-}
-\arguments{
-\item{...}{character(s), any search term(s) to use when searching
-the local (re)SPECIATE archive for relevant records using
-\code{rsp_profile_info} or \code{rsp_species_info}.}
-
-\item{by}{character, the section of the archive to
-search, by default \code{'keywords'} for \code{rsp_profile_info} and
-\code{'species_names'} for \code{sp_species_info}.}
-
-\item{partial}{logical, if \code{TRUE} (default)
-\code{rsp_profile_info} or \code{rsp_profile_info} use partial matching.}
 }
 \value{
 \code{rsp_info} provides a brief version information report on the
-currently installed (re)SPECIATE archive.
-
-\code{rsp_profile_info} returns a \code{data.frame} of
-profile information, as a \code{respeciate} object.
-\code{rsp_species_info} returns a \code{data.frame} of
-species information as a \code{respeciate} object.
+currently installed respeciate archive.
 }
 \description{
-Functions that provide (re)SPECIATE
+Functions that provide respeciate
 source information.
 \code{rsp_info} generates a brief version report for the currently installed
-(re)SPECIATE data sets.
-\code{rsp_profile_info} searches the currently installed (re)SPECIATE
-data sets for profile records.
-\code{rsp_species_info} searches the currently installed (re)SPECIATE
-data sets for species records.
+respeciate data sets.
 }
 \examples{
 \dontrun{
-profile <- "Ethanol"
-pr <- rsp_find_profile(profile)
-pr
+rsp_info()
+}
 
-species <- "Ethanol"
-sp <- rsp_find_species(species)
-sp}
+}
+\references{
+For SPECIATE:
 
+Simon, H., Beck, L., Bhave, P.V., Divita, F., Hsu, Y., Luecken, D.,
+Mobley, J.D., Pouliot, G.A., Reff, A., Sarwar, G. and Strum, M., 2010.
+The development and uses of EPA SPECIATE database.
+Atmospheric Pollution Research, 1(4), pp.196-206.
+
+For SPECIEUROPE:
+
+Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The
+European data base for PM source profiles. Atmospheric Pollution Research,
+7(2), pp.307-314. DOI: https://doi.org/10.1016/j.apr.2015.10.007
+}
+\seealso{
+\code{\link{SPECIATE}} and \code{\link{SPECIEUROPE}}
 }

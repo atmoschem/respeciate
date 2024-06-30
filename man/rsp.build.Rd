@@ -3,54 +3,64 @@
 \name{rsp.build}
 \alias{rsp.build}
 \alias{rsp_build_x}
+\alias{rsp_build_simx}
 \title{Building respeciate-like Objects}
 \usage{
-rsp_build_x(
-  x,
-  profile_code,
-  profile_name,
-  species_name,
-  species_id,
-  value,
-  ...
-)
+rsp_build_x(x, profile_id, profile_name, species_name, species_id, value, ...)
+
+rsp_build_simx(m, n = 1, ...)
 }
 \arguments{
 \item{x}{\code{data.frame} or similar (i.e.
 something that can be coerced into a \code{data.frame} using
 \code{as.data.frame}) to be converted into a \code{respeciate} object.}
 
-\item{profile_name, profile_code}{(\code{character}) The name of the column
-in \code{x} containing profile name and code records, respectively. If not
-already named according to SPECIATE conventions, at least one of these will
-need to be assigned.}
+\item{profile_name, profile_id}{(\code{character}) The names of the columns
+in \code{x} containing profile names and identifiers, respectively. If not
+already named according to \code{respeciate} conventions, at least one
+of these will need to be assigned.}
 
-\item{species_name, species_id}{(\code{character}) The name of the column
-in \code{x} containing species name and id records, respectively. If not
-already named according to SPECIATE conventions, at least one of these will
+\item{species_name, species_id}{(\code{character}) The names of the columns
+in \code{x} containing species name and identifiers, respectively. If not
+already named according to \code{respeciate} conventions, at least one of these will
 need to be assigned.}
 
 \item{value}{(\code{character}) The name of the column in \code{x}
-containing measurement values. If not already named according to SPECIATE
+containing measurement values. If not already named according to \code{respeciate}
 conventions, this will need to be assigned.}
 
 \item{...}{(any other arguments) currently ignored.}
+
+\item{m}{\code{respeciate} data set of source profiles intended to be used
+as the source profiles (or M) matrix when building a simulated data set for
+use with a PLS model (see \code{rsp_pls_x})}
+
+\item{n}{a numeric object, e.g. a \code{vector}, \code{matrix}, \code{data.frame} or
+a similar object that can be coerced into a \code{data.frame} of suitable
+dimensions for use as the source strength matrix (N) to build a simulated data set for
+use with a PLS model (see \code{rsp_pls_x}).}
 }
 \value{
-\code{rsp_build}s attempt to build and return a (re)SPECIATE-like
-object that can be compared with data from re(SPECIATE).
+\code{rsp_build}s attempt to build and return a \code{respeciate}-like
+object that can be directly compared with data from \code{respeciate}.
+
+\code{rsp_build_x} is the standard object builder.
+
+\code{rsp_build_simx} builds a simulation of an \code{x} data set based on
+the `linear combination of profiles` model applied in conventional source
+apportionment. (See below and \code{rsp_pls_x})
 }
 \description{
 rsp function(s) to reconfigure data.frames (and similar
-object classes) for use with data and functions in re(SPECIATE).
+object classes) for use with data and functions in \code{respeciate}.
 }
 \note{
-If you want to compare your data with profiles in the SPECIATE archive,
-you need to use EPA SPECIATE conventions when assigning species names and
-identifiers. Currently, we are working on options to improve on this (and
+If you want to compare your data with profiles in the \code{respeciate} archive,
+you need \code{respeciate} conventions when assigning species names and
+identifiers. We are working on options to improve on this (and
 very happy to discuss if anyone has ideas), but current best suggestion is:
-(1) identify the SPECIATE species code for each of the species in your data set,
-and (2) assign these as \code{species_id} when \code{rsp_build}ing. The
-function will then associate the \code{species_name} from SPECIATE species
-records.
+(1) identify the \code{respeciate} species code for each of the species in
+your data set, and (2) assign these as \code{species_code} when \code{rsp_build}ing.
+The function will then associate the \code{species_name} from \code{respeciate}
+species records.
 }

@@ -3,12 +3,12 @@
 \name{rsp.pad}
 \alias{rsp.pad}
 \alias{rsp_pad}
-\title{(re)SPECIATE profile padding functions}
+\title{Meta-data padding respeciate data sets}
 \usage{
 rsp_pad(rsp, pad = "standard", drop.nas = TRUE)
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{pad}{character, type of meta data padding, current options
@@ -16,8 +16,8 @@ profiles.}
 \code{'standard'} (default; all but \code{'reference'}), and \code{'all'}
 (all).}
 
-\item{drop.nas}{logical, discard any rows where \code{WEIGHT_PERCENT} is
-\code{NA}, default \code{TRUE}.}
+\item{drop.nas}{logical, discard any rows where the \code{respeciate}
+species amount column \code{.pc.weight} is \code{NA}, default \code{TRUE}.}
 }
 \value{
 \code{rsp_pad} returns supplied \code{respeciate} data set, with
@@ -27,14 +27,17 @@ requested additional profile and species meta-data added as additional
 \description{
 Functions for padding \code{respeciate} objects.
 
-\code{rsp_pad} pads a supplied (re)SPECIATE profile data set
+\code{rsp_pad} pads a supplied respeciate profile data set
 with profile and species meta-data.
 }
 \note{
-Some data handling can remove (re)SPECIATE meta-data,
+Some data handling can remove respeciate meta-data,
 and \code{rsp_pad}s provide a quick rebuild/repair. For example,
 \code{\link{rsp_dcast}}ing to a (by-species or by-profile) widened
 form strips some meta-data, and padding is used as part of the
 \code{\link{rsp_melt_wide}} to re-add this meta-data
 when returning the data set to its standard long form.
+}
+\seealso{
+\code{\link{rsp_pad}}
 }

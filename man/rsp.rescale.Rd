@@ -3,12 +3,9 @@
 \name{rsp.rescale}
 \alias{rsp.rescale}
 \alias{rsp_rescale}
-\alias{sp_rescale}
-\alias{sp_rescale_profile}
-\alias{sp_rescale_species}
 \alias{rsp_rescale_profile}
 \alias{rsp_rescale_species}
-\title{(re)SPECIATE profile rescaling functions}
+\title{rescaling respeciate profiles}
 \usage{
 rsp_rescale(rsp, method = 2, by = "species")
 
@@ -17,7 +14,7 @@ rsp_rescale_profile(rsp, method = 1, by = "profile")
 rsp_rescale_species(rsp, method = 2, by = "species")
 }
 \arguments{
-\item{rsp}{A \code{respeciate} object, a \code{data.frame} of re(SPECIATE)
+\item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
 profiles.}
 
 \item{method}{numeric, the rescaling method to apply:
@@ -30,31 +27,31 @@ The alternative 0 returns the records to their original
 values.}
 
 \item{by}{character, when rescaling \code{x} with
-\code{\link{sp_rescale}}, the data type to group and rescale,
+\code{\link{rsp_rescale}}, the data type to group and rescale,
 currently \code{'species'} (default) or \code{'profile'}.}
 }
 \value{
-\code{sp_rescale} and \code{sp_rescale} return the
+\code{rsp_rescale} and \code{rsp_rescale} return the
 \code{respeciate} profile with the percentage weight records rescaled using
 the requested method. See Note.
 }
 \description{
-Functions for rescaling
+Functions for rescaling respeciate data sets
 
 \code{rsp_rescale} rescales the percentage weight records in
-a supplied (re)SPECIATE profile data set. This can be by profile or species
+a supplied respeciate profile data set. This can be by profile or species
 subsets, and \code{rsp_rescale_profile} and \code{rsp_rescale_species} provide
 short-cuts to these options.
 }
 \note{
 Data sometimes needs to be normalised, e.g. when applying some
-statistical analyses. Rather than modify the EPA records in the
-\code{WEIGHT_PERCENT} column, \code{respeciate} creates a duplicate column
-\code{.value} which is modified by operations like \code{sp_rescale_profile}
-and \code{sp_rescale_species}. This means rescaling is always applied to
-the source information, rather than rescaling an already rescaled value,
-and the EPA records are retained unaffected. So, the original source
-information can be easily recovered.
+statistical analyses. Rather than modify source information in
+\code{SPECIATE} and \code{SPECIEUROPE}, \code{respeciate} creates a
+duplicate column \code{.value} which is modified by operations
+like \code{sp_rescale_profile} and \code{sp_rescale_species}. This means
+rescaling is always applied to the source information, rather than
+rescaling an already rescaled value, and the EPA records are retained
+unaffected. So, the original source information can be easily recovered.
 }
 \references{
 Dowle M, Srinivasan A (2023). data.table: Extension of `data.frame`.
