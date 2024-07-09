@@ -392,7 +392,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
   profiles.eu <- profiles.eu[!duplicated(profiles.eu$Id),]
   profiles.eu <- profiles.eu[c("Id", "Name", "Original.Name", "Country",
                                "Place", "Test.Year", "Profile.Type",
-                               "Latitude", "Longitude")]
+                               "Particle.Size", "Latitude", "Longitude")]
   profiles.eu$Keywords <- profiles.eu$Name
   profiles.eu$.profile.id <- paste("EU:", profiles.eu$Id, sep="")
   profiles.eu$.profile <- profiles.eu$Name

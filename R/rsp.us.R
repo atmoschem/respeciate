@@ -25,6 +25,7 @@
 #' \code{rsp_us_other} returns all profiles classified as other in SPECIATE
 #' (\code{PROFILE_TYPE == 'OTHER'}).
 #'
+#' @seealso \code{\link{SPECIATE}}
 
 
 #############################
@@ -36,20 +37,25 @@
 # SPECIATE profile types
 # GAS, OTHER, PM, PM-AE6, PM-AE8, PM-CR1, PM-Simplified
 
+# started similar for SPECIEUROPE in rsp.eu.R
 
 ##########################
 # to do / think about ...
 #########################
 
-# any others worth doing???
-#     others from SPECIATE (as rsp_us_... ???)
-#     anything similar in SPECIEUROPE (as rsp_eu_... ???)
 
-# feels like ther should be a quicker way of doing this...
+# feels like there should be a quicker way of doing this...
 #    maybe try going SPECIATE directly instead of using rsp_profile_info???
 #       BUT might not be much a speed saving...
 
-# rsp() or rsp_profile() ????
+# comparing rsp.us and rsp.eu code
+#     function nomenclature
+#         rsp() or rsp_profile() ????
+#         rsp_profile_info() or rsp_find_profile() ???
+#     rsp_eu for all SPECIEUROPE but not rsp_us for all SPECIATE
+#         reason SPECIATE is both PM and gas profiles; not sure mixing wise ...
+#                SPECIEUROPE is only PM
+#                     (although different size fractions...)
 
 
 #' @rdname rsp.us

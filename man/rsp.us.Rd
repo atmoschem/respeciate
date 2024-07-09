@@ -50,3 +50,6 @@ applications, and these include \code{rsp_us_pm.ae6} (type \code{PM-AE6}),
 \code{rsp_us_} functions are quick access wrappers to commonly
 requested SPECIATE subsets.
 }
+\seealso{
+\code{\link{SPECIATE}}
+}

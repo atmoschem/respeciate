@@ -1,5 +1,10 @@
 # Release Notes Version 0.3
 
+* [0.3.2] 
+    * released 2024-07-09 
+    * added rsp_eu shortcut for SPECIEUROPE profiles 
+    
+    
 * [0.3.1] 
     * released 2024-06-12 
     * added standard plot output handler for rsp_ and pls_ plots 
