@@ -7,8 +7,8 @@ status](https://github.com/atmoschem/respeciate/workflows/R-CMD-check/badge.svg)
 respeciate gives you access to air pollutant emissions profiles in the
 [US/EPA Speciate
 v5.2](https://www.epa.gov/air-emissions-modeling/speciate) and [EU/JRC
-SPECIEUROPE](https://source-apportionment.jrc.ec.europa.eu/) archives
-via R.
+SPECIEUROPE v2.0](https://source-apportionment.jrc.ec.europa.eu/)
+archives via R.
 
 The installation is:
 
@@ -26,12 +26,12 @@ x <- rsp_find_profile("Ethanol")
 x
 #> respeciate profile list: 160
 #> [NO SPECIES]
-#>   (CODE 0291) Surface Coating Solvent - Methyl Alcohol
-#>   (CODE 1070) Alcohols Production - Methanol - Purge Gas Vent
-#>   (CODE 1071) Alcohols Production - Methanol - Distillation Vent
-#>   (CODE 1132) Ethanolamines
-#>   (CODE 1149) Methanol
-#>   (CODE 1301) 10% Ethanol Composite (Hot Soak + Diurnal) Evaporative
+#>   (CODE US:0291) Surface Coating Solvent - Methyl Alcohol
+#>   (CODE US:1070) Alcohols Production - Methanol - Purge Gas Vent
+#>   (CODE US:1071) Alcohols Production - Methanol - Distillation Vent
+#>   (CODE US:1132) Ethanolamines
+#>   (CODE US:1149) Methanol
+#>   (CODE US:1301) 10% Ethanol Composite (Hot Soak + Diurnal) Evaporative
 #>     > showing 6 of 160
 ```
 

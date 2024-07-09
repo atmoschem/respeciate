@@ -14,6 +14,7 @@
     added) 
     * various fixes; some typos in docs; rsp_plot_species id 
     tracking when species is factor  
+    * website update
 
 
 * [0.3.0] 

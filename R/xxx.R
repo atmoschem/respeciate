@@ -20,6 +20,41 @@
 #          PROFILE_NAME -> .profile
 #          WEIGHT_PERCENT -> .pc.weight
 
+
+.rsp_old2ew <- function(x){
+  #make previous data look like new data
+  ##################################
+  #.species.id
+  if(!".species.id" %in% names(x)){
+    if("SPECIES_ID" %in% names(x))
+      x$.species.id <- x$SPECIES_ID
+  }
+  #.species
+  if(!".species" %in% names(x)){
+    if("SPECIES_NAME" %in% names(x))
+      x$.species <- x$SPECIES_NAME
+  }
+  #.profile.id
+  if(!".profile.id" %in% names(x)){
+    if("PROFILE_CODE" %in% names(x))
+      x$.profile.id <- x$PROFILE_CODE
+  }
+  #.profile
+  if(!".profile" %in% names(x)){
+    if("PROFILE_NAME" %in% names(x))
+      x$.profile <- x$PROFILE_NAME
+  }
+  #.pc.weight
+  if(!".pc.weight" %in% names(x)){
+    if("WEIGHT_PERCENT" %in% names(x))
+      x$.pc.weight <- x$WEIGHT_PERCENT
+  }
+
+  #out
+  x
+}
+
+
 #     made ..rsp_ function common sources for merged SPECIATE + SPECIEUROPE data
 
 #     can now combine or compare US and EU profiles with
@@ -173,7 +208,7 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
                          "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
                          ".profile.id", ".profile", "PROFILE_TYPE",
                          ".species.id", ".species", "SPEC_MW", ".profile.type",
-                         ".pc.weight", ".", ".value", "Id"))
+                         ".pc.weight", ".", ".value", ".load", "Id"))
 
 #to think about...
 
