@@ -125,7 +125,7 @@
 #           we could base this on ..rsp_[whatever]_meta and .rsp_eu2us
 #           unexported functions. .rsp_eu2us was used to handle eu data
 #           when we were defaulting to us structure (early code from 0.3.1,
-#           now superceded)...
+#           now superseded)...
 
 
 
