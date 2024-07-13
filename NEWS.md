@@ -1,9 +1,14 @@
 # Release Notes Version 0.3
 
+* [0.3.3] 
+    * released 2024-07-13 
+    * added draft rsp_lbind 
+
+
 * [0.3.2] 
     * released 2024-07-09 
     * added rsp_eu shortcut for SPECIEUROPE profiles 
-    
+    * updated logo; now SPECIATE + SPECIEUROPE
     
 * [0.3.1] 
     * released 2024-06-12 

@@ -1,7 +1,7 @@
 Package: respeciate
 Title: Speciation profiles for gases and aerosols
-Version: 0.3.2
-Date: 2024-07-09
+Version: 0.3.3
+Date: 2024-07-13
 Description: Access to the air pollutant emission profiles in US EPA SPECIATE (v5.2) and
          EU JRC SPECIEUROPE archives. More details in Simon et al (2010)
          doi:10.5094/APR.2010.026 and Pernigotti et al (2016)
