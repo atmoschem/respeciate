@@ -210,14 +210,14 @@ print.respeciate <-
 
 
     rsp.rep <- "respeciate"
-    if(class(.x)[1] == "rsp_sw"){
+    if(class(.x)[1] %in% c("rsp_sw", "rsp_siw")){
       rsp.rep <- paste(rsp.rep, " (wide/species)", sep="")
       .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
       #####################################
       #should we loose this if we start testing if missing below...
       .x$.species.id <- .x$.species
     }
-    if(class(.x)[1] == "rsp_pw"){
+    if(class(.x)[1] %in%c("rsp_pw", "rsp_piw")){
       rsp.rep <- paste(rsp.rep, " (wide/profile)", sep="")
       .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
       #.x$PROFILE_NAME <- .x$PROFILE_CODE

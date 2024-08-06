@@ -4,7 +4,9 @@
 \alias{rsp.reshape}
 \alias{rsp_dcast}
 \alias{rsp_dcast_profile}
+\alias{rsp_dcast_profile_id}
 \alias{rsp_dcast_species}
+\alias{rsp_dcast_species_id}
 \alias{rsp_melt_wide}
 \title{Reshaping respeciate data sets}
 \usage{
@@ -12,7 +14,11 @@ rsp_dcast(rsp, widen = "species")
 
 rsp_dcast_profile(rsp, widen = "profile")
 
+rsp_dcast_profile_id(rsp, widen = "profile.id")
+
 rsp_dcast_species(rsp = rsp, widen = "species")
+
+rsp_dcast_species_id(rsp = rsp, widen = "species.id")
 
 rsp_melt_wide(rsp, pad = TRUE, drop.nas = TRUE)
 }
@@ -23,12 +29,13 @@ profiles in standard long form or widened form using
 
 \item{widen}{character, when widening \code{rsp} with
 \code{\link{rsp_dcast}}, the data type to \code{dcast},
-currently \code{'species'} (default) or \code{'profile'}. See Note.}
+currently \code{'species'} (default), \code{'species.id'}, \code{'profile'}
+or \code{'profile.id'}. See Note.}
 
 \item{pad}{logical or character, when \code{melt}ing a previously widened
 data set, should output be re-populated with species and/or profile
 meta-data, discarded when widening. This is currently handled by
-\code{\link{rsp_pad}}. The default \code{TRUE} applies standard settings,
+\code{\link{rsp_pad}}. The default \code{FALSE} applies standard settings,
 so does not include profile sources reference meta-data. (See
 \code{\link{rsp_pad}} for other options).}
 
@@ -36,7 +43,7 @@ so does not include profile sources reference meta-data. (See
 data set, should output be stripped of any rows containing empty
 weight/value columns. Because not all profile contains all species, the
 \code{dcast}/\code{melt} process can generate empty rows, and this step
-attempt account for that when working with standard re(SPECIATE)
+attempt account for that when working with standard \code{reSPECIATE}
 profiles. It is, however, sometimes useful to check first, e.g. when
 building profiles yourself.}
 }
@@ -52,8 +59,9 @@ Functions for reshaping respeciate profiles
 respeciate profile(s). \code{rsp_dcast} converts these from their supplied
 long form to a widened form, \code{dcast}ing the data set by either species
 or profiles depending on the \code{widen} setting applied.
-\code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
-options. \code{rsp_melt_wide} attempts to return a previously widened data
+\code{rsp_dcast_profile}, \code{rsp_dcast_profile_id},
+\code{rsp_dcast_species} and \code{rsp_dcast_species_id} are wrappers for
+these options. \code{rsp_melt_wide} attempts to return a previously widened data
 set to the original long form.
 }
 \note{
@@ -69,7 +77,7 @@ And, the alternative \code{widen='profile'}:
 
 \code{dcast(..., species.id+.species~.profile, value.var=".value")}
 
-Although, \code{respeciate} uses a local version of the \code{SPECIATE} and
+\code{respeciate} uses a local version of the \code{SPECIATE} and
 \code{SPECIEUROPE} weight measurements \code{.value}, so the EPA and
 JCR source information can easily be recovered. See also
 \code{\link{rsp_rescale_profile}}.

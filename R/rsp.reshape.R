@@ -1,6 +1,7 @@
 #' @name rsp.reshape
 #' @title Reshaping respeciate data sets
-#' @aliases rsp_dcast rsp_dcast_profile rsp_dcast_species rsp_melt_wide
+#' @aliases rsp_dcast rsp_dcast_profile rsp_dcast_profile_id rsp_dcast_species
+#' rsp_dcast_species_id rsp_melt_wide
 
 #' @description Functions for reshaping respeciate profiles
 
@@ -8,26 +9,28 @@
 #' respeciate profile(s). \code{rsp_dcast} converts these from their supplied
 #' long form to a widened form, \code{dcast}ing the data set by either species
 #' or profiles depending on the \code{widen} setting applied.
-#' \code{rsp_dcast_profile} and \code{rsp_dcast_species} are wrappers for these
-#' options. \code{rsp_melt_wide} attempts to return a previously widened data
+#' \code{rsp_dcast_profile}, \code{rsp_dcast_profile_id},
+#' \code{rsp_dcast_species} and \code{rsp_dcast_species_id} are wrappers for
+#' these options. \code{rsp_melt_wide} attempts to return a previously widened data
 #' set to the original long form.
 #' @param rsp A \code{respeciate} object, a \code{data.frame} of respeciate
 #' profiles in standard long form or widened form using
 #' \code{\link{rsp_dcast}} and \code{\link{rsp_melt_wide}}, respectively.
 #' @param widen character, when widening \code{rsp} with
 #' \code{\link{rsp_dcast}}, the data type to \code{dcast},
-#' currently \code{'species'} (default) or \code{'profile'}. See Note.
+#' currently \code{'species'} (default), \code{'species.id'}, \code{'profile'}
+#' or \code{'profile.id'}. See Note.
 #' @param pad logical or character, when \code{melt}ing a previously widened
 #' data set, should output be re-populated with species and/or profile
 #' meta-data, discarded when widening. This is currently handled by
-#' \code{\link{rsp_pad}}. The default \code{TRUE} applies standard settings,
+#' \code{\link{rsp_pad}}. The default \code{FALSE} applies standard settings,
 #' so does not include profile sources reference meta-data. (See
 #' \code{\link{rsp_pad}} for other options).
 #' @param drop.nas logical, when \code{melt}ing a previously widened
 #' data set, should output be stripped of any rows containing empty
 #' weight/value columns. Because not all profile contains all species, the
 #' \code{dcast}/\code{melt} process can generate empty rows, and this step
-#' attempt account for that when working with standard re(SPECIATE)
+#' attempt account for that when working with standard \code{reSPECIATE}
 #' profiles. It is, however, sometimes useful to check first, e.g. when
 #' building profiles yourself.
 #' @return \code{rsp_dcast} returns the wide form of the supplied
@@ -46,7 +49,7 @@
 #'
 #' \code{dcast(..., species.id+.species~.profile, value.var=".value")}
 #'
-#' Although, \code{respeciate} uses a local version of the \code{SPECIATE} and
+#' \code{respeciate} uses a local version of the \code{SPECIATE} and
 #' \code{SPECIEUROPE} weight measurements \code{.value}, so the EPA and
 #' JCR source information can easily be recovered. See also
 #' \code{\link{rsp_rescale_profile}}.
@@ -64,22 +67,20 @@
 # data.table::as.data.table
 # data.table::dcast
 # data.table::melt
+# data.table::merge.data.table
 # rsp_pad
 
-
-
-
-
-
-##   now imports from xxx.r
-##   #' @import data.table
-
-# may need to set data.table specifically??
+# need to set data.table specifically??
 #      data.table::as.data.table, etc??
 
-#in development sp_melt_wide below
+# in development
+# extended handling species and profile to
+#     species, species.id, profile and profile.id]
 
-#maybe think about padding sp_dcast_profile
+# might be an issue with rsp_dcast_profile
+#     if profile names are not unique
+
+#maybe think about padding rsp_dcast_profile
 
 ######################
 #dcast
@@ -95,7 +96,7 @@ rsp_dcast <- function(rsp, widen = "species"){
   #see ?data.table::dcast for examples
   ####################
 
-  # currently running with any x
+  # currently running with any object type as rsp
   # but likely errors out with anything but a respeciate object...
 
   #note: should this handle non-respeciate objects?
@@ -104,6 +105,9 @@ rsp_dcast <- function(rsp, widen = "species"){
   #note: thinking about adding formal to set the wide term
   #      so user can set the dcast term, e.g. ~ species or profile
   #      name key? wide? variable.name?
+
+  #note: think there bit be an issue is anything is not unique
+  #
 
   ######################
   # SPECIEUROPE data
@@ -124,17 +128,43 @@ rsp_dcast <- function(rsp, widen = "species"){
   xx <- data.table::as.data.table(x)
 
   #stop if widen option not known.
-  if(!widen %in% c("species", "profile")){
+  if(!widen %in% c("species", "species.id", "profile", "profile.id")){
     stop("unknown widen option")
   }
   if(widen=="species"){
+    cmt <- paste(xx$.species, xx$.species.id, sep="--rsp--")
+    cmt <- c(".species--rsp--.species.id", cmt)
+    ncl <-  "rsp_sw"
     out <- data.table::dcast(xx,
                  .profile.id + .profile ~ .species,
                  mean,
                  na.rm=TRUE,
                  value.var = ".value")
   }
+  if(widen=="species.id"){
+    cmt <- paste(xx$.species.id, xx$.species, sep="--rsp--")
+    cmt <- c(".species.id--rsp--.species", cmt)
+    ncl <-  "rsp_siw"
+    out <- data.table::dcast(xx,
+                             .profile.id + .profile ~ .species.id,
+                             mean,
+                             na.rm=TRUE,
+                             value.var = ".value")
+  }
   if(widen=="profile"){
+    cmt <- paste(xx$.profile, xx$.profile.id, sep="--rsp--")
+    cmt <- c(".profile--rsp--.profile.id", cmt)
+    ncl <- "rsp_pw"
+    out <- data.table::dcast(xx,
+                             .species.id + .species ~ .profile,
+                             mean,
+                             na.rm=TRUE,
+                             value.var = ".value")
+  }
+  if(widen=="profile.id"){
+    cmt <- paste(xx$.profile.id, xx$.profile, sep="--rsp--")
+    cmt <- c(".profile.id--rsp--.profile", cmt)
+    ncl <- "rsp_piw"
     out <- data.table::dcast(xx,
                  .species.id + .species ~ .profile.id,
                  mean,
@@ -142,27 +172,18 @@ rsp_dcast <- function(rsp, widen = "species"){
                  value.var = ".value")
   }
 
-  #maybe use species_id in species dcast??
-  ########################################
-
-  #then add matched species_names, making this unique??
-  #   ~species_name makes labeling easier but will be
-  #       merging any duplicated species_names...
-  #   could also add back in other profile info but not species info...
-  #       which means we will loose that it you melt(dcast(...))
+  ################################################
+  # testing
+  # using comments to track the dropped rsp term
+  ################################################
 
   #output
-  #   just outputting as data.frame at moment
-  #       not sure if this can be respeciate and
-  #          don't want a respeciate wide class
-  #   could use an output arg??? as.is, data.frame, etc...
-
+  # convert to data frame, add cmt as source for dropped info
+  # class what came in plus the rsp_.w identifier
+  # we might not need to keep the rsp_.w identifier or use a general rsp_wide???
   out <- as.data.frame(out)
-  if(widen=="species"){
-    class(out) <- c("rsp_sw", cls)
-  } else {
-    class(out) <- c("rsp_pw", cls)
-  }
+  comment(out) <- unique(cmt)
+  class(out) <- c(ncl, cls)
   out
 }
 
@@ -177,6 +198,12 @@ rsp_dcast_profile <- function(rsp, widen = "profile"){
   rsp_dcast(rsp=rsp, widen=widen)
 }
 
+#' @rdname rsp.reshape
+#' @export
+
+rsp_dcast_profile_id <- function(rsp, widen = "profile.id"){
+  rsp_dcast(rsp=rsp, widen=widen)
+}
 
 #' @rdname rsp.reshape
 #' @export
@@ -185,6 +212,12 @@ rsp_dcast_species <- function(rsp=rsp, widen = "species"){
   rsp_dcast(rsp=rsp, widen=widen)
 }
 
+#' @rdname rsp.reshape
+#' @export
+
+rsp_dcast_species_id <- function(rsp=rsp, widen = "species.id"){
+  rsp_dcast(rsp=rsp, widen=widen)
+}
 
 
 
@@ -217,13 +250,10 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   #see ?data.table::melt for examples
   ####################
 
-  #adds .value if missing
-  ## using .value rather the WEIGHT_PERCENT in case rescaled
+  #setup
   x <- .rsp_tidy_profile(rsp)
-
-  #save class
   cls <- class(x)
-
+  cmt <- comment(x)
   xx <- data.table::as.data.table(x)
 
   #################
@@ -257,9 +287,22 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   #should only be species.wide or profile.wide
   #   if we get to here
 
+  if(!is.null(cmt)){
+    # we have a tracked record of the dropped term
+    # use this as source of .long
+    cmt <- strsplit(cmt, "--rsp--")
+    .nms <- cmt[[1]]
+    .long <- .nms[1]
+    cmt <- as.data.frame(t(as.data.frame(cmt)))
+    names(cmt) <- .nms
+  }
+
   out <- data.table::melt(xx, id.vars = .id.vars)
   names(out)[names(out)=="variable"] <- .long
   names(out)[names(out)=="value"] <- ".value"
+  if(!is.null(cmt)){
+    out <- data.table::merge.data.table(out, cmt, all.x=TRUE)
+  }
   if(".species.id" %in% names(out)){
     out$.species.id <- as.character(out$.species.id)
   }
@@ -269,6 +312,10 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   if(".profile.id" %in% names(out)){
     out$.profile.id <- as.character(out$.profile.id)
   }
+  if(".profile" %in% names(out)){
+    out$.profile <- as.character(out$.profile)
+  }
+
 
   #out$WEIGHT_PERCENT <- out$.value
 
@@ -322,7 +369,7 @@ rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
   #need to rationalise outputs!!!
   #.rsp_build_respeciate(out)
   out <- as.data.frame(out)
-  class(out) <- cls[!cls %in% c("rsp_pw", "rsp_sw")]
+  class(out) <- cls[!cls %in% c("rsp_pw", "rsp_piw", "rsp_sw", "rsp_siw")]
   out
 }
 

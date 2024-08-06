@@ -1,5 +1,10 @@
 # Release Notes Version 0.3
 
+* [0.3.4] 
+    * released 2024-08-06 
+    * expended rsp_dcast to handle species, species.id, profile, 
+    profile.id, and track all in all rsp_dcasts... 
+
 * [0.3.3] 
     * released 2024-07-13 
     * added draft rsp_lbind 
