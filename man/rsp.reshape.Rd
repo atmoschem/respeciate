@@ -20,7 +20,7 @@ rsp_dcast_species(rsp = rsp, widen = "species")
 
 rsp_dcast_species_id(rsp = rsp, widen = "species.id")
 
-rsp_melt_wide(rsp, pad = TRUE, drop.nas = TRUE)
+rsp_melt_wide(rsp, pad = FALSE, drop.nas = FALSE)
 }
 \arguments{
 \item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate
@@ -35,9 +35,9 @@ or \code{'profile.id'}. See Note.}
 \item{pad}{logical or character, when \code{melt}ing a previously widened
 data set, should output be re-populated with species and/or profile
 meta-data, discarded when widening. This is currently handled by
-\code{\link{rsp_pad}}. The default \code{FALSE} applies standard settings,
-so does not include profile sources reference meta-data. (See
-\code{\link{rsp_pad}} for other options).}
+\code{\link{rsp_pad}}. The default \code{FALSE} does not pad, \code{TRUE}
+pads, applies standard settings, so does not include profile sources
+reference meta-data. (See \code{\link{rsp_pad}} for other options).}
 
 \item{drop.nas}{logical, when \code{melt}ing a previously widened
 data set, should output be stripped of any rows containing empty

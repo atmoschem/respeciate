@@ -23,9 +23,9 @@
 #' @param pad logical or character, when \code{melt}ing a previously widened
 #' data set, should output be re-populated with species and/or profile
 #' meta-data, discarded when widening. This is currently handled by
-#' \code{\link{rsp_pad}}. The default \code{FALSE} applies standard settings,
-#' so does not include profile sources reference meta-data. (See
-#' \code{\link{rsp_pad}} for other options).
+#' \code{\link{rsp_pad}}. The default \code{FALSE} does not pad, \code{TRUE}
+#' pads, applies standard settings, so does not include profile sources
+#' reference meta-data. (See \code{\link{rsp_pad}} for other options).
 #' @param drop.nas logical, when \code{melt}ing a previously widened
 #' data set, should output be stripped of any rows containing empty
 #' weight/value columns. Because not all profile contains all species, the
@@ -244,7 +244,7 @@ rsp_dcast_species_id <- function(rsp=rsp, widen = "species.id"){
 #' @rdname rsp.reshape
 #' @export
 
-rsp_melt_wide <- function(rsp, pad = TRUE, drop.nas = TRUE){
+rsp_melt_wide <- function(rsp, pad = FALSE, drop.nas = FALSE){
 
   ####################
   #see ?data.table::melt for examples
