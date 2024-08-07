@@ -250,7 +250,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #dcast to reshape for search
   #    cols (profiles), rows(species)
   ##################
-  .tmp <- data.table::as.data.table(rsp_dcast(.tmp, widen="profile"))
+  .tmp <- data.table::as.data.table(rsp_dcast(.tmp, widen="profile.id"))
 
   #nb: need the as.data.table() because rsp_profile_dcast
 
