@@ -11,8 +11,9 @@ rsp_match_profile(
   matches = 10,
   rescale = 5,
   min.n = 8,
-  method = "pd",
-  test.rsp = FALSE
+  method = "sid * log.pd",
+  test.rsp = FALSE,
+  ...
 )
 }
 \arguments{
@@ -36,13 +37,25 @@ comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
 species measurements in two profiles required for a match to be assessed.
 See also \code{\link{rsp_cor_species}}.}
 
-\item{method}{Character (default 'pd'), the similarity measure to use, current
-options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
-or 'sid', the Standardized Identity Distance (See References).}
+\item{method}{Character (default 'sid * log.pd'), the ranking metric used to
+rank profile matches. The function calculates several matching metrics:
+'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
+'log.pd', the pd for logged inputs, and 'sid', the Standardized Identity
+Distance (See References). All the metrics tend to zero for a perfect match,
+and the \code{method} can be any character string that can be evaluated from
+any of these, e.g., \code{'pd'}, \code{'log.pd'}, \code{'sid'}, and
+combinations thereof.}
 
 \item{test.rsp}{Logical (default FALSE). The match process self-tests by adding
 \code{rsp} to \code{ref}, which should generate a perfect fit=0 score. Setting
 \code{test.rsp} to \code{TRUE} retains this as an extra record.}
+
+\item{...}{Additional arguments, typically ignore but sometimes used for
+function development. Currently, testing \code{rm.reps} (logical) option to
+remove what appear to be replicate profile matches from the result set. This
+is based on the assumption that identical 'pd' and 'sid' scores identical
+identical \code{ref} profiles (or identical overlaps with \code{rsp}) but is
+not validated, so handle with care...}
 }
 \value{
 \code{rsp_match_profile} returns a fit report: a \code{data.frame} of
