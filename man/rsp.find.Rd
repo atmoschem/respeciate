@@ -9,11 +9,23 @@
 \alias{rsp_species_info}
 \title{Information about data sets currently in respeciate}
 \usage{
-rsp_find_profile(..., by = "keywords", partial = TRUE, source = "all")
+rsp_find_profile(
+  ...,
+  by = "keywords",
+  partial = TRUE,
+  source = "all",
+  ref = NULL
+)
 
 rsp_profile_info(...)
 
-rsp_find_species(..., by = ".species", partial = TRUE, source = "all")
+rsp_find_species(
+  ...,
+  by = ".species",
+  partial = TRUE,
+  source = "all",
+  ref = NULL
+)
 
 rsp_species_info(...)
 }
@@ -32,6 +44,9 @@ search, by default \code{'keywords'} for \code{rsp_find_profile} and
 \item{source}{character, the data set to search: \code{'us'}
 US EPA SPECIATE; \code{'eu'} JRC SPECIEUROPE; or, \code{'all'} (default)
 both archives.}
+
+\item{ref}{any \code{respeciate} object, \code{data.frame} or similar
+that profile or species information can be extracted from.}
 }
 \value{
 \code{rsp_profile_info} returns a \code{data.frame} of

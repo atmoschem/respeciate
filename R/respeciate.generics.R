@@ -743,6 +743,49 @@ merge.respeciate <-
 
 
 
+
+##################################
+# subset
+##################################
+
+# local subset for respeciate objects...
+# allowing function pass
+
+# #' @rdname respeciate.generics
+# #' @method subset respeciate
+# #' @export
+
+################################
+# think about
+################################
+
+# currently not working...
+# maybe have a look at data.table subset and work up from that???
+
+#
+### example
+## to do...
+
+# subset.respeciate <-
+#   function(x, subset, ...){
+#    #setup
+#    .cls <- class(x)
+#    x <- data.table::as.data.table(x)
+#    s <- try(eval(substitute(subset), x, parent.frame()),
+#             silent=TRUE)
+#    if(class(s)[1]=="function"){
+#      subset <- s(x)
+#    } else {
+#      subset <- s
+#    }
+#    subset(x, subset, ...)
+#    out <- as.data.frame(x)
+#    class(out) <- .cls
+#    out
+#  }
+
+
+
 ################################
 # not sure about this
 ################################

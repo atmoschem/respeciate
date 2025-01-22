@@ -19,4 +19,7 @@ LazyData: yes
 Depends: R (>= 3.5.0)
 RoxygenNote: 7.3.2
 Encoding: UTF-8
-Imports: data.table, lattice, latticeExtra
+Imports: 
+    data.table, 
+    lattice, 
+    latticeExtra

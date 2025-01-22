@@ -18,20 +18,23 @@
 #' @param rescale Numeric (default 5), the data scaling method to apply before
 #' comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
 #' \code{\link{rsp_rescale}}.
-#' @param min.n \code{numeric} (default 8), the minimum number of paired
-#' species measurements in two profiles required for a match to be assessed.
-#' See also \code{\link{rsp_cor_species}}.
-#' @param method Character (default 'sid * log.pd'), the ranking metric used to
+#' @param min.n Numeric (or \code{NULL}), the minimum number of paired species
+#' measurements required for a match to be assessed. The larger \code{min.n},
+#' the greater the required \code{rsp} and \code{ref} profile overlap, so the
+#' better the matching confidence for paired cases but also the more likely
+#' that a sparse but relevant \code{ref} profile may be missing. The default
+#' option, \code{NULL}, is half the number of species in \code{rsp}.
+#' @param method Character (default 'sid * srd'), the ranking metric used to
 #' rank profile matches. The function calculates several matching metrics:
 #' 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
-#' 'log.pd', the pd for logged inputs, and 'sid', the Standardized Identity
-#' Distance (See References). All the metrics tend to zero for a perfect match,
-#' and the \code{method} can be any character string that can be evaluated from
-#' any of these, e.g., \code{'pd'}, \code{'log.pd'}, \code{'sid'}, and
-#' combinations thereof.
+#' 'srd', like pd but using the Spearman Ranked data correlation coefficient,
+#' and 'sid', the Standardized Identity Distance (See References). All the
+#' metrics tend to zero for better matches, and the \code{method} can be
+#' any character string that can be evaluated from any of these, e.g.,
+#' \code{'pd'}, \code{'srd'}, \code{'sid'}, and combinations thereof.
 #' @param test.rsp Logical (default FALSE). The match process self-tests by adding
-#' \code{rsp} to \code{ref}, which should generate a perfect fit=0 score. Setting
-#' \code{test.rsp} to \code{TRUE} retains this as an extra record.
+#' \code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
+#' Setting \code{test.rsp} to \code{TRUE} retains this as an extra record.
 #' @param ... Additional arguments, typically ignore but sometimes used for
 #' function development. Currently, testing \code{rm.reps} (logical) option to
 #' remove what appear to be replicate profile matches from the result set. This
@@ -174,14 +177,14 @@
 
 
 #a <- rsp(80, source="eu"); rsp_test_match(a, rsp_us_pm(), method="sid", matches=10);a
-#rsp_test_match(rsp(172, source="eu"), rsp_us_pm(), method="sid2 * pd", test.rsp = TRUE, min.n=10)
+#rsp_match_profile(rsp(172, source="eu"), rsp_us_pm(), method="sid2 * pd", test.rsp = TRUE, min.n=10)
 
 #a <- rsp_eu_pm2.5()
 #unique(a$.profile.id) #valid cases ???
 
 
 rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
-                           min.n=8, method = "sid * log.pd",
+                           min.n=NULL, method = "sid * srd",
                            test.rsp=FALSE, ...){
 
   #######################
@@ -205,11 +208,6 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
     ref <- .rsp_eu2us(ref)
   }
 
-
-  #tidy x for testing
-  #.x.pr.cd <- as.character(x$PROFILE_CODE)
-  #.x.pr.nm <- as.character(x$PROFILE_NAME)
-
   #note
   #   assuming only one profile
   #   might think about changing this in future
@@ -219,6 +217,21 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   } else {
     x <- rsp_average_profile(x, code = "test",
                              name = paste("test>", x$.profile[1], sep=""))
+  }
+
+  .test <- length(unique(x$.species.id[!is.na(x$.value) & x$.value>0]))
+  if(is.null(min.n)){
+    min.n <- floor(.test*0.65)
+    if(min.n < 6){
+      min.n <- 6
+    }
+  }
+  if(min.n < 3){
+    min.n <- 3
+  }
+  if(min.n > .test){
+    stop("rsp_match_profile> min.n (" , min.n, ") exceeds species in rsp",
+         call. = FALSE)
   }
 
   ###############
@@ -298,7 +311,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
       x <- x * mean(.t2/x)
       ans <- mean(((x-.t2)^2)/((x+.t2)^2), na.rm=TRUE)
       #rounding issue somewhere... or jitter... ???
-      round(ans, digits=10)
+      round(ans, digits=12)
     }
   }
 
@@ -312,7 +325,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
       x <- x * mean(.t2/x)
       ans <- mean((abs(x-.t2)*(1/sqrt(2)))/((x+.t2)/2), na.rm=TRUE)
       #rounding issue somewhere... or jitter... ???
-      round(ans, digits=10)
+      round(ans, digits=12)
     }
   }
 
@@ -332,7 +345,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #      x <- predict(mod)
   #      ans <- mean(abs(x-.t2)/.t2, na.rm=TRUE)
   #      #rounding issue somewhere... or jitter... ???
-  #      round(ans, digits=10)
+  #      round(ans, digits=12)
   #    }
   #  }
 
@@ -344,7 +357,40 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
     } else {
       #.t2 <- as.vector(unlist(.test))[.ref]
       .t2 <- .test[.ref]
-      suppressWarnings(1-cor(x, .t2, use ="pairwise.complete.obs"))
+      ans <- suppressWarnings(1-cor(x, .t2,
+                             use ="pairwise.complete.obs",
+                             method = "pearson"))
+      round(ans, digits=12)
+    }
+  }
+
+  .srd <- function(x) {
+    .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+    x <- x[.ref]
+    if(length(x)<3){
+      NA_real_
+    } else {
+      #.t2 <- as.vector(unlist(.test))[.ref]
+      .t2 <- .test[.ref]
+      ans <- suppressWarnings(1-cor(x, .t2,
+                             use ="pairwise.complete.obs",
+                             method = "spearman"))
+      round(ans, digits=12)
+    }
+  }
+
+  .krd <- function(x) {
+    .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
+    x <- x[.ref]
+    if(length(x)<3){
+      NA_real_
+    } else {
+      #.t2 <- as.vector(unlist(.test))[.ref]
+      .t2 <- .test[.ref]
+      ans <- suppressWarnings(1-cor(x, .t2,
+                             use ="pairwise.complete.obs",
+                             method = "kendall"))
+      round(ans, digits=12)
     }
   }
 
@@ -380,6 +426,8 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
       .profile = .profile[1],
       n = .n(.value),
       pd = .pd(.value),
+      srd = .srd(.value),
+      krd = .krd(.value),
       log.pd = .log.pd(.value),
       sid = .sid(.value),
       zzz = .zzz(.value)
@@ -390,29 +438,32 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
       .profile = .profile[1],
       n = .n(.value),
       pd = .pd(.value),
-      log.pd = .log.pd(.value),
+      srd = .srd(.value),
       sid = .sid(.value)
     ), by=.(.profile.id)]
 
   }
 
   .out <- as.data.frame(.ans)
+  .tmp <- try(with(.out, eval(parse(text=method))),
+              silent = TRUE)
+  if(class(.tmp)[1]=="try-error"){
+    stop("rsp_match_profile> Sorry, can't evaluate method (", method, ")",
+         call. = FALSE)
+  }
+  .out$nearness <- .tmp
 
   ################################
   # rm.reps via ...
   #  option to remove what look like replicated profile matches
+  #  BUT keep test no matter what
   if("rm.reps" %in% names(.xargs) && .xargs$rm.reps){
-    .out <- .out[!duplicated(.out$pd) & !duplicated(.out$sid),]
+    .out <- .out[!duplicated(.out$pd) & !duplicated(.out$sid) | .out$.profile.id=="test",]
   }
-
-  .tmp <- try(with(.out, eval(parse(text=method))),
-              silent = TRUE)
-  if(class(.tmp)[1]=="try-error"){
-    stop("rsp_match_profile> Sorry, can evaluate metod (", method, ")",
-         call. = FALSE)
-  }
-  .out$nearness <- .tmp
   .out <- .out[order(.out$nearness),]
+
+  #put test to top for neatness
+  .out <- rbind(.out[.out$.profile.id=="test",], .out[.out$.profile.id!="test",])
 
   #think about this
   #   when time should be a better way...?
@@ -426,7 +477,7 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   if(nrow(.out) > (matches)){
     .out <- .out[1:matches,]
   }
-  if(nrow(.out)<1){
+  if(nrow(.out[.out$.profile.id!="test",])<1){
     #anything left if test is dropped and not wanted ???
     #   (was reporting empty df if test was only result and test not reported...)
     stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
@@ -446,410 +497,6 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
 
 
 
-
-
-
-################################################################
-# old version only did one stat...
-################################################################
-
-# going ???
-
-..rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
-                             min.n=8, method = "pd", test.rsp=FALSE){
-
-  #######################
-  #if ref missing
-  ##################
-  #to do
-  #   using rsp_profile(rsp_find_profile("composite", by="profile_name"))
-  #   looked promising
-
-  #add .value if not there
-  x <- .rsp_tidy_profile(rsp)
-
-  ############################
-  #can we loose these...
-
-  if("rsp_eu" %in% class(x)){
-    x <- .rsp_eu2us(x)
-  }
-  if("rsp_eu" %in% class(ref)){
-    ref <- .rsp_eu2us(ref)
-  }
-
-
-  #tidy x for testing
-  #.x.pr.cd <- as.character(x$PROFILE_CODE)
-  #.x.pr.nm <- as.character(x$PROFILE_NAME)
-
-  #note
-  #   assuming only one profile
-  #   might think about changing this in future
-
-  if(length(unique(x$.profile.id))>1){
-    x <- rsp_average_profile(x, code = "test")
-  } else {
-    x <- rsp_average_profile(x, code = "test",
-                            name = paste("test>", x$.profile[1], sep=""))
-  }
-
-  #note
-  #    dropped the force option
-  #    to override min.n if < min.n species in x
-  #if(length(unique(x$SPECIES_ID)) < min.n & force){
-  #  min.n <- length(unique(x$SPECIES_ID))
-  #}
-
-  ###############
-  #do test anyway
-  ###############
-  #if(test.rsp){
-    matches <- matches + 1
-  #}
-
-  x <- data.table::as.data.table(x)
-  ref <- data.table::as.data.table(ref)
-  .tmp <- data.table::rbindlist(list(x, ref), fill=TRUE)
-
-  #################
-  #think about this
-  #################
-
-  #no normalisation option is method = 0 (via sp_profile_rescale)
-
-  #note: think about calling this rescale because it is the rescale method
-  #      (not match method) we are setting
-
-  #rescale data
-  ################################
-  #note: currently outputting data.frame
-  #      (idea is we are not restricting the user to data.table)
-  #      (but it means we have to reset and I am guessing there is
-  #       a time/memory penalty for that??)
-
-  #might handle sp_rescale_species in/output
-  #   either returns object in class it is given
-  #      or errors if not respeciate
-  #      or errors if not respeciate unless forced
-  #          but then maybe need to check requires
-  #          cols are there???
-
-  #.tmp <- data.table::as.data.table(sp_rescale_species(.tmp, method=rescale))
-  .tmp <- data.table::as.data.table(rsp_rescale_profile(.tmp, method=rescale))
-
-
-  ###################
-  #keep species names and ids for renaming
-  #    as.character to stop rename tripping on factors
-  #         not ideal...
-  ###################
-  .tmp.pr.nm <- as.character(.tmp$.profile)
-  .tmp.pr.cd <- as.character(.tmp$.profile.id)
-
-  ##################
-  #dcast to reshape for search
-  #    cols (profiles), rows(species)
-  ##################
-  .tmp <- data.table::as.data.table(rsp_dcast(.tmp, widen="profile.id"))
-
-  #nb: need the as.data.table() because rsp_profile_dcast
-
-  #to think about:
-  #    an as.is option in functions to made outputs same as inputs?
-  #    disable the 'as is' assumption in previous code
-  #        BUT now not sure why...
-
-  #ignore first two columns
-  #    species_id and species_name
-  .cols <- names(.tmp)[3:(ncol(.tmp))]
-
-  #get x back as a test case...
-  #need a better way to handle test
-  #     could as.vector(unlist(.test)) be done here
-  #         (just can't do .test[.ref] here...)
-  .test <- .tmp[, "test"]
-
-  ###########################
-  #fit term
-  #    currently using pd 1-r and sid based on jcr method
-
-  #nb: we see a warning
-  #     think it is just cases when no variance in the xy data
-  #          so only one pair or (all xs same and all ys sames)???
-
-  #########################
-  #min n
-  #########################
-  #to do
-  #   compare this and code in rsp_cor_species
-  #   if/when we deal with this stop message this code may need to be updated
-
-  #########################
-  #method
-  ########################
-
-  # currently documenting pd and sid methods
-
-  #to do
-  #   check with dennis re SID negative handling
-  #
-  #   think about methods
-  #        but three options would mean we need stricter method handling...
-
-  f <- FALSE
-  if(tolower(method)=="pd"){
-    # method pd
-    f <- function(x) {
-      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
-      x <- x[.ref]
-      if(length(x)<min.n){
-        NA
-      } else {
-        .t2 <- as.vector(unlist(.test))[.ref]
-        suppressWarnings(1-cor(x, .t2, use ="pairwise.complete.obs"))
-      }
-    }
-  }
-  if(tolower(method)=="sid"){
-    # method SID
-    ####################################
-    # current best estimate of a normalised SID??
-    #      (we need to normalise because we do not know
-    #       that all profiles are on same scale...)
-    ####################################
-    f <- function(x) {
-      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
-      x <- x[.ref]
-      if(length(x)<min.n){
-        NA
-      } else{
-        .t2 <- as.vector(unlist(.test))[.ref]
-        #rescale x and ref may be different
-        mod <- lm(.t2~0+x, weights=1/x)
-        x <- predict(mod)
-        ans <- mean(abs(x-.t2)/.t2, na.rm=TRUE)
-        #rounding issue somewhere... or jitter... ???
-        round(ans, digits=10)
-      }
-    }
-  }
-
-  ############################################
-  # following methods are undocumented tests...
-  #    draft template below because
-  #        all earlier versions were a little different...
-  #        and it would be sensible to be
-
-  #if(tolower(method)=="whatever"){
-  #  # method whatever
-  #  ####################################
-  #  # why are we testing/using this??
-  #  ####################################
-  #  f <- function(x) {
-  #    .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
-  #    x <- x[.ref]
-  #    if(length(x)<min.n){
-  #      NA
-  #    } else{
-  #      .t2 <- as.vector(unlist(.test))[.ref]
-  ########################################
-  #    code for method.........
-  #         compare x and .t2
-  #         output as ans...
-  #########################################
-  #      #rounding issue somewhere... or jitter... ???
-  #      round(ans, digits=10)
-  #    }
-  #  }
-  #}
-
-  ###########################
-  # other methods
-  ###########################
-  # not documented/ need work
-  ############################
-  if(tolower(method)=="log.pd"){
-    # method log pd
-    # to think about
-    #    drops if a lot are set to zero...
-    f <- function(x) {
-      if(length(x[!is.na(x) & !is.na(.test)])>min.n){
-        suppressWarnings(1-cor(log10(x), log10(.test),
-                               use ="pairwise.complete.obs"))
-      } else {
-        NA
-      }
-    }
-  }
-  if(tolower(method)=="sid.1"){
-    # method SID
-    ####################################
-    #need to check this with dennis
-    #how are negatives handled??
-    ####################################
-    f <- function(x) {
-      .ref <- !is.na(x) & !is.na(.test)
-      x <- x[.ref]
-      if(length(x)>min.n){
-        .test <- as.vector(unlist(.test))[.ref]
-        .ans <- (sqrt(2)/length(x))* (sum(((.test-x)/(.test+x)), na.rm = TRUE))
-        if(.ans < 0) NA else .ans
-        #.ans
-      } else{
-        NA
-      }
-    }
-  }
-  if(tolower(method)=="sid.2"){
-    # method SID
-    ####################################
-    # based on reading I think this is closer to a locally normalised form
-    #       their SID??
-    ####################################
-    f <- function(x) {
-      .ref <- !is.na(x) & !is.na(.test)
-      x <- x[.ref]
-      if(length(x)>min.n){
-        .test <- as.vector(unlist(.test))[.ref]
-        mean(abs(x-.test)/.test, na.rm=TRUE)
-      } else{
-        NA
-      }
-    }
-  }
-  if(tolower(method)=="sid.3"){
-    # method SID
-    ####################################
-    # sid.2 using zero's as points
-    #       and a series e.g. 10, 0 , 0, ...
-    #           correlates highly with anything where
-    #           first element is higher than rest...
-    #       and I think some 0s are missing values...
-    ####################################
-    f <- function(x) {
-      .ref <- !is.na(x) & !is.na(.test) & x!=0 & .test!=0
-      x <- x[.ref]
-      if(length(x)>min.n){
-        .test <- as.vector(unlist(.test))[.ref]
-        #rescale x and ref may be different
-        temp <- .test/x
-        temp <- temp[is.finite(temp)]
-        # note
-        #######################################
-        #    also x/0 and 0/x is complicated...
-        temp <- mean(temp, na.rm=TRUE)
-        x <- x * temp
-        ans <- mean(abs(x-.test)/.test, na.rm=TRUE)
-        #rounding issue somewhere... or jitter... ???
-        round(ans, digits=10)
-      } else{
-        NA
-      }
-    }
-  }
-
-  # no more methods after here...
-  ###################################################
-
-  if(!is.function(f)){
-    stop("RSP> rsp_match_profile 'method' unknown", call. = FALSE)
-  }
-
-  #notes
-  ##############################
-
-  # next bit seems slower than I was expecting
-  #      maybe better was to do this
-  #          anyone any ideas ???
-
-  # be nice to be able to calculate
-  #      more than one stat at a time...
-  #      maybe look at plotting two, e.g. sid vs pd as an output...
-  .out <- .tmp[, (.cols) := lapply(.SD, f), .SDcols = .cols]
-
-#print(head(.out))
-
-
-  # suspect above is non-ideal??
-  #    rows are replicates
-  #    might be a better way of doing this???
-  ################################
-  # when time
-  ####################################
-  #   try of these
-  #https://stackoverflow.com/questions/29620783/apply-multiple-functions-to-multiple-columns-in-data-table
-  ####################################
-  #   like to track overlap???
-  #        more overlap should be better
-  #   like to think about zero values
-
-
-  ##########################
-  #chop down to build report
-  ##########################
-
-  # suspect below is non-ideal??
-  #    should be a tidier/safer way of handling this...
-
-  .out <- as.data.frame(.out[1, -1:-2])
-  .out <- sort(unlist(.out), decreasing = FALSE)
-  if(length(.out) > matches){
-    .out <- .out[1:matches]
-  }
-
-  #could be better way to do next bit
-  #just making a lookup for profile info
-
-  #this is a pain because some profile names are replicated
-  #    (several profile codes seem to have same profile name)
-
-
-  if(length(.out)<1){
-    #see notes....
-    #sometimes this is because there are less than min.n species in the x profile
-    stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
-  }
-
-
-  .tmp <- names(.out)
-  for(i in 1:length(.tmp)){
-    if(.tmp[i] %in% .tmp.pr.cd){
-      .tmp[i] <- .tmp.pr.nm[.tmp.pr.cd == names(.out)[i]][1]
-    }
-  }
-
-  #row.names fulled form .out if you don't overwrite
-
-  .out <- data.frame(.profile.id=names(.out),
-                     .profile=.tmp,
-                     fit=.out,
-                     row.names = 1:length(.out))
-
-  #think about this
-  #   when time should be a better way...?
-  if(!test.rsp){
-    matches <- matches - 1
-    if("test" %in% x$.profile.id){
-      .out <- .out[tolower(.out$.profile.id)!="test",]
-    }
-    if(nrow(.out) > (matches)){
-      .out <- .out[1:matches,]
-    }
-  }
-  if(nrow(.out)<1){
-    #anything left if test is dropped and not wanted ???
-    #   (was reporting empty df if test was only result and test not reported...)
-    stop("rsp_match_profile> No (", min.n, " point) matches for rsp", call. = FALSE)
-  }
-
-  #######################
-  #output
-  #######################
-  #think about options?
-  rownames(.out) <- NULL
-  return(as.data.frame(.out))
-}
 
 
 

@@ -462,8 +462,22 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
     }
   }
 
-  if (!any(species %in% .sp.ord) | any(is.na(species))) {
-    stop("RSP> unknown species(s) or missing ids, please check",
+  #########################
+  # split previous warning
+  if (!any(species %in% .sp.ord)){
+    print(.sp.ord)
+    stop("RSP> unknown species(s) requested, please check",
+         call. = FALSE)
+  }
+  if(any(is.na(species))){
+    species <- species[!is.na(species)]
+    if(length(species)<1){
+      stop("RSP> Too may suspect species(s) found, halting plot...",
+           "\n\t (maybe bad or corrupt'rsp'?)",
+           call. = FALSE)
+    }
+    warning("RSP> Suspect species(s) found, discarding for plot...",
+         "\n\t (maybe check 'rsp' if a concern?)",
          call. = FALSE)
   }
 

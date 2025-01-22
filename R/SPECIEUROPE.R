@@ -12,7 +12,7 @@
 #' \describe{
 #'   \item{source}{The main SPECIEUROPE data set as of 2024/05/26.}
 #'   \item{ref}{The source citation, to be used whenever this data is used.}
-#'   \item{website}{The SPECIEUROPE project website}
+#'   \item{website}{The SPECIEUROPE project website link}
 #' }
 #' @source https://source-apportionment.jrc.ec.europa.eu/
 #' @references Pernigotti, D., Belis, C.A., Spano, L., 2016. SPECIEUROPE: The

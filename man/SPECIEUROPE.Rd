@@ -9,7 +9,7 @@ A ( 3  long) 'list' object
 \describe{
   \item{source}{The main SPECIEUROPE data set as of 2024/05/26.}
   \item{ref}{The source citation, to be used whenever this data is used.}
-  \item{website}{The SPECIEUROPE project website}
+  \item{website}{The SPECIEUROPE project website link}
 }
 }
 \source{

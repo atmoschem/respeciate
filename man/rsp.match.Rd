@@ -10,8 +10,8 @@ rsp_match_profile(
   ref,
   matches = 10,
   rescale = 5,
-  min.n = 8,
-  method = "sid * log.pd",
+  min.n = NULL,
+  method = "sid * srd",
   test.rsp = FALSE,
   ...
 )
@@ -33,22 +33,25 @@ report.}
 comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
 \code{\link{rsp_rescale}}.}
 
-\item{min.n}{\code{numeric} (default 8), the minimum number of paired
-species measurements in two profiles required for a match to be assessed.
-See also \code{\link{rsp_cor_species}}.}
+\item{min.n}{Numeric (or \code{NULL}), the minimum number of paired species
+measurements required for a match to be assessed. The larger \code{min.n},
+the greater the required \code{rsp} and \code{ref} profile overlap, so the
+better the matching confidence for paired cases but also the more likely
+that a sparse but relevant \code{ref} profile may be missing. The default
+option, \code{NULL}, is half the number of species in \code{rsp}.}
 
-\item{method}{Character (default 'sid * log.pd'), the ranking metric used to
+\item{method}{Character (default 'sid * srd'), the ranking metric used to
 rank profile matches. The function calculates several matching metrics:
 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
-'log.pd', the pd for logged inputs, and 'sid', the Standardized Identity
-Distance (See References). All the metrics tend to zero for a perfect match,
-and the \code{method} can be any character string that can be evaluated from
-any of these, e.g., \code{'pd'}, \code{'log.pd'}, \code{'sid'}, and
-combinations thereof.}
+'srd', like pd but using the Spearman Ranked data correlation coefficient,
+and 'sid', the Standardized Identity Distance (See References). All the
+metrics tend to zero for better matches, and the \code{method} can be
+any character string that can be evaluated from any of these, e.g.,
+\code{'pd'}, \code{'srd'}, \code{'sid'}, and combinations thereof.}
 
 \item{test.rsp}{Logical (default FALSE). The match process self-tests by adding
-\code{rsp} to \code{ref}, which should generate a perfect fit=0 score. Setting
-\code{test.rsp} to \code{TRUE} retains this as an extra record.}
+\code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
+Setting \code{test.rsp} to \code{TRUE} retains this as an extra record.}
 
 \item{...}{Additional arguments, typically ignore but sometimes used for
 function development. Currently, testing \code{rm.reps} (logical) option to
