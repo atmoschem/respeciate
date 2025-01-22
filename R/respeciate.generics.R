@@ -751,6 +751,9 @@ merge.respeciate <-
 # local subset for respeciate objects...
 # allowing function pass
 
+# example, would like this to work...
+# subset(rsp_eu(), rsp_id_pah16)
+
 # #' @rdname respeciate.generics
 # #' @method subset respeciate
 # #' @export
@@ -759,7 +762,8 @@ merge.respeciate <-
 # think about
 ################################
 
-# currently not working...
+# wanted to do like above but subset.data.table not exported...
+# and currently not working...
 # maybe have a look at data.table subset and work up from that???
 
 #
