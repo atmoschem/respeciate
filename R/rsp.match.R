@@ -33,7 +33,7 @@
 #' metrics tend to zero for better matches, and the \code{method} can be
 #' any character string that can be evaluated from any of these, e.g.,
 #' \code{'pd'}, \code{'srd'}, \code{'sid'}, and combinations thereof.
-#' @param slef.test Logical (default FALSE). The match process self-tests by adding
+#' @param self.test Logical (default FALSE). The match process self-tests by adding
 #' \code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
 #' Setting \code{self.test} to \code{TRUE} retains this as an extra record.
 #' @param ... Additional arguments, typically ignore but sometimes used for

@@ -51,6 +51,10 @@ metrics tend to zero for better matches, and the \code{method} can be
 any character string that can be evaluated from any of these, e.g.,
 \code{'pd'}, \code{'srd'}, \code{'sid'}, and combinations thereof.}
 
+\item{self.test}{Logical (default FALSE). The match process self-tests by adding
+\code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
+Setting \code{self.test} to \code{TRUE} retains this as an extra record.}
+
 \item{...}{Additional arguments, typically ignore but sometimes used for
 function development. Currently, testing \code{rm.reps} (logical) option to
 remove what appear to be replicate profile matches from the result set. This
@@ -62,10 +66,6 @@ not validated, so handle with care...}
 default) a \code{data.frame} of the requested best \code{matches}, ranked
 according to the \code{method} used; \code{'plot'} the associated output from
 \code{\link{rsp_plot_match}}.}
-
-\item{slef.test}{Logical (default FALSE). The match process self-tests by adding
-\code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
-Setting \code{self.test} to \code{TRUE} retains this as an extra record.}
 }
 \value{
 By default \code{rsp_match_profile} returns a fit report summary: a

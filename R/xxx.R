@@ -2,6 +2,52 @@
 # to think about
 #####################
 
+##############################
+#setup code, misc code,
+#testing code, etc
+##############################
+
+#currently no hooks, etc...
+
+#globals
+utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
+                         "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
+                         ".profile.id", ".profile", "PROFILE_TYPE",
+                         ".species.id", ".species", "SPEC_MW", ".profile.type",
+                         ".pc.weight", ".", ".value", ".load", "Id",
+                         ".profile.id.ref", ".profile.ref", ".test.z",
+                         ".test.z1", ".test.z2", ".value.ref", ".value.x",
+                         "corr", "n", "nearness"))
+
+#to think about...
+
+# all @import here
+#    moved to data.table::as.data.table in code...
+# #' @import data.table
+
+#   data.table used by:
+#         rsp_test_profile,
+#         rsp_dcast..., rsp_melt...
+#         rsp_cor_species
+#         rsp_distance_profile
+#         and others???
+#               need to identify them
+
+#' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
+#' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
+#' panel.abline
+#' @importFrom latticeExtra doubleYScale panel.ablineq
+#' @importFrom data.table ":="
+#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
+#' as.formula coefficients formula lm nls nls.control predict update na.omit
+#' @importFrom utils modifyList head packageVersion
+#' @importFrom graphics axis barplot par legend lines rect text abline
+#' grid mtext plot.new plot.window points polygon title
+#' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
+#' dev.flush dev.hold heat.colors rainbow
+
+
+
 # standardise
 
 #     error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
@@ -196,46 +242,6 @@
 #                shortcut via
 
 
-##############################
-#setup code, misc code,
-#testing code, etc
-##############################
-
-#currently no hooks, etc...
-
-#globals
-utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
-                         "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
-                         ".profile.id", ".profile", "PROFILE_TYPE",
-                         ".species.id", ".species", "SPEC_MW", ".profile.type",
-                         ".pc.weight", ".", ".value", ".load", "Id"))
-
-#to think about...
-
-# all @import here
-#    moved to data.table::as.data.table in code...
-# #' @import data.table
-
-#   data.table used by:
-#         rsp_test_profile,
-#         rsp_dcast..., rsp_melt...
-#         rsp_cor_species
-#         rsp_distance_profile
-#         and others???
-#               need to identify them
-
-#' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
-#' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
-#' panel.abline
-#' @importFrom latticeExtra doubleYScale panel.ablineq
-#' @importFrom data.table ":="
-#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
-#' as.formula coefficients formula lm nls nls.control predict update na.omit
-#' @importFrom utils modifyList head packageVersion
-#' @importFrom graphics axis barplot par legend lines rect text abline
-#' grid mtext plot.new plot.window points polygon title
-#' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
-#' dev.flush dev.hold heat.colors rainbow
 
 # notes
 
