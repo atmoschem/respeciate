@@ -102,6 +102,13 @@
 #               to retain the data type history
 #               and drop back to tibble rather than data.frame....
 
+# wondering if .profile and .profile.id are wrong for rsp_x ??? 
+#     maybe they should be .sample and .sample.id 
+#     but need special handler method 
+#         for example: 
+#             rsp_x-to-rsp code at start of most functions 
+#             then a rsp-to-rsp_x at end (before all outputs if start code used... 
+
 
 #' @rdname rsp.build
 #' @export
