@@ -21,42 +21,49 @@ respeciate gives you access to air pollutant emissions profiles in the [US/EPA S
 The installation is:
 
 
-```{r eval = F}
+```{r install, eval = FALSE}
 remotes::install_github("atmoschem/respeciate")
 ```
 
 
-## example
+## Example
 
-Find profiles based on search criteria
+The currently packaged SPECIATE and SPECIEUROPE archives:
 
-```{r }
+```{r load}
 library(respeciate)
-x <- rsp_find_profile("Ethanol")
-x
+# packaged archives
+rsp_info()
+```
+Searching that for a profile, e.g. using a keyword: 
+
+```{r find01}
+rsp_find_profile("cement")
 ```
 
+Limiting the search to just SPECIEUROPE 
 
-## speciate
-
-```{r }
-p <- rsp_profile("8833")
+```{r find02}
+rsp_find_profile("cement", source="eu")
 ```
 
-## plot
-
-Plotting a profile
-
-```{r fig.width=12, fig.height=5, fig.align="center", dpi=400}
-#profiles have a default plot option
-plot(p)
+```{r get, fig.dpi=900, fig.height=5, fig.width=12}
+# getting the first profile in SPECIEUROPE
+prf <- rsp(1, source="eu")
+prf
+plot(prf)
 ```
 
-... using lattice barchart syntax
-
-```{r fig.width=12, fig.height=5, fig.align="center", dpi=400}
-p2 <- rsp_profile(c(8833, 8850))
-plot(p2, key=list(space="top"))
+```{r output.options, fig.dpi=900, fig.height=7.5, fig.width=15}
+#comparing that profile with pm profiles in SPECIATE
+rsp_match_profile(prf, rsp_us_pm(), 
+                  output = "plot,summary",
+                  layout=c(5,2))
 ```
+
+Notes: 
+
+* The nearest match to the SPECIEUROPE EU:1 profile Cement from the US EPA SPECIATE PM subset is SPECIATE US:4377 Cement Kiln. 
+* In addition, 5/9 of the other nearest matches are cement-related sources.  
 
 
