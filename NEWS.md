@@ -1,7 +1,7 @@
 # Release Notes Version 0.3
 
 * [0.3.5] 
-    * released 2025-02-14 
+    * released 2025-02-19 
     * rebuild rsp_match_profile using data.table 
     * added rsp_plot_match (rsp_match_profile plot) output... 
 

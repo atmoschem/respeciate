@@ -67,6 +67,10 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
 #          WEIGHT_PERCENT -> .pc.weight
 
 
+
+
+
+
 .rsp_old2ew <- function(x){
   #make previous data look like new data
   ##################################
@@ -640,6 +644,78 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
     return(li)
   }
 }
+
+
+# .rsp_function_output(ls, output)
+###################################
+# standard output from function
+
+# based on similar in align...
+
+# Think about
+###########################
+# I think we could simplify this a bit
+# also i don't like that it expects the list to be
+#     list(summary, data, data)
+# should/could make this more generic???
+
+.rsp_function_output <-
+  function (ls, output){
+    #little messy...
+    #but catches most sloppy calls...
+    if(length(output)==1){
+      if(output=="all"){
+        output <- c("data", "summary", "plot", "list")
+      }
+      output <- unlist(strsplit(output, ","))
+    }
+    output <- gsub(" ", "", tolower(output))
+    if (length(output) > 0) {
+      for (i in 1:length(output)) {
+        if (i == length(output)) {
+          if (output[i] == "plot"){
+            return(ls$plot)
+          }
+          if (output[i] == "summary"){
+            return(as.data.frame(ls$summary))
+          }
+          if (output[i] == "data"){
+            return(as.data.frame(ls$data))
+          }
+          if (output[i] == "list"){
+            return(ls)
+          }
+          if (output[i] == "silent"){
+            return(invisible(ls))
+          }
+          #warning???
+          return(invisible(ls))
+        } else {
+          if (output[i] == "plot"){
+            plot(ls$plot)
+          }
+          if (output[i] == "summary"){
+            print(as.data.frame(ls$summary))
+          }
+          if (output[i] == "data"){
+            print(as.data.frame(ls$data))
+          }
+          if (output[i] == "print"){
+            print(ls$data)
+          }
+          if (output[i] == "list"){
+            print(ls)
+          }
+        }
+      }
+    } else {
+      return(invisible(ls))
+    }
+  }
+
+
+
+
 
 
 

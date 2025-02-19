@@ -83,6 +83,8 @@ rsp_info <- function() {
   #extract profile info dircetly from archive
   #    could use ..rsp outputs in future but
   #         either is probably fine...
+  SPECIATE <- respeciate::SPECIATE
+  SPECIEUROPE <- respeciate::SPECIEUROPE
   .epa <- paste("source: SPECIATE 5.2\n\t[in respeciate since 0.2.0]",
                 "\n\tProfiles: ", length(unique(SPECIATE$PROFILES$PROFILE_CODE)),
                 "; species: ", length(unique(SPECIATE$SPECIES_PROPERTIES$SPECIES_ID)),

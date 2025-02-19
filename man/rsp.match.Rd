@@ -64,8 +64,9 @@ not validated, so handle with care...}
 
 \item{output}{Character, output options, including: \code{'summary'} (the
 default) a \code{data.frame} of the requested best \code{matches}, ranked
-according to the \code{method} used; \code{'plot'} the associated output from
-\code{\link{rsp_plot_match}}.}
+according to the \code{method} used; \code{'data'} the full data set used
+to make plots; \code{'plot'} the associated output from
+\code{\link{rsp_plot_match}}; or, a combination of these.}
 }
 \value{
 By default \code{rsp_match_profile} returns a fit report summary: a

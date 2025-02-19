@@ -44,8 +44,9 @@
 #' not validated, so handle with care...
 #' @param output Character, output options, including: \code{'summary'} (the
 #' default) a \code{data.frame} of the requested best \code{matches}, ranked
-#' according to the \code{method} used; \code{'plot'} the associated output from
-#' \code{\link{rsp_plot_match}}.
+#' according to the \code{method} used; \code{'data'} the full data set used
+#' to make plots; \code{'plot'} the associated output from
+#' \code{\link{rsp_plot_match}}; or, a combination of these.
 #' @return By default \code{rsp_match_profile} returns a fit report summary: a
 #' \code{data.frame} of up to \code{matches} fit reports for the nearest
 #' matches to profiles from the reference profile data set, \code{ref}. (See
@@ -507,31 +508,21 @@ rsp_match_profile <- function(rsp, ref, matches=10, rescale=5,
   #    standardise use/options, so it and others are concistent...
 
   output <- tolower(paste(output, collapse=","))
+
+  #output
+  ################
+  #shortcuts
   if(output=="summary"){
     return(as.data.frame(.ans))
   }
   ls <- list(summary=.ans, data=.tmp)
   if(output=="plot.data"){
-    # shortcut for rsp_plot_match
     return(list(summary=.ans,
                 data=.tmp))
   }
   plt <- rsp_plot_match(ls, ..., output="plot")
   ls$plot <- plt
-  if(output=="plot"){
-    return(ls$plot)
-  }
-  if(output=="silent"){
-    return(invisible(ls))
-  }
-  #else working output
-  if("plot" %in% names(ls)){
-    plot(ls$plot)
-  }
-  if("summary" %in% names(ls)){
-    print(as.data.frame(ls$summary))
-  }
-  return(invisible(ls))
+  .rsp_function_output(ls, output)
 }
 
 
