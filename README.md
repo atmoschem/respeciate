@@ -16,9 +16,7 @@ The installation is:
 remotes::install_github("atmoschem/respeciate")
 ```
 
-## Example
-
-The currently packaged SPECIATE and SPECIEUROPE archives:
+The currently packaged SPECIATE and SPECIEUROPE archives are:
 
 ``` r
 library(respeciate)
@@ -33,7 +31,10 @@ rsp_info()
 #>  Profiles: 285; species: 231
 ```
 
-Searching that for a profile, e.g. using a keyword:
+## Example
+
+Searching the respeciate (SPECIATE + SPECIEUROPE) for a profile,
+e.g. using a keyword:
 
 ``` r
 rsp_find_profile("cement")
@@ -48,7 +49,7 @@ rsp_find_profile("cement")
 #>     > showing 6 of 82
 ```
 
-Limiting the search to just SPECIEUROPE
+Limiting the search to just SPECIEUROPE:
 
 ``` r
 rsp_find_profile("cement", source="eu")
@@ -63,8 +64,9 @@ rsp_find_profile("cement", source="eu")
 #>     > showing 6 of 11
 ```
 
+Getting the first profile in SPECIEUROPE:
+
 ``` r
-# getting the first profile in SPECIEUROPE
 prf <- rsp(1, source="eu")
 prf
 #> respeciate: count 1
@@ -74,8 +76,9 @@ plot(prf)
 
 ![](man/figures/get-1.png)<!-- -->
 
+Comparing that profile with pm profiles in (US EPA) SPECIATE:
+
 ``` r
-#comparing that profile with pm profiles in SPECIATE
 rsp_match_profile(prf, rsp_us_pm(), 
                   output = "plot,summary",
                   layout=c(5,2))
@@ -111,4 +114,8 @@ Notes:
 - The nearest match to the SPECIEUROPE EU:1 profile Cement from the US
   EPA SPECIATE PM subset is SPECIATE US:4377 Cement Kiln.
 - In addition, 5/9 of the other nearest matches are cement-related
-  sources.
+  sources.  
+- The nearest metrics, pd (Pearson’s Distance), srd (Spearman Ranked
+  Distance) and sid (Standardized Identity Distance), all tend to zero
+  for better matches. See ?rsp_match_profile in the packaged resepciate
+  documentation for details and references.

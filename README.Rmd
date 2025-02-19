@@ -25,37 +25,39 @@ The installation is:
 remotes::install_github("atmoschem/respeciate")
 ```
 
-
-## Example
-
-The currently packaged SPECIATE and SPECIEUROPE archives:
+The currently packaged SPECIATE and SPECIEUROPE archives are:
 
 ```{r load}
 library(respeciate)
 # packaged archives
 rsp_info()
 ```
-Searching that for a profile, e.g. using a keyword: 
+
+## Example
+
+Searching the respeciate (SPECIATE + SPECIEUROPE) for a profile, e.g. using a keyword: 
 
 ```{r find01}
 rsp_find_profile("cement")
 ```
 
-Limiting the search to just SPECIEUROPE 
+Limiting the search to just SPECIEUROPE: 
 
 ```{r find02}
 rsp_find_profile("cement", source="eu")
 ```
 
+Getting the first profile in SPECIEUROPE:
+
 ```{r get, fig.dpi=900, fig.height=5, fig.width=12}
-# getting the first profile in SPECIEUROPE
 prf <- rsp(1, source="eu")
 prf
 plot(prf)
 ```
 
+Comparing that profile with pm profiles in (US EPA) SPECIATE:
+
 ```{r output.options, fig.dpi=900, fig.height=7.5, fig.width=15}
-#comparing that profile with pm profiles in SPECIATE
 rsp_match_profile(prf, rsp_us_pm(), 
                   output = "plot,summary",
                   layout=c(5,2))
@@ -65,5 +67,6 @@ Notes:
 
 * The nearest match to the SPECIEUROPE EU:1 profile Cement from the US EPA SPECIATE PM subset is SPECIATE US:4377 Cement Kiln. 
 * In addition, 5/9 of the other nearest matches are cement-related sources.  
+* The nearest metrics, pd (Pearson's Distance), srd (Spearman Ranked Distance) and sid (Standardized Identity Distance), all tend to zero for better matches. See ?rsp_match_profile in the packaged resepciate documentation for details and references. 
 
 
