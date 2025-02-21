@@ -5,6 +5,7 @@
 \alias{rsp_plot_profile}
 \alias{rsp_plot}
 \alias{rsp_plot_species}
+\alias{rsp_plot_match}
 \title{plotting respeciate source profiles}
 \usage{
 rsp_plot_profile(
@@ -27,6 +28,15 @@ rsp_plot_species(
   ...,
   silent = FALSE,
   output = "default"
+)
+
+rsp_plot_match(
+  rsp,
+  ref = NULL,
+  plot.type = 2,
+  log = FALSE,
+  ...,
+  output = "plot"
 )
 }
 \arguments{
@@ -59,6 +69,14 @@ plot then return the data invisibly (default).}
 
 \item{multi.species, }{character, like \code{multi.profile} in
 \code{rsp_plot_profile} but for species in \code{rsp_plot_species}.}
+
+\item{ref}{\code{respeciate} or similar data set of profiles, used by
+\code{rsp_match_plot} as a reference when comparing with \code{rsp}. See
+\code{\link{rsp_match_profile}} for further details and other matching
+arguments.}
+
+\item{plot.type}{numeric, option if the \code{rsp_plot...} function includes
+different plot reports.}
 }
 \value{
 \code{rsp_plot} graph, plot, etc usually as a trellis object.

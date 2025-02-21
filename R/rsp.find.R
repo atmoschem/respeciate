@@ -29,6 +29,9 @@
 #        SPECIATE or SPECIEUROPE... and overlap is not perfect
 #              see notes
 
+#  a <- rsp_find_profile("composite", by="profile_name")
+#  rsp_find_profile("pm", by=".profile.type", ref=a)
+
 
 #' @description Functions that provide respeciate
 #' source information.
@@ -48,6 +51,8 @@
 #' @param source character, the data set to search: \code{'us'}
 #' US EPA SPECIATE; \code{'eu'} JRC SPECIEUROPE; or, \code{'all'} (default)
 #' both archives.
+#' @param ref any \code{respeciate} object, \code{data.frame} or similar
+#' that profile or species information can be extracted from.
 
 #' @return \code{rsp_profile_info} returns a \code{data.frame} of
 #' profile information, as a \code{respeciate} object.
@@ -89,7 +94,7 @@
 #' @export
 
 rsp_find_profile <- function(..., by = "keywords", partial = TRUE,
-                             source = "all") {
+                             source = "all", ref = NULL) {
 
   #extract profile info from archive
   if(!tolower(source) %in% c("us", "eu", "all")){
@@ -102,6 +107,14 @@ rsp_find_profile <- function(..., by = "keywords", partial = TRUE,
   }
   if(tolower(source)=="eu"){
     out <- subset(out, grepl("^EU:", out$.profile.id))
+  }
+
+  #if ref provided get similar from ref
+  # and use that as out...
+  if(!is.null(ref)){
+    ref <- ref[names(ref) %in% names(out)]
+    ref <- ref[!duplicated(ref$.profile.id),]
+    out <- ref
   }
 
   #search for requested in
@@ -124,6 +137,7 @@ rsp_find_profile <- function(..., by = "keywords", partial = TRUE,
     }
     out <- out[out$.profile.id %in% ref,]
   } else {
+
     for(ti in terms){
       ref <- out[,tolower(names(out))==by]
       if(nrow(out)>0){
@@ -158,7 +172,7 @@ rsp_profile_info <- function(...){
 #' @export
 
 rsp_find_species <- function(..., by = ".species", partial = TRUE,
-                             source = "all") {
+                             source = "all", ref = NULL) {
   #extract species info from archive
   if(!source %in% c("us", "eu", "all")){
     stop("RSP> unknown source...",
@@ -171,6 +185,12 @@ rsp_find_species <- function(..., by = ".species", partial = TRUE,
   if(tolower(source)=="eu"){
     out <- out[!is.na(out$Species.Id),]
   }
+  if(!is.null(ref)){
+    ref <- ref[names(ref) %in% names(out)]
+    ref <- ref[!duplicated(ref$.species.id),]
+    out <- ref
+  }
+
   terms <- c(...)
   for(ti in terms){
     ref <- out[,tolower(names(out))==by]

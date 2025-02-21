@@ -72,18 +72,24 @@
 #does this work for species_id and profile_name?
 #should it....
 
-#need to think about respeciate object class
-#class have
-#      "respeciate", ".rsp"
-#      "respeciate", ".rsp.wp"
-#      "respeciate", ".rsp.ws"
-#      "respeciate", ".rsp.pi"
-#      "respeciate", ".rsp.si"
+#currently running with respeciate object class
+#class at moment
+#      "respeciate" (not extension) #standard librray output
+#      "respeciate", "rsp_x", # respeciate-like datasets
+#      "respeciate", "rsp_pw" or "rsp_piw" # wide by profile
+#      "respeciate", "rsp_sw" or "rsp_siw" # wide by species
+
+#      "respeciate", "rsp_pi" # profile info
+#      "respeciate", "rsp_si" # species info
+
 # with the second not being defined???
 #    assuming this does cause a build problem
-#    it would just be an identifier for the respeciate object type
+#    it is just being used as be an identifier for the respeciate object type
 #        standard (long), wide by profile, wide by species,
-#        profile info, species info...
+#        profile info, species info, etc ...
+#   might be able to replace this with comment
+#        just not sure if the as.data.table/as.data.frame steps would
+#        kill that...
 
 #test
 #b <- rsp_dcast_species(rsp_us_pm.ae8())
@@ -178,9 +184,12 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #################################################
   #need to think about this
+  #################################################
   #weight_percent not there if we don't pad weights
   #     or profiles and will be NA for anything not
   #     in the SPECIATE/SPECIEUROPE archive
+  #likewise might want a
+  #     if both there only discard if both na...
   #################################################
   #drop.nas.
   if(drop.nas){
@@ -194,6 +203,7 @@ rsp_pad <- function(rsp, pad = "standard", drop.nas = TRUE){
 
   #rsp/rsp_profile reorders
   #   not sure if this is a good idea but could add as option
+  #      to turn off/on
   if(".profile.id" %in% names(out)){
     out <- out[order(out$.profile.id, decreasing = FALSE),]
   }

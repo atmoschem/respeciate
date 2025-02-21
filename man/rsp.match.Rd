@@ -10,9 +10,11 @@ rsp_match_profile(
   ref,
   matches = 10,
   rescale = 5,
-  min.n = 8,
-  method = "pd",
-  test.rsp = FALSE
+  min.n = NULL,
+  method = "sid * srd",
+  self.test = FALSE,
+  ...,
+  output = "summary"
 )
 }
 \arguments{
@@ -32,22 +34,47 @@ report.}
 comparing \code{rsp} and profiles in \code{ref}: options 0 to 5 handled by
 \code{\link{rsp_rescale}}.}
 
-\item{min.n}{\code{numeric} (default 8), the minimum number of paired
-species measurements in two profiles required for a match to be assessed.
-See also \code{\link{rsp_cor_species}}.}
+\item{min.n}{Numeric (or \code{NULL}), the minimum number of paired species
+measurements required for a match to be assessed. The larger \code{min.n},
+the greater the required \code{rsp} and \code{ref} profile overlap, so the
+better the matching confidence for paired cases but also the more likely
+that a sparse but relevant \code{ref} profile may be missing. The default
+option, \code{NULL}, is 65\% of the number of species in \code{rsp} or 6
+if larger.}
 
-\item{method}{Character (default 'pd'), the similarity measure to use, current
-options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
-or 'sid', the Standardized Identity Distance (See References).}
+\item{method}{Character (default 'sid * srd'), the ranking metric used to
+rank profile matches. The function calculates several matching metrics:
+'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
+'srd', like pd but using the Spearman Ranked data correlation coefficient,
+and 'sid', the Standardized Identity Distance (See References). All the
+metrics tend to zero for better matches, and the \code{method} can be
+any character string that can be evaluated from any of these, e.g.,
+\code{'pd'}, \code{'srd'}, \code{'sid'}, and combinations thereof.}
 
-\item{test.rsp}{Logical (default FALSE). The match process self-tests by adding
-\code{rsp} to \code{ref}, which should generate a perfect fit=0 score. Setting
-\code{test.rsp} to \code{TRUE} retains this as an extra record.}
+\item{self.test}{Logical (default FALSE). The match process self-tests by adding
+\code{rsp} to \code{ref}, which should generate an ideal (nearness = 0) score.
+Setting \code{self.test} to \code{TRUE} retains this as an extra record.}
+
+\item{...}{Additional arguments, typically ignore but sometimes used for
+function development. Currently, testing \code{rm.reps} (logical) option to
+remove what appear to be replicate profile matches from the result set. This
+is based on the assumption that identical 'pd' and 'sid' scores identical
+identical \code{ref} profiles (or identical overlaps with \code{rsp}) but is
+not validated, so handle with care...}
+
+\item{output}{Character, output options, including: \code{'summary'} (the
+default) a \code{data.frame} of the requested best \code{matches}, ranked
+according to the \code{method} used; \code{'data'} the full data set used
+to make plots; \code{'plot'} the associated output from
+\code{\link{rsp_plot_match}}; or, a combination of these.}
 }
 \value{
-\code{rsp_match_profile} returns a fit report: a \code{data.frame} of
-up to \code{n} fit reports for the nearest matches to \code{rsp} from the
-reference profile data set, \code{ref}.
+By default \code{rsp_match_profile} returns a fit report summary: a
+\code{data.frame} of up to \code{matches} fit reports for the nearest
+matches to profiles from the reference profile data set, \code{ref}. (See
+also \code{output} above for other options). If several options are requested,
+earlier options are report (e.g. using \code{print} or \code{plot}) and only
+the final option is returned.
 }
 \description{
 \code{rsp_match_profile} compares a supplied respeciate
@@ -69,4 +96,7 @@ Mooibroek, D., Sofowote, U.M. and Hopke, P.K., 2022. Source apportionment of
 ambient PM10 collected at three sites in an urban-industrial area with
 multi-time resolution factor analyses. Science of The Total Environment,
 850, p.157981. http://dx.doi.org/10.1016/j.scitotenv.2022.157981.
+}
+\seealso{
+\code{\link{rsp_plot_match}}
 }

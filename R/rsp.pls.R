@@ -92,7 +92,7 @@
 #'  source contributions, the source apportion solution, to be solved by
 #'  minimising e, the error terms.
 #'
-#' 3. The number of species in \code{x} must be more that the number of
+#' 3. The number of species in \code{x} must be more than the number of
 #' profiles in \code{m} to reduce the likelihood of over-fitting.
 #'
 

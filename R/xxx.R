@@ -2,6 +2,52 @@
 # to think about
 #####################
 
+##############################
+#setup code, misc code,
+#testing code, etc
+##############################
+
+#currently no hooks, etc...
+
+#globals
+utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
+                         "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
+                         ".profile.id", ".profile", "PROFILE_TYPE",
+                         ".species.id", ".species", "SPEC_MW", ".profile.type",
+                         ".pc.weight", ".", ".value", ".load", "Id",
+                         ".profile.id.ref", ".profile.ref", ".test.z",
+                         ".test.z1", ".test.z2", ".value.ref", ".value.x",
+                         "corr", "n", "nearness"))
+
+#to think about...
+
+# all @import here
+#    moved to data.table::as.data.table in code...
+# #' @import data.table
+
+#   data.table used by:
+#         rsp_test_profile,
+#         rsp_dcast..., rsp_melt...
+#         rsp_cor_species
+#         rsp_distance_profile
+#         and others???
+#               need to identify them
+
+#' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
+#' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
+#' panel.abline
+#' @importFrom latticeExtra doubleYScale panel.ablineq
+#' @importFrom data.table ":="
+#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
+#' as.formula coefficients formula lm nls nls.control predict update na.omit
+#' @importFrom utils modifyList head packageVersion
+#' @importFrom graphics axis barplot par legend lines rect text abline
+#' grid mtext plot.new plot.window points polygon title
+#' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
+#' dev.flush dev.hold heat.colors rainbow
+
+
+
 # standardise
 
 #     error messages, e.g. RSP> [function]: [issue] \n\t [fix]?
@@ -19,6 +65,10 @@
 #          PROFILE_CODE -> .profile.id
 #          PROFILE_NAME -> .profile
 #          WEIGHT_PERCENT -> .pc.weight
+
+
+
+
 
 
 .rsp_old2ew <- function(x){
@@ -196,46 +246,6 @@
 #                shortcut via
 
 
-##############################
-#setup code, misc code,
-#testing code, etc
-##############################
-
-#currently no hooks, etc...
-
-#globals
-utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
-                         "PROFILE_TYPE", "SPECIES_ID", "WEIGHT_PERCENT",
-                         ".profile.id", ".profile", "PROFILE_TYPE",
-                         ".species.id", ".species", "SPEC_MW", ".profile.type",
-                         ".pc.weight", ".", ".value", ".load", "Id"))
-
-#to think about...
-
-# all @import here
-#    moved to data.table::as.data.table in code...
-# #' @import data.table
-
-#   data.table used by:
-#         rsp_test_profile,
-#         rsp_dcast..., rsp_melt...
-#         rsp_cor_species
-#         rsp_distance_profile
-#         and others???
-#               need to identify them
-
-#' @importFrom lattice xyplot barchart panel.grid panel.xyplot panel.barchart
-#' trellis.par.get simpleTheme yscale.components.default prepanel.default.xyplot
-#' panel.abline
-#' @importFrom latticeExtra doubleYScale panel.ablineq
-#' @importFrom data.table ":="
-#' @importFrom stats sd cophenetic cor cutree dist hclust heatmap AIC
-#' as.formula coefficients formula lm nls nls.control predict update na.omit
-#' @importFrom utils modifyList head packageVersion
-#' @importFrom graphics axis barplot par legend lines rect text abline
-#' grid mtext plot.new plot.window points polygon title
-#' @importFrom grDevices cm.colors colorRampPalette as.graphicsAnnot
-#' dev.flush dev.hold heat.colors rainbow
 
 # notes
 
@@ -634,6 +644,78 @@ utils::globalVariables(c("SPECIATE", "SPECIEUROPE", ".SD", "ans", "control",
     return(li)
   }
 }
+
+
+# .rsp_function_output(ls, output)
+###################################
+# standard output from function
+
+# based on similar in align...
+
+# Think about
+###########################
+# I think we could simplify this a bit
+# also i don't like that it expects the list to be
+#     list(summary, data, data)
+# should/could make this more generic???
+
+.rsp_function_output <-
+  function (ls, output){
+    #little messy...
+    #but catches most sloppy calls...
+    if(length(output)==1){
+      if(output=="all"){
+        output <- c("data", "summary", "plot", "list")
+      }
+      output <- unlist(strsplit(output, ","))
+    }
+    output <- gsub(" ", "", tolower(output))
+    if (length(output) > 0) {
+      for (i in 1:length(output)) {
+        if (i == length(output)) {
+          if (output[i] == "plot"){
+            return(ls$plot)
+          }
+          if (output[i] == "summary"){
+            return(as.data.frame(ls$summary))
+          }
+          if (output[i] == "data"){
+            return(as.data.frame(ls$data))
+          }
+          if (output[i] == "list"){
+            return(ls)
+          }
+          if (output[i] == "silent"){
+            return(invisible(ls))
+          }
+          #warning???
+          return(invisible(ls))
+        } else {
+          if (output[i] == "plot"){
+            plot(ls$plot)
+          }
+          if (output[i] == "summary"){
+            print(as.data.frame(ls$summary))
+          }
+          if (output[i] == "data"){
+            print(as.data.frame(ls$data))
+          }
+          if (output[i] == "print"){
+            print(ls$data)
+          }
+          if (output[i] == "list"){
+            print(ls)
+          }
+        }
+      }
+    } else {
+      return(invisible(ls))
+    }
+  }
+
+
+
+
 
 
 

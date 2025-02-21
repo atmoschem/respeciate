@@ -210,14 +210,14 @@ print.respeciate <-
 
 
     rsp.rep <- "respeciate"
-    if(class(.x)[1] == "rsp_sw"){
+    if(class(.x)[1] %in% c("rsp_sw", "rsp_siw")){
       rsp.rep <- paste(rsp.rep, " (wide/species)", sep="")
       .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
       #####################################
       #should we loose this if we start testing if missing below...
       .x$.species.id <- .x$.species
     }
-    if(class(.x)[1] == "rsp_pw"){
+    if(class(.x)[1] %in%c("rsp_pw", "rsp_piw")){
       rsp.rep <- paste(rsp.rep, " (wide/profile)", sep="")
       .x <- rsp_melt_wide(.x, pad=FALSE, drop.nas = TRUE)
       #.x$PROFILE_NAME <- .x$PROFILE_CODE
@@ -740,6 +740,53 @@ merge.respeciate <-
     class(out) <- .cls
     out
   }
+
+
+
+
+##################################
+# subset
+##################################
+
+# local subset for respeciate objects...
+# allowing function pass
+
+# example, would like this to work...
+# subset(rsp_eu(), rsp_id_pah16)
+
+# #' @rdname respeciate.generics
+# #' @method subset respeciate
+# #' @export
+
+################################
+# think about
+################################
+
+# wanted to do like above but subset.data.table not exported...
+# and currently not working...
+# maybe have a look at data.table subset and work up from that???
+
+#
+### example
+## to do...
+
+# subset.respeciate <-
+#   function(x, subset, ...){
+#    #setup
+#    .cls <- class(x)
+#    x <- data.table::as.data.table(x)
+#    s <- try(eval(substitute(subset), x, parent.frame()),
+#             silent=TRUE)
+#    if(class(s)[1]=="function"){
+#      subset <- s(x)
+#    } else {
+#      subset <- s
+#    }
+#    subset(x, subset, ...)
+#    out <- as.data.frame(x)
+#    class(out) <- .cls
+#    out
+#  }
 
 
 

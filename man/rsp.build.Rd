@@ -22,8 +22,8 @@ of these will need to be assigned.}
 
 \item{species_name, species_id}{(\code{character}) The names of the columns
 in \code{x} containing species name and identifiers, respectively. If not
-already named according to \code{respeciate} conventions, at least one of these will
-need to be assigned.}
+already named according to \code{respeciate} conventions, at least one of
+these will need to be assigned.}
 
 \item{value}{(\code{character}) The name of the column in \code{x}
 containing measurement values. If not already named according to \code{respeciate}

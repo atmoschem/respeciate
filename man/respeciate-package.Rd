@@ -2,8 +2,8 @@
 % Please edit documentation in R/respeciate-package.R
 \docType{package}
 \name{respeciate-package}
-\alias{respeciate}
 \alias{respeciate-package}
+\alias{respeciate}
 \title{respeciate: Speciation profiles for gases and aerosols}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}

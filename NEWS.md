@@ -1,9 +1,24 @@
 # Release Notes Version 0.3
 
+* [0.3.5] 
+    * released 2025-02-19 
+    * rebuild rsp_match_profile using data.table 
+    * added rsp_plot_match (rsp_match_profile plot) output... 
+
+* [0.3.4] 
+    * released 2024-08-06 
+    * expended rsp_dcast to handle species, species.id, profile, 
+    profile.id, and track all in all rsp_dcasts... 
+
+* [0.3.3] 
+    * released 2024-07-13 
+    * added draft rsp_lbind 
+
+
 * [0.3.2] 
     * released 2024-07-09 
     * added rsp_eu shortcut for SPECIEUROPE profiles 
-    
+    * updated logo; now SPECIATE + SPECIEUROPE
     
 * [0.3.1] 
     * released 2024-06-12 

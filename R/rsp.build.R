@@ -15,8 +15,8 @@
 #' of these will need to be assigned.
 #' @param species_name,species_id (\code{character}) The names of the columns
 #' in \code{x} containing species name and identifiers, respectively. If not
-#' already named according to \code{respeciate} conventions, at least one of these will
-#' need to be assigned.
+#' already named according to \code{respeciate} conventions, at least one of
+#' these will need to be assigned.
 #' @param value (\code{character}) The name of the column in \code{x}
 #' containing measurement values. If not already named according to \code{respeciate}
 #' conventions, this will need to be assigned.
@@ -101,6 +101,13 @@
 #           BUT be nice if c("respeciate", class("tibble")) could be used...
 #               to retain the data type history
 #               and drop back to tibble rather than data.frame....
+
+# wondering if .profile and .profile.id are wrong for rsp_x ??? 
+#     maybe they should be .sample and .sample.id 
+#     but need special handler method 
+#         for example: 
+#             rsp_x-to-rsp code at start of most functions 
+#             then a rsp-to-rsp_x at end (before all outputs if start code used... 
 
 
 #' @rdname rsp.build
