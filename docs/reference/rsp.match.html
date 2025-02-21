@@ -6,7 +6,7 @@ basis of similarity."><meta property="og:image" content="/logo.png"><!-- mathjax
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -20,7 +20,7 @@ basis of similarity."><meta property="og:image" content="/logo.png"><!-- mathjax
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">respeciate</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.5</span>
       </span>
     </div>
 
@@ -34,14 +34,14 @@ basis of similarity."><meta property="og:image" content="/logo.png"><!-- mathjax
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/atmoschem/respeciate/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -64,63 +64,94 @@ basis of similarity.</p>
 <span>  <span class="va">ref</span>,</span>
 <span>  matches <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  rescale <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  min.n <span class="op">=</span> <span class="fl">8</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"pd"</span>,</span>
-<span>  test.rsp <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  min.n <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"sid * srd"</span>,</span>
+<span>  self.test <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  output <span class="op">=</span> <span class="st">"summary"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>rsp</dt>
+
+
+<dl><dt id="arg-rsp">rsp<a class="anchor" aria-label="anchor" href="#arg-rsp"></a></dt>
 <dd><p>A <code>respeciate</code> object or similar <code>data.frame</code> containing
 a species profile to be compared with profiles in <code>ref</code>. If <code>rsp</code>
 contains more than one profile, these are averaged (using
 <code><a href="rsp.average.html">rsp_average_profile</a></code>), and the average compared.</p></dd>
 
 
-<dt>ref</dt>
+<dt id="arg-ref">ref<a class="anchor" aria-label="anchor" href="#arg-ref"></a></dt>
 <dd><p>A <code>respeciate</code> object, a <code>data.frame</code> containing a
 multiple species profiles, to be used as reference library when identifying
 nearest matches for <code>rsp</code>.</p></dd>
 
 
-<dt>matches</dt>
+<dt id="arg-matches">matches<a class="anchor" aria-label="anchor" href="#arg-matches"></a></dt>
 <dd><p>Numeric (default 10), the maximum number of profile matches to
 report.</p></dd>
 
 
-<dt>rescale</dt>
+<dt id="arg-rescale">rescale<a class="anchor" aria-label="anchor" href="#arg-rescale"></a></dt>
 <dd><p>Numeric (default 5), the data scaling method to apply before
 comparing <code>rsp</code> and profiles in <code>ref</code>: options 0 to 5 handled by
 <code><a href="rsp.rescale.html">rsp_rescale</a></code>.</p></dd>
 
 
-<dt>min.n</dt>
-<dd><p><code>numeric</code> (default 8), the minimum number of paired
-species measurements in two profiles required for a match to be assessed.
-See also <code><a href="rsp.cor.html">rsp_cor_species</a></code>.</p></dd>
+<dt id="arg-min-n">min.n<a class="anchor" aria-label="anchor" href="#arg-min-n"></a></dt>
+<dd><p>Numeric (or <code>NULL</code>), the minimum number of paired species
+measurements required for a match to be assessed. The larger <code>min.n</code>,
+the greater the required <code>rsp</code> and <code>ref</code> profile overlap, so the
+better the matching confidence for paired cases but also the more likely
+that a sparse but relevant <code>ref</code> profile may be missing. The default
+option, <code>NULL</code>, is 65% of the number of species in <code>rsp</code> or 6
+if larger.</p></dd>
 
 
-<dt>method</dt>
-<dd><p>Character (default 'pd'), the similarity measure to use, current
-options 'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
-or 'sid', the Standardized Identity Distance (See References).</p></dd>
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>Character (default 'sid * srd'), the ranking metric used to
+rank profile matches. The function calculates several matching metrics:
+'pd', the Pearson's Distance (1 - Pearson's correlation coefficient),
+'srd', like pd but using the Spearman Ranked data correlation coefficient,
+and 'sid', the Standardized Identity Distance (See References). All the
+metrics tend to zero for better matches, and the <code>method</code> can be
+any character string that can be evaluated from any of these, e.g.,
+<code>'pd'</code>, <code>'srd'</code>, <code>'sid'</code>, and combinations thereof.</p></dd>
 
 
-<dt>test.rsp</dt>
+<dt id="arg-self-test">self.test<a class="anchor" aria-label="anchor" href="#arg-self-test"></a></dt>
 <dd><p>Logical (default FALSE). The match process self-tests by adding
-<code>rsp</code> to <code>ref</code>, which should generate a perfect fit=0 score. Setting
-<code>test.rsp</code> to <code>TRUE</code> retains this as an extra record.</p></dd>
+<code>rsp</code> to <code>ref</code>, which should generate an ideal (nearness = 0) score.
+Setting <code>self.test</code> to <code>TRUE</code> retains this as an extra record.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments, typically ignore but sometimes used for
+function development. Currently, testing <code>rm.reps</code> (logical) option to
+remove what appear to be replicate profile matches from the result set. This
+is based on the assumption that identical 'pd' and 'sid' scores identical
+identical <code>ref</code> profiles (or identical overlaps with <code>rsp</code>) but is
+not validated, so handle with care...</p></dd>
+
+
+<dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
+<dd><p>Character, output options, including: <code>'summary'</code> (the
+default) a <code>data.frame</code> of the requested best <code>matches</code>, ranked
+according to the <code>method</code> used; <code>'data'</code> the full data set used
+to make plots; <code>'plot'</code> the associated output from
+<code><a href="rsp.plot.html">rsp_plot_match</a></code>; or, a combination of these.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p><code>rsp_match_profile</code> returns a fit report: a <code>data.frame</code> of
-up to <code>n</code> fit reports for the nearest matches to <code>rsp</code> from the
-reference profile data set, <code>ref</code>.</p>
+    <p>By default <code>rsp_match_profile</code> returns a fit report summary: a
+<code>data.frame</code> of up to <code>matches</code> fit reports for the nearest
+matches to profiles from the reference profile data set, <code>ref</code>. (See
+also <code>output</code> above for other options). If several options are requested,
+earlier options are report (e.g. using <code>print</code> or <code>plot</code>) and only
+the final option is returned.</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -136,6 +167,10 @@ ambient PM10 collected at three sites in an urban-industrial area with
 multi-time resolution factor analyses. Science of The Total Environment,
 850, p.157981. http://dx.doi.org/10.1016/j.scitotenv.2022.157981.</p>
     </div>
+    <div id="see-also">
+    <h2>See also</h2>
+    <div class="dont-index"><p><code><a href="rsp.plot.html">rsp_plot_match</a></code></p></div>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -149,15 +184,15 @@ multi-time resolution factor analyses. Science of The Total Environment,
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

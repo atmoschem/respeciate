@@ -26,7 +26,7 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">respeciate</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.5</span>
       </span>
     </div>
 
@@ -57,7 +57,7 @@
 <li>
   <a href="https://github.com/atmoschem/respeciate/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -68,7 +68,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="contents col-md-9">
@@ -80,43 +80,88 @@
 <p>The installation is:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"atmoschem/respeciate"</span><span class="op">)</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="example">example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<p>Find profiles based on search criteria</p>
+<p>The currently packaged SPECIATE and SPECIEUROPE archives are:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/atmoschem/respeciate" class="external-link">respeciate</a></span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.find.html">rsp_find_profile</a></span><span class="op">(</span><span class="st">"Ethanol"</span><span class="op">)</span></span>
-<span><span class="va">x</span></span>
-<span><span class="co">#&gt; respeciate profile list: 160</span></span>
-<span><span class="co">#&gt; [NO SPECIES]</span></span>
-<span><span class="co">#&gt;   (CODE US:0291) Surface Coating Solvent - Methyl Alcohol</span></span>
-<span><span class="co">#&gt;   (CODE US:1070) Alcohols Production - Methanol - Purge Gas Vent</span></span>
-<span><span class="co">#&gt;   (CODE US:1071) Alcohols Production - Methanol - Distillation Vent</span></span>
-<span><span class="co">#&gt;   (CODE US:1132) Ethanolamines</span></span>
-<span><span class="co">#&gt;   (CODE US:1149) Methanol</span></span>
-<span><span class="co">#&gt;   (CODE US:1301) 10% Ethanol Composite (Hot Soak + Diurnal) Evaporative</span></span>
-<span><span class="co">#&gt;     &gt; showing 6 of 160</span></span></code></pre></div>
-</div>
+<span><span class="co"># packaged archives</span></span>
+<span><span class="fu"><a href="reference/rsp.info.html">rsp_info</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; respeciate: 0.3.5</span></span>
+<span><span class="co">#&gt; source: SPECIATE 5.2</span></span>
+<span><span class="co">#&gt;  [in respeciate since 0.2.0]</span></span>
+<span><span class="co">#&gt;  Profiles: 6845; species: 3035</span></span>
+<span><span class="co">#&gt; source: SPECIEUROPE 2.0</span></span>
+<span><span class="co">#&gt;  [in respeciate since 0.3.1]</span></span>
+<span><span class="co">#&gt;  Profiles: 285; species: 231</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="speciate">speciate<a class="anchor" aria-label="anchor" href="#speciate"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
+<p>Searching the respeciate (SPECIATE + SPECIEUROPE) for a profile, e.g. using a keyword:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.html">rsp_profile</a></span><span class="op">(</span><span class="st">"8833"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="plot">plot<a class="anchor" aria-label="anchor" href="#plot"></a>
-</h2>
-<p>Plotting a profile</p>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/rsp.find.html">rsp_find_profile</a></span><span class="op">(</span><span class="st">"cement"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; respeciate profile list: 82</span></span>
+<span><span class="co">#&gt; [NO SPECIES]</span></span>
+<span><span class="co">#&gt;   (CODE US:2720110) Cement Kiln (Gas-Fired)</span></span>
+<span><span class="co">#&gt;   (CODE US:272012.5) Cement Kiln (Gas-Fired)</span></span>
+<span><span class="co">#&gt;   (CODE US:2720130) Cement Kiln (Gas-Fired)</span></span>
+<span><span class="co">#&gt;   (CODE US:27201C) Cement Kiln (Gas-Fired)</span></span>
+<span><span class="co">#&gt;   (CODE US:2720310) Cement Kiln (Coal-Fired)</span></span>
+<span><span class="co">#&gt;   (CODE US:272032.5) Cement Kiln (Coal-Fired)</span></span>
+<span><span class="co">#&gt;     &gt; showing 6 of 82</span></span></code></pre></div>
+<p>Limiting the search to just SPECIEUROPE:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#profiles have a default plot option</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-5-1.png" style="display: block; margin: auto;"></p>
-<p>… using lattice barchart syntax</p>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/rsp.find.html">rsp_find_profile</a></span><span class="op">(</span><span class="st">"cement"</span>, source<span class="op">=</span><span class="st">"eu"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; respeciate profile list: 11</span></span>
+<span><span class="co">#&gt; [NO SPECIES]</span></span>
+<span><span class="co">#&gt;   (CODE EU:1) Cement</span></span>
+<span><span class="co">#&gt;   (CODE EU:32) Cement kiln (coal fired)</span></span>
+<span><span class="co">#&gt;   (CODE EU:71) Cement production dust</span></span>
+<span><span class="co">#&gt;   (CODE EU:72) Cement production dust</span></span>
+<span><span class="co">#&gt;   (CODE EU:73) Cement production dust</span></span>
+<span><span class="co">#&gt;   (CODE EU:126) Cement kiln</span></span>
+<span><span class="co">#&gt;     &gt; showing 6 of 11</span></span></code></pre></div>
+<p>Getting the first profile in SPECIEUROPE:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.html">rsp_profile</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8833</span>, <span class="fl">8850</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p2</span>, key<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>space<span class="op">=</span><span class="st">"top"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/unnamed-chunk-6-1.png" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">prf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/rsp.html">rsp</a></span><span class="op">(</span><span class="fl">1</span>, source<span class="op">=</span><span class="st">"eu"</span><span class="op">)</span></span>
+<span><span class="va">prf</span></span>
+<span><span class="co">#&gt; respeciate: count 1</span></span>
+<span><span class="co">#&gt;   EU:1 (38 species) Cement</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prf</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/get-1.png"><!-- --></p>
+<p>Comparing that profile with pm profiles in (US EPA) SPECIATE:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/rsp.match.html">rsp_match_profile</a></span><span class="op">(</span><span class="va">prf</span>, <span class="fu"><a href="reference/rsp.us.html">rsp_us_pm</a></span><span class="op">(</span><span class="op">)</span>,  </span>
+<span>                  output <span class="op">=</span> <span class="st">"plot,summary"</span>, </span>
+<span>                  layout<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/output.options-1.png"><!-- --></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">#&gt;    .profile.id                            .profile  n         pd        srd</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; 1      US:4377                         Cement Kiln 28 0.29765994 0.05338075</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; 2     US:91004 Draft Cement Production - Composite 28 0.17778945 0.06022444</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; 3      US:4378                         Cement Kiln 28 0.36391799 0.06283360</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; 4      US:4332                         Cement Kiln 28 0.23612659 0.06310738</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; 5      US:4365                  Vegetative Burning 25 0.46103010 0.06430434</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; 6      US:4325                         Cement Kiln 27 0.31685832 0.08085236</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 7      US:4348                   Unpaved Road Dust 26 0.08515821 0.07900131</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; 8      US:4376                         Cement Kiln 28 0.39199238 0.07911302</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; 9      US:4205                     Paved Road Dust 24 0.11406813 0.08829917</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 10   US:12707C     Hogged Fuel Boiler / Dutch Oven 26 0.26458592 0.08331874</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;          sid   nearness</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; 1  0.2657993 0.01418856</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; 2  0.2365555 0.01424642</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 3  0.2497328 0.01569161</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; 4  0.2654109 0.01674938</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; 5  0.3118844 0.02005552</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; 6  0.2525269 0.02041740</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; 7  0.2694941 0.02129038</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; 8  0.2772226 0.02193192</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; 9  0.2537020 0.02240167</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; 10 0.2925727 0.02437679</span></span></code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>The nearest match to the SPECIEUROPE EU:1 profile Cement from the US EPA SPECIATE PM subset is SPECIATE US:4377 Cement Kiln.</li>
+<li>In addition, 5/9 of the other nearest matches are cement-related sources.<br>
+</li>
+<li>The nearest metrics, pd (Pearson’s Distance), srd (Spearman Ranked Distance) and sid (Standardized Identity Distance), all tend to zero for better matches. See ?rsp_match_profile in the packaged respeciate documentation for details and references.</li>
+</ul>
 </div>
 </div>
   </div>
@@ -168,16 +213,16 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>
