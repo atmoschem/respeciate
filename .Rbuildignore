@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^README.md$
 ^README.Rmd$
+^README_files$
 ^figs$
 .github
 pkgdown
