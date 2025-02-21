@@ -4,7 +4,7 @@ object classes) for use with data and functions in respeciate."><meta property="
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -18,7 +18,7 @@ object classes) for use with data and functions in respeciate."><meta property="
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">respeciate</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.5</span>
       </span>
     </div>
 
@@ -32,14 +32,14 @@ object classes) for use with data and functions in respeciate."><meta property="
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/atmoschem/respeciate/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -62,43 +62,45 @@ object classes) for use with data and functions in <code>respeciate</code>.</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>x</dt>
+
+
+<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p><code>data.frame</code> or similar (i.e.
 something that can be coerced into a <code>data.frame</code> using
 <code>as.data.frame</code>) to be converted into a <code>respeciate</code> object.</p></dd>
 
 
-<dt>profile_name, profile_id</dt>
+<dt id="arg-profile-name-profile-id">profile_name, profile_id<a class="anchor" aria-label="anchor" href="#arg-profile-name-profile-id"></a></dt>
 <dd><p>(<code>character</code>) The names of the columns
 in <code>x</code> containing profile names and identifiers, respectively. If not
 already named according to <code>respeciate</code> conventions, at least one
 of these will need to be assigned.</p></dd>
 
 
-<dt>species_name, species_id</dt>
+<dt id="arg-species-name-species-id">species_name, species_id<a class="anchor" aria-label="anchor" href="#arg-species-name-species-id"></a></dt>
 <dd><p>(<code>character</code>) The names of the columns
 in <code>x</code> containing species name and identifiers, respectively. If not
-already named according to <code>respeciate</code> conventions, at least one of these will
-need to be assigned.</p></dd>
+already named according to <code>respeciate</code> conventions, at least one of
+these will need to be assigned.</p></dd>
 
 
-<dt>value</dt>
+<dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
 <dd><p>(<code>character</code>) The name of the column in <code>x</code>
 containing measurement values. If not already named according to <code>respeciate</code>
 conventions, this will need to be assigned.</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>(any other arguments) currently ignored.</p></dd>
 
 
-<dt>m</dt>
+<dt id="arg-m">m<a class="anchor" aria-label="anchor" href="#arg-m"></a></dt>
 <dd><p><code>respeciate</code> data set of source profiles intended to be used
 as the source profiles (or M) matrix when building a simulated data set for
 use with a PLS model (see <code>rsp_pls_x</code>)</p></dd>
 
 
-<dt>n</dt>
+<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
 <dd><p>a numeric object, e.g. a <code>vector</code>, <code>matrix</code>, <code>data.frame</code> or
 a similar object that can be coerced into a <code>data.frame</code> of suitable
 dimensions for use as the source strength matrix (N) to build a simulated data set for
@@ -107,15 +109,9 @@ use with a PLS model (see <code>rsp_pls_x</code>).</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p><code>rsp_build</code>s attempt to build and return a <code>respeciate</code>-like
+    <p><code>rsp_build</code>s attempt to build and return a <code>respeciate</code>-like
 object that can be directly compared with data from <code>respeciate</code>.</p>
-
-
 <p><code>rsp_build_x</code> is the standard object builder.</p>
-
-
 <p><code>rsp_build_simx</code> builds a simulation of an <code>x</code> data set based on
 the `linear combination of profiles` model applied in conventional source
 apportionment. (See below and <code>rsp_pls_x</code>)</p>
@@ -144,15 +140,15 @@ species records.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
