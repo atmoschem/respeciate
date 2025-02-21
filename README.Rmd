@@ -67,6 +67,6 @@ Notes:
 
 * The nearest match to the SPECIEUROPE EU:1 profile Cement from the US EPA SPECIATE PM subset is SPECIATE US:4377 Cement Kiln. 
 * In addition, 5/9 of the other nearest matches are cement-related sources.  
-* The nearest metrics, pd (Pearson's Distance), srd (Spearman Ranked Distance) and sid (Standardized Identity Distance), all tend to zero for better matches. See ?rsp_match_profile in the packaged resepciate documentation for details and references. 
+* The nearest metrics, pd (Pearson's Distance), srd (Spearman Ranked Distance) and sid (Standardized Identity Distance), all tend to zero for better matches. See ?rsp_match_profile in the packaged respeciate documentation for details and references. 
 
 

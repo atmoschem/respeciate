@@ -79,8 +79,8 @@ plot(prf)
 Comparing that profile with pm profiles in (US EPA) SPECIATE:
 
 ``` r
-rsp_match_profile(prf, rsp_us_pm(), plot.type=4, log=TRUE, 
-                  output = "plot,summary",
+rsp_match_profile(prf, rsp_us_pm(),  
+                  output = "plot,summary", 
                   layout=c(5,2))
 ```
 
@@ -117,5 +117,5 @@ Notes:
   sources.  
 - The nearest metrics, pd (Pearson’s Distance), srd (Spearman Ranked
   Distance) and sid (Standardized Identity Distance), all tend to zero
-  for better matches. See ?rsp_match_profile in the packaged resepciate
+  for better matches. See ?rsp_match_profile in the packaged respeciate
   documentation for details and references.
