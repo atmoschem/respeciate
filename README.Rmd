@@ -58,8 +58,8 @@ plot(prf)
 Comparing that profile with pm profiles in (US EPA) SPECIATE:
 
 ```{r output.options, fig.dpi=900, fig.height=7.5, fig.width=15}
-rsp_match_profile(prf, rsp_us_pm(), 
-                  output = "plot,summary",
+rsp_match_profile(prf, rsp_us_pm(),  
+                  output = "plot,summary", 
                   layout=c(5,2))
 ```
 

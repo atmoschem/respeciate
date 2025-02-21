@@ -762,22 +762,32 @@ rsp_plot_species <- function(rsp, id, multi.species = "group",
 #    lines(.) might not be best names for the 'red' lines?
 # think about how to document grid., lines., etc...
 
+#like to improve the legend/key output
+#    key modification is messy
+#       for example key=list(text=list(c("hic", "hoc")))
+#    changing the rect values without the text, reorders it...
+#    key rectangles are a bit wide
 
 
 # general is OK but
 #    think about zero cases
 #        currently removing these before plotting
 #             but they might be worth including ???
-#             naybe different colour
-# plot.type 1 is OK but could be better
+#             maybe different colour
+# plot.type 1 (bellis-like) is OK but could be better
 #       but wondering if original fishbone plot idea was better???
-# plot.type 2 is OK but could be better
-# plot.type 3 to do
-#     percentage scores
-#
+# plot.type 2 (normalised type 1) is OK but could be better
+# plot.type 3 (percentage scores) is OK but could be better
+# plot.type 4 (rsp/ref barplot) is work in progress
+#        might be better plotting .test.z[whatever]
+#        rather than .value.ref and .value.x?
+#             need to look that up
+#        maybe turn off bar border?
+#             border=NA does the bars but not the key...
+#        maybe reduce the rectangle width in key ???
 
-
-rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
+rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2,
+                           log=FALSE, ..., output="plot"){
 
   #option to pass previous rsp_match_profile(..., output="list")
   #    but maybe need to check structure more in case user just passes a list...
@@ -792,7 +802,7 @@ rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
   .xargs <- list(...)
 
   #error catcher instead of NULL???
-  .test <- 1:3
+  .test <- 1:4
   if(!as.character(plot.type) %in% as.character(.test)){
     stop("RSP> Sorry, ", plot.type, " is not a know 'plot.type'",
          "\n\t    (maybe one of: ", paste(.test, collapse=","), ")",
@@ -810,7 +820,11 @@ rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
   .dat <- subset(.dat, .value.ref!=0)
 
   if(plot.type==1){
-
+    #based on bellis
+    if(log){
+      stop("RSP> Sorry, currently not logging match type 1 plots",
+           call. = FALSE)
+    }
     plt.ls <- list(x = .value.ref~.value.x | .profile.id.ref,
                    data=.dat, xlab="rescaled(rsp)", ylab="rescaled(reference)",
                    xlim = range(pretty(c(.dat$.value.ref, .dat$.value.x))),
@@ -852,12 +866,14 @@ rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
     )
     plt.ls <- modifyList(plt.ls, .xargs)
     plt <- do.call(lattice::xyplot, plt.ls)
-
   }
   if(plot.type==2){
     #normalised version of plot.type=1
+    if(log){
+      stop("RSP> Sorry, currently not logging match type 2 plots",
+           call. = FALSE)
+    }
     #.n.pr <- length(unique(.dat$.profile.id.ref))
-
     plt.ls <- list(x = (.test.z1n-.test.zn)~factor(.species) | .profile.id.ref,
                    data=.dat, xlab="", ylab="Standardized Difference",
                    pch=16,
@@ -881,6 +897,10 @@ rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
   }
   if(plot.type==3){
     #percentage fit
+    if(log){
+      stop("RSP> Sorry, currently not logging match type 2 plots",
+           call. = FALSE)
+    }
     #.n.pr <- length(unique(.dat$.profile.id.ref))
     plt.ls <- list(x =100*(1-abs(1-.test.z1n))~ factor(.species) | .profile.id.ref,
                    data=.dat, xlab="", ylab="Percentage Fit",
@@ -903,6 +923,52 @@ rsp_plot_match <- function(rsp, ref = NULL, plot.type = 2, ..., output="plot"){
     plt.ls <- modifyList(plt.ls, .xargs)
     plt <- do.call(lattice::barchart, plt.ls)
   }
+  if(plot.type==4){
+    #rsp/ref bars
+    # .test.z to .test.z2 might be better than .value.x and .value.ref
+    plt.ls <- list(x =.value.x + .value.ref ~ factor(.species) | .profile.id.ref,
+                   data=.dat, xlab="", ylab="Profile Loading",
+                   col=trellis.par.get()$superpose.symbol$col[1:2],
+                   strip=lattice::strip.custom(bg="transparent",
+                                               par.strip.text=list(cex=0.7)),
+                   scales=list(x=list(rot=90,
+                                      alternating=TRUE),
+                               cex=0.7),
+                   panel=function(...){
+                     .rsp_panelPal("grid", list(h=-1, v=0.1, col="grey", lty=3),
+                                   lattice::panel.grid, ...)
+                     lattice::panel.barchart(...)
+                   }
+    )
+    if(log){
+      plt.ls$scales$y$log <- 10
+      plt.ls$yscale.components <- .rsp_yscale.component.log10
+    } else {
+      plt.ls$origin <- 0
+    }
+    plt.ls <- modifyList(plt.ls, .xargs)
+    .tmp <- list(space="right",
+                   #title="Legends",
+                   text = list(c("rsp", "ref")),
+                   rectangles=list(col=rep(plt.ls$col,
+                                           length.out=2)),
+                   cex=0.7)
+    plt.ls$key <- if("key" %in% names(plt.ls)){
+      if(is.logical(plt.ls$key)){
+        if(!plt.ls$key){
+          NULL
+        } else {
+          .tmp
+        }
+      } else {
+        modifyList(plt.ls$key, .tmp)
+      }
+    } else {
+       .tmp
+    }
+    plt <- do.call(lattice::barchart, plt.ls)
+  }
+
 
   #outputs like other plots
   .rsp_plot_output(as.data.frame(plt.ls$data), plt.ls, plt, output)

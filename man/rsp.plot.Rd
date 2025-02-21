@@ -30,7 +30,14 @@ rsp_plot_species(
   output = "default"
 )
 
-rsp_plot_match(rsp, ref = NULL, plot.type = 2, ..., output = "plot")
+rsp_plot_match(
+  rsp,
+  ref = NULL,
+  plot.type = 2,
+  log = FALSE,
+  ...,
+  output = "plot"
+)
 }
 \arguments{
 \item{rsp}{A \code{respeciate} object, a \code{data.frame} of respeciate

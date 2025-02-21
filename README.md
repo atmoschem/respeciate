@@ -79,7 +79,7 @@ plot(prf)
 Comparing that profile with pm profiles in (US EPA) SPECIATE:
 
 ``` r
-rsp_match_profile(prf, rsp_us_pm(), 
+rsp_match_profile(prf, rsp_us_pm(), plot.type=4, log=TRUE, 
                   output = "plot,summary",
                   layout=c(5,2))
 ```
